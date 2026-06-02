@@ -101,7 +101,7 @@ SelfSkill/
 │   ├── clinerules.md            # Cline / RooCode (.clinerules/)
 │   ├── guide.md                 # Gemini Code Assist (.gemini/)
 │   ├── ANTIGRAVITY.md           # Antigravity Agent
-│   ├── ANTIGRAVITY.md           # Kiro AI Agent (命名为 KIRO_AGENT.md)
+│   ├── KIRO_AGENT.md           # Kiro AI Agent (命名为 KIRO_AGENT.md)
 └───── AGENTS.md                # 通用格式 (AGENTS.md)
 ```
 

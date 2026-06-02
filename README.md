@@ -194,4 +194,4 @@ This Skill is built upon key agentic design paradigms:
 
 ## 📜 License
 
-MIT — Feel free to use, modify, and distribute.
+MIT — Feel free to use, modify, and distribute.texttext
