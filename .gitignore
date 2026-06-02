@@ -17,3 +17,7 @@ test_install/
 *.tmp
 *.bak
 *local*
+
+# Original docs (archived references)
+docs/
+
