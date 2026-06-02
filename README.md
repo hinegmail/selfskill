@@ -76,35 +76,37 @@ Open a new conversation in your preferred AI IDE and type the startup command:
 
 ## 📁 Project Structure
 
+```test
 SelfSkill/
-├── skill.md                     # Core Skill instructions (Single Source of Truth)
-├── README.md                    # This file (English)
-├── README_CN.md                 # Chinese description (简体中文)
-├── init.ps1                     # PowerShell initialization script (Windows)
-├── init.sh                      # Bash initialization script (macOS/Linux)
+├── skill.md                  # Core Skill instructions (Single Source of Truth)
+├── README.md                 # This file (English)
+├── README_CN.md              # Chinese description (简体中文)
+├── init.ps1                  # PowerShell initialization script (Windows)
+├── init.sh                   # Bash initialization script (macOS/Linux)
 │
-├── templates/ai/                # .ai/ templates
-│   ├── PRD.md                   # Product Requirements Document template
-│   ├── DESIGN.md                # Technical Design Document template
-│   ├── TASKS.md                 # Task list template (uses [ ]/[~]/[x]/[!] status markers)
-│   ├── STATUS.md                # Real project status log (highest reality truth)
-│   ├── NEXT.md                  # Single active task gate template
-│   ├── RULES.md                 # AI behavior rules & coding conventions
-│   ├── TEST_LOG.md              # Automated test record log
-│   ├── DECISIONS.md             # Architecture Decisions Records (ADR)
-│   ├── LESSONS.md               # Accumulated lessons learned (auto-appendable)
-│   └── EVOLUTION_PROPOSALS.md   # Propose improvements to rules or architecture
+├── templates/ai/             # .ai/ templates
+│   ├── PRD.md                # Product Requirements Document template
+│   ├── DESIGN.md             # Technical Design Document template
+│   ├── TASKS.md              # Task list template ([ ]/[~]/[x]/[!] markers)
+│   ├── STATUS.md             # Real project status log (highest reality truth)
+│   ├── NEXT.md               # Single active task gate template
+│   ├── RULES.md              # AI behavior rules & coding conventions
+│   ├── TEST_LOG.md           # Automated test record log
+│   ├── DECISIONS.md          # Architecture Decisions Records (ADR)
+│   ├── LESSONS.md            # Accumulated lessons learned (auto-appendable)
+│   └── EVOLUTION_PROPOSALS.md# Propose improvements to rules or architecture
 │
-├── adapters/                    # IDE & Agent Adapters
-│   ├── cursor.mdc               # Cursor MDC format (.cursor/rules/)
-│   ├── cursorrules              # Cursor legacy format (.cursorrules)
-│   ├── clinerules.md            # Cline / RooCode format (.clinerules/)
-│   ├── windsurfrules.md         # Windsurf format (.windsurfrules)
-│   ├── CLAUDE.md                # Claude Code format (CLAUDE.md)
-│   ├── gemini_styleguide.md     # Gemini Code Assist format (.gemini/)
-│   ├── ANTIGRAVITY.md           # Antigravity Agent (Google DeepMind Agent)
-│   ├── ANTIGRAVITY.md           # Kiro AI Agent (copied as KIRO_AGENT.md)
-└─── AGENTS.md                # Generic agent configuration (AGENTS.md)
+└── adapters/                 # IDE & Agent Adapters
+    ├── cursor.mdc            # Cursor MDC format (.cursor/rules/)
+    ├── cursorrules           # Cursor legacy format (.cursorrules)
+    ├── clinerules.md         # Cline / RooCode format (.clinerules/)
+    ├── windsurfrules.md      # Windsurf format (.windsurfrules)
+    ├── CLAUDE.md             # Claude Code format (CLAUDE.md)
+    ├── gemini_styleguide.md  # Gemini Code Assist format (.gemini/)
+    ├── ANTIGRAVITY.md        # Antigravity Agent (Google DeepMind Agent)
+    ├── KIRO_AGENT.md         # Kiro AI Agent
+    └── AGENTS.md             # Generic agent configuration
+```
 
 ---
 
