@@ -100,7 +100,7 @@ SelfSkill/
 │   ├── gemini_styleguide.md     # Gemini Code Assist (.gemini/)
 │   └── AGENTS.md                # 通用格式 (AGENTS.md)
 │
-└── docs/                        # 原始参考文档
+└── docs/                        # 原始参考文档（本地归档，已在 .gitignore 中忽略）
     └── ...
 ```
 
