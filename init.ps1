@@ -185,7 +185,7 @@ foreach ($ideItem in $ideList) {
             Install-Adapter $src $dst "ANTIGRAVITY.md"
         }
         "kiro" {
-            $src = Join-Path $AdaptersDir "ANTIGRAVITY.md"
+            $src = Join-Path $AdaptersDir "KIRO_AGENT.md"
             $dst = Join-Path $TargetPath "KIRO_AGENT.md"
             Install-Adapter $src $dst "KIRO_AGENT.md"
         }

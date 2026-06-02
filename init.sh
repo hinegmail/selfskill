@@ -166,7 +166,7 @@ for ide in "${IDES[@]}"; do
             copy_if_not_exists "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/ANTIGRAVITY.md" "ANTIGRAVITY.md"
             ;;
         kiro)
-            copy_if_not_exists "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/KIRO_AGENT.md" "KIRO_AGENT.md"
+            copy_if_not_exists "$ADAPTERS_DIR/KIRO_AGENT.md" "$TARGET_PATH/KIRO_AGENT.md" "KIRO_AGENT.md"
             ;;
         *)
             echo "  ⚠️  未知 IDE: $ide"
