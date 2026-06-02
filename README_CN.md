@@ -118,7 +118,7 @@ SelfSkill/
 | **Claude Code**                         | `CLAUDE.md`            | `CLAUDE.md` (项目根目录)                 |
 | **Gemini Code Assist**                  | `gemini_styleguide.md` | `.gemini/styleguide.md`                  |
 | **Antigravity** (Google DeepMind Agent) | `ANTIGRAVITY.md`       | `ANTIGRAVITY.md` (项目根目录)            |
-| **Kiro AI Agent**                       | `ANTIGRAVITY.md`       | `KIRO_AGENT.md` (项目根目录)             |
+| **Kiro AI Agent**                       | `KIRO_AGENT.md`        | `KIRO_AGENT.md` (项目根目录)             |
 | **通用**                                | `AGENTS.md`            | `AGENTS.md` (项目根目录)                 |
 
 ---

@@ -121,7 +121,7 @@ SelfSkill/
 | **Claude Code**        | `CLAUDE.md`            | `CLAUDE.md` (Root)                       |
 | **Gemini Code Assist** | `gemini_styleguide.md` | `.gemini/styleguide.md`                  |
 | **Antigravity Agent**  | `ANTIGRAVITY.md`       | `ANTIGRAVITY.md` (Root)                  |
-| **Kiro AI Agent**      | `ANTIGRAVITY.md`       | `KIRO_AGENT.md` (Root)                   |
+| **Kiro AI Agent**      | `KIRO_AGENT.md`        | `KIRO_AGENT.md` (Root)                   |
 | **Generic Agent**      | `AGENTS.md`            | `AGENTS.md` (Root)                       |
 
 ---
