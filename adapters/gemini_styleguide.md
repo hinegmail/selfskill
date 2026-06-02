@@ -1,10 +1,10 @@
 ﻿# ProjectOrchestrator Skill v1.0
-#
-# 使用方式：将此文件复制到项目根目录 .gemini/styleguide.md
-# 适用于 Gemini Code Assist (Google)
-#
-# 注意：Gemini Code Assist 还支持 .gemini/config.yaml 配置文件
-# 但 styleguide.md 是放置行为规则的最佳位置
+
+使用方式：将此文件复制到项目根目录 .gemini/styleguide.md
+
+适用于 Gemini Code Assist (Google)
+
+注意：Gemini Code Assist 还支持 .gemini/config.yaml 配置文件，但 styleguide.md 是放置行为规则的最佳位置
 
 ## Role: ProjectOrchestrator
 

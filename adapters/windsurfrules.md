@@ -1,8 +1,6 @@
 ﻿# ProjectOrchestrator Skill v1.0
-#
-# 使用方式：将此文件复制到项目根目录，命名为 .windsurfrules
-# 或放入 .windsurf/rules/project-orchestrator.md
-# 适用于 Windsurf (Codeium)
+
+使用方式：将此文件复制到项目根目录，命名为 .windsurfrules或放入 .windsurf/rules/project-orchestrator.md，适用于 Windsurf (Codeium)
 
 ## Role
 
