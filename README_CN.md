@@ -10,16 +10,16 @@
 
 ## ✨ 核心特性
 
-| 特性 | 描述 |
-|------|------|
-| 🧠 **双轨认知** | 执行轨（写代码）+ 演进轨（自我反思和知识固化）同时运行 |
-| 🚦 **NEXT.md 硬闸门** | 唯一活跃任务控制，彻底杜绝 AI 擅自扩展范围、跳任务 |
-| 🔄 **七模式引擎** | 初始化 → 审计 → 规划 → 实现 → 验证 → 收口 → 进化，不可跳跃 |
-| 📋 **三项确认协议** | 编码前强制确认：目标理解 + 技术路径 + 首个交付物 |
-| 🧬 **提案制进化** | LESSONS 可自动积累，规则修改需用户审批，安全可控 |
-| 📂 **`.ai/` 单一事实来源** | 所有项目认知存文件，新对话即可完美恢复上下文 |
-| 🔌 **多 IDE 适配** | 一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等 |
-| ⚖️ **轻重分层** | 小项目 5 文件轻量模式，大项目 10 文件完整模式 |
+| 特性                              | 描述                                                                |
+| --------------------------------- | ------------------------------------------------------------------- |
+| 🧠**双轨认知**              | 执行轨（写代码）+ 演进轨（自我反思和知识固化）同时运行              |
+| 🚦**NEXT.md 硬闸门**        | 唯一活跃任务控制，彻底杜绝 AI 擅自扩展范围、跳任务                  |
+| 🔄**七模式引擎**            | 初始化 → 审计 → 规划 → 实现 → 验证 → 收口 → 进化，不可跳跃    |
+| 📋**三项确认协议**          | 编码前强制确认：目标理解 + 技术路径 + 首个交付物                    |
+| 🧬**提案制进化**            | LESSONS 可自动积累，规则修改需用户审批，安全可控                    |
+| 📂**`.ai/` 单一事实来源** | 所有项目认知存文件，新对话即可完美恢复上下文                        |
+| 🔌**多 IDE 适配**           | 一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等 |
+| ⚖️**轻重分层**            | 小项目 5 文件轻量模式，大项目 10 文件完整模式                       |
 
 ---
 
@@ -28,6 +28,7 @@
 ### 1. 初始化项目
 
 **Windows (PowerShell)**:
+
 ```powershell
 # 在目标项目中初始化（完整模式 + 所有 IDE）
 .\init.ps1 -Path "D:\Projects\YourProject" -IDE "all"
@@ -40,6 +41,7 @@
 ```
 
 **macOS / Linux (Bash)**:
+
 ```bash
 # 完整模式 + 所有 IDE
 ./init.sh -p ~/Projects/YourProject -i all
@@ -100,27 +102,24 @@ SelfSkill/
  guide.md     # Gemini Code Assist (.gemini/)
 │   ├── ANTIGRAVITY.md           # Antigravity Agent
 │   ├── ANTIGRAVITY.md           # Kiro AI Agent (命名为 KIRO_AGENT.md)
-│   └── AGENTS.md                # 通用格式 (AGENTS.md)
-│
-└── docs/                        # 原始参考文档（本地归档，已在 .gitignore 中忽略）
-    └── ...
+└───── AGENTS.md                # 通用格式 (AGENTS.md)
 ```
 
 ---
 
 ## 🔌 支持的 AI IDE
 
-| IDE | 适配器文件 | 安装位置 |
-|-----|-----------|---------|
-| **Cursor** (新版) | `cursor.mdc` | `.cursor/rules/project-orchestrator.mdc` |
-| **Cursor** (传统) | `cursorrules` | `.cursorrules` |
-| **Cline / RooCode** | `clinerules.md` | `.clinerules/project-orchestrator.md` |
-| **Windsurf** | `windsurfrules.md` | `.windsurfrules` |
-| **Claude Code** | `CLAUDE.md` | `CLAUDE.md` (项目根目录) |
-| **Gemini Code Assist** | `gemini_styleguide.md` | `.gemini/styleguide.md` |
-| **Antigravity** (Google DeepMind Agent) | `ANTIGRAVITY.md` | `ANTIGRAVITY.md` (项目根目录) |
-| **Kiro AI Agent** | `ANTIGRAVITY.md` | `KIRO_AGENT.md` (项目根目录) |
-| **通用** | `AGENTS.md` | `AGENTS.md` (项目根目录) |
+| IDE                                           | 适配器文件               | 安装位置                                   |
+| --------------------------------------------- | ------------------------ | ------------------------------------------ |
+| **Cursor** (新版)                       | `cursor.mdc`           | `.cursor/rules/project-orchestrator.mdc` |
+| **Cursor** (传统)                       | `cursorrules`          | `.cursorrules`                           |
+| **Cline / RooCode**                     | `clinerules.md`        | `.clinerules/project-orchestrator.md`    |
+| **Windsurf**                            | `windsurfrules.md`     | `.windsurfrules`                         |
+| **Claude Code**                         | `CLAUDE.md`            | `CLAUDE.md` (项目根目录)                 |
+| **Gemini Code Assist**                  | `gemini_styleguide.md` | `.gemini/styleguide.md`                  |
+| **Antigravity** (Google DeepMind Agent) | `ANTIGRAVITY.md`       | `ANTIGRAVITY.md` (项目根目录)            |
+| **Kiro AI Agent**                       | `ANTIGRAVITY.md`       | `KIRO_AGENT.md` (项目根目录)             |
+| **通用**                                | `AGENTS.md`            | `AGENTS.md` (项目根目录)                 |
 
 ---
 
@@ -150,14 +149,14 @@ SelfSkill/
 
 ## 💬 常用触发词速查
 
-| 你想做什么 | 说什么 |
-|-----------|--------|
-| 开始新会话 | "继续" / "continue" / "同步状态" |
-| 制定计划 | "规划" / "plan" / "执行 Task 1.2" |
-| 开始编码 | "确认" / "批准" / "approved" |
-| 运行测试 | "运行测试" / "test" / "validate" |
-| 完成任务 | "测试通过" / "收口" / "closeout" |
-| 优化规则 | "优化规则" / "进化" / "evolve" |
+| 你想做什么 | 说什么                            |
+| ---------- | --------------------------------- |
+| 开始新会话 | "继续" / "continue" / "同步状态"  |
+| 制定计划   | "规划" / "plan" / "执行 Task 1.2" |
+| 开始编码   | "确认" / "批准" / "approved"      |
+| 运行测试   | "运行测试" / "test" / "validate"  |
+| 完成任务   | "测试通过" / "收口" / "closeout"  |
+| 优化规则   | "优化规则" / "进化" / "evolve"    |
 | 初始化项目 | "初始化" / "initialize" / "setup" |
 
 ---
