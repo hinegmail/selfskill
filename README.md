@@ -1,197 +1,198 @@
+# [简体中文](README_CN.md) | English
+
 # 🧭 ProjectOrchestrator
 
-**一个具备双轨认知与自进化能力的通用 AI 编程协调器 Skill**
+**A Universal AI Programming Orchestrator Skill with Dual-Track Cognition and Self-Evolution Capabilities**
 
-让 AI 不再是「盲目写代码的工具人」，而是一个严格遵守流程、能自我学习、可审计的项目开发协调器。适配所有主流 AI IDE。
-
----
-
-## ✨ 核心特性
-
-| 特性 | 描述 |
-|------|------|
-| 🧠 **双轨认知** | 执行轨（写代码）+ 演进轨（自我反思和知识固化）同时运行 |
-| 🚦 **NEXT.md 硬闸门** | 唯一活跃任务控制，彻底杜绝 AI 擅自扩展范围、跳任务 |
-| 🔄 **七模式引擎** | 初始化 → 审计 → 规划 → 实现 → 验证 → 收口 → 进化，不可跳跃 |
-| 📋 **三项确认协议** | 编码前强制确认：目标理解 + 技术路径 + 首个交付物 |
-| 🧬 **提案制进化** | LESSONS 可自动积累，规则修改需用户审批，安全可控 |
-| 📂 **`.ai/` 单一事实来源** | 所有项目认知存文件，新对话即可完美恢复上下文 |
-| 🔌 **多 IDE 适配** | 一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等 |
-| ⚖️ **轻重分层** | 小项目 5 文件轻量模式，大项目 10 文件完整模式 |
+Transform AI from a "blind code-writing tool" into a highly disciplined, self-learning, and fully auditable project orchestrator. Designed to be compatible with all major AI IDEs and Agentic coding assistants.
 
 ---
 
-## 🚀 快速上手
+## ✨ Core Features
 
-### 1. 初始化项目
+| Feature | Description |
+|------|-------------|
+| 🧠 **Dual-Track Cognition** | Runs two cognitive tracks simultaneously: the Execution Track (coding) and the Evolution Track (self-reflection & knowledge persistence). |
+| 🚦 **`NEXT.md` Hard Gate** | Restricts coding to a single active task, preventing AI from expanding scope or jumping between tasks. |
+| 🔄 **Seven-Mode Engine** | Strict lifecycle flow: Init ➔ Context Audit ➔ Task Planning ➔ Implementation ➔ Validation ➔ Closeout ➔ Evolution. |
+| 📋 **Three Confirmations** | Mandatory pre-coding validation: Objective alignment + Technical path/file plan + Minimum deliverable. |
+| 🧬 **Proposal-Based Evolution** | AI automatically accumulates lessons, but rule/conventions changes require explicit user approval. |
+| 📂 **`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat. |
+| 🔌 **Multi-IDE Adapter Suite** | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows. |
+| ⚖️ **Flexible Layering** | Choose between a 5-file Lite Mode (solo/small projects) and a 10-file Full Mode (large/team projects). |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Initialize Your Project
 
 **Windows (PowerShell)**:
 ```powershell
-# 在目标项目中初始化（完整模式 + 所有 IDE）
-.\init.ps1 -Path "D:\Projects\MyApp" -IDE "all"
+# Initialize with Full Mode and all IDE adapters in the target folder
+.\init.ps1 -Path "D:\Projects\YourProject" -IDE "all"
 
-# 轻量模式 + 仅 Cursor
-.\init.ps1 -Path "D:\Projects\MyApp" -IDE "cursor" -Lite
+# Initialize with Lite Mode and only Cursor adapter
+.\init.ps1 -Path "D:\Projects\YourProject" -IDE "cursor" -Lite
 
-# 在当前目录初始化
+# Initialize in the current directory
 .\init.ps1
 ```
 
 **macOS / Linux (Bash)**:
 ```bash
-# 完整模式 + 所有 IDE
-./init.sh -p ~/Projects/MyApp -i all
+# Initialize with Full Mode and all IDE adapters in the target folder
+./init.sh -p ~/Projects/YourProject -i all
 
-# 轻量模式 + 仅 Cline
-./init.sh -p ~/Projects/MyApp -i cline --lite
+# Initialize with Lite Mode and only Cline adapter
+./init.sh -p ~/Projects/YourProject -i cline --lite
 
-# 在当前目录
+# Initialize in the current directory
 ./init.sh
 ```
 
-### 2. 编辑 `.ai/` 文件
+### 2. Configure the `.ai/` Brain Files
 
-初始化后，编辑以下文件填入你的项目信息：
+After initialization, edit the following files to match your project specifications:
 
 ```
 .ai/
-├── PRD.md        ← 填写产品需求
-├── DESIGN.md     ← 填写技术设计
-├── TASKS.md      ← 填写任务清单
-├── STATUS.md     ← 设置当前状态
-└── NEXT.md       ← 设置第一个活跃任务
+├── PRD.md        ← Define product requirements & business logic
+├── DESIGN.md     ← Outline system architecture & database schema
+├── TASKS.md      ← Write down the task list & milestones
+├── STATUS.md     ← Document the current project status
+└── NEXT.md       ← Set the first active task to be executed
 ```
 
-### 3. 开始使用
+### 3. Trigger the Orchestrator
 
-在 AI IDE 中新开对话，输入：
+Open a new conversation in your preferred AI IDE and type the startup command:
 
-> **使用 ProjectOrchestrator。进入 Context Audit 模式，读取 .ai/ 全部文件并输出审计报告。不要写代码，等我确认后再进入 Task Planning。**
+> **Enter Context Audit mode. Read all .ai/ files and output the audit report. Do not modify any code until I confirm the task plan.**
 
 ---
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 SelfSkill/
-├── skill.md                     # 核心 Skill（完整版，唯一事实来源）
-├── README.md                    # 本文件
-├── init.ps1                     # Windows 初始化脚本
-├── init.sh                      # macOS/Linux 初始化脚本
+├── skill.md                     # Core Skill instructions (Single Source of Truth)
+├── README.md                    # This file (English)
+├── README_CN.md                 # Chinese description (简体中文)
+├── init.ps1                     # PowerShell initialization script (Windows)
+├── init.sh                      # Bash initialization script (macOS/Linux)
 │
-├── templates/ai/                # .ai/ 目录模板
-│   ├── PRD.md                   # 产品需求模板
-│   ├── DESIGN.md                # 技术设计模板
-│   ├── TASKS.md                 # 任务清单模板
-│   ├── STATUS.md                # 项目状态模板
-│   ├── NEXT.md                  # 活跃任务闸门模板
-│   ├── RULES.md                 # AI 规则 + 编码约定模板
-│   ├── TEST_LOG.md              # 测试记录模板
-│   ├── DECISIONS.md             # 架构决策模板
-│   ├── LESSONS.md               # 经验教训模板
-│   └── EVOLUTION_PROPOSALS.md   # 进化提案模板
+├── templates/ai/                # .ai/ templates
+│   ├── PRD.md                   # Product Requirements Document template
+│   ├── DESIGN.md                # Technical Design Document template
+│   ├── TASKS.md                 # Task list template (uses [ ]/[~]/[x]/[!] status markers)
+│   ├── STATUS.md                # Real project status log (highest reality truth)
+│   ├── NEXT.md                  # Single active task gate template
+│   ├── RULES.md                 # AI behavior rules & coding conventions
+│   ├── TEST_LOG.md              # Automated test record log
+│   ├── DECISIONS.md             # Architecture Decisions Records (ADR)
+│   ├── LESSONS.md               # Accumulated lessons learned (auto-appendable)
+│   └── EVOLUTION_PROPOSALS.md   # Propose improvements to rules or architecture
 │
-├── adapters/                    # IDE 适配器
-│   ├── cursor.mdc               # Cursor 新格式 (.cursor/rules/)
-│   ├── cursorrules              # Cursor 传统格式 (.cursorrules)
-│   ├── clinerules.md            # Cline / RooCode (.clinerules/)
-│   ├── windsurfrules.md         # Windsurf (.windsurfrules)
-│   ├── CLAUDE.md                # Claude Code (CLAUDE.md)
-│   ├── gemini_styleguide.md     # Gemini Code Assist (.gemini/)
-│   └── AGENTS.md                # 通用格式 (AGENTS.md)
+├── adapters/                    # IDE & Agent Adapters
+│   ├── cursor.mdc               # Cursor MDC format (.cursor/rules/)
+│   ├── cursorrules              # Cursor legacy format (.cursorrules)
+│   ├── clinerules.md            # Cline / RooCode format (.clinerules/)
+│   ├── windsurfrules.md         # Windsurf format (.windsurfrules)
+│   ├── CLAUDE.md                # Claude Code format (CLAUDE.md)
+│   ├── gemini_styleguide.md     # Gemini Code Assist format (.gemini/)
+│   ├── ANTIGRAVITY.md           # Antigravity Agent (Google DeepMind Agent)
+│   ├── ANTIGRAVITY.md           # Kiro AI Agent (copied as KIRO_AGENT.md)
+│   └── AGENTS.md                # Generic agent configuration (AGENTS.md)
 │
-└── docs/                        # 原始参考文档（本地归档，已在 .gitignore 中忽略）
+└── docs/                        # Reference materials (Local-only, ignored in .gitignore)
     └── ...
 ```
 
 ---
 
-## 🔌 支持的 AI IDE
+## 🔌 Supported AI IDEs & Agents
 
-| IDE | 适配器文件 | 安装位置 |
-|-----|-----------|---------|
-| **Cursor** (新版) | `cursor.mdc` | `.cursor/rules/project-orchestrator.mdc` |
-| **Cursor** (传统) | `cursorrules` | `.cursorrules` |
+| IDE / Agent | Adapter File | Installation Location |
+|-------------|--------------|-----------------------|
+| **Cursor** (MDC) | `cursor.mdc` | `.cursor/rules/project-orchestrator.mdc` |
+| **Cursor** (Legacy) | `cursorrules` | `.cursorrules` (Root) |
 | **Cline / RooCode** | `clinerules.md` | `.clinerules/project-orchestrator.md` |
-| **Windsurf** | `windsurfrules.md` | `.windsurfrules` |
-| **Claude Code** | `CLAUDE.md` | `CLAUDE.md` (项目根目录) |
+| **Windsurf** | `windsurfrules.md` | `.windsurfrules` (Root) |
+| **Claude Code** | `CLAUDE.md` | `CLAUDE.md` (Root) |
 | **Gemini Code Assist** | `gemini_styleguide.md` | `.gemini/styleguide.md` |
-| **Antigravity** (Google DeepMind Agent) | `ANTIGRAVITY.md` | `ANTIGRAVITY.md` (项目根目录) |
-| **Kiro AI Agent** | `ANTIGRAVITY.md` | `KIRO_AGENT.md` (项目根目录) |
-| **通用** | `AGENTS.md` | `AGENTS.md` (项目根目录) |
+| **Antigravity Agent** | `ANTIGRAVITY.md` | `ANTIGRAVITY.md` (Root) |
+| **Kiro AI Agent** | `ANTIGRAVITY.md` | `KIRO_AGENT.md` (Root) |
+| **Generic Agent** | `AGENTS.md` | `AGENTS.md` (Root) |
 
 ---
 
-## 🔄 工作流程
+## 🔄 Execution Workflow
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    七模式执行引擎                              │
+│                    Seven-Mode Engine                        │
 │                                                             │
 │  Mode 0         Mode 1          Mode 2         Mode 3      │
-│  初始化    →    上下文审计   →   任务规划    →   任务实现     │
-│  (init)        (audit)       (plan+3确认)    (implement)   │
+│  Initialize ──➔ Context Audit ➔ Task Plan  ──➔ Implement   │
+│  (init)         (audit)         (plan+3conf)   (code)      │
 │                                                             │
 │                Mode 4          Mode 5         Mode 6       │
-│           →   验证与修复   →   阶段收口    →  进化提案      │
-│               (validate)     (closeout)      (evolve)      │
+│           ──➔  Validate   ──➔  Closeout   ──➔  Evolve      │
+│                (run tests)     (log progress)  (proposal)  │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │ 📂 .ai/ 文件系统   ← 所有认知持久化于此             │    │
-│  │ 📋 NEXT.md 闸门    ← 唯一允许执行的任务              │    │
-│  │ 🔍 EVOLUTION_LOG   ← 每次写回的审计日志              │    │
+│  │ 📂 .ai/ Directory  ➔ Cog memory persisted locally   │    │
+│  │ 🚦 NEXT.md Gate    ➔ Strict single active task      │    │
+│  │ 🗜️ EVOLUTION_LOG   ➔ Fully auditable git tags       │    │
 │  └─────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💬 常用触发词速查
+## 💬 Quick Trigger Keywords
 
-| 你想做什么 | 说什么 |
-|-----------|--------|
-| 开始新会话 | "继续" / "continue" / "同步状态" |
-| 制定计划 | "规划" / "plan" / "执行 Task 1.2" |
-| 开始编码 | "确认" / "批准" / "approved" |
-| 运行测试 | "运行测试" / "test" / "validate" |
-| 完成任务 | "测试通过" / "收口" / "closeout" |
-| 优化规则 | "优化规则" / "进化" / "evolve" |
-| 初始化项目 | "初始化" / "initialize" / "setup" |
-
----
-
-## ⚖️ 完整模式 vs 轻量模式
-
-| | 完整模式 | 轻量模式 |
-|--|---------|---------|
-| **文件数** | 10 个 | 5 个 |
-| **适合** | 团队项目、中大型项目 | 个人项目、小型项目 |
-| **七模式引擎** | ✅ | ✅ |
-| **NEXT.md 闸门** | ✅ | ✅ |
-| **EVOLUTION_LOG** | ✅ | ✅ |
-| **RULES.md** | ✅ | ❌ |
-| **TEST_LOG.md** | ✅ | ❌ |
-| **DECISIONS.md** | ✅ | ❌ |
-| **LESSONS.md** | ✅ | ❌ |
-| **EVOLUTION_PROPOSALS** | ✅ | ❌ |
-
-轻量模式保留了核心的「流程控制」和「防漂移」能力，只省略了「知识积累」相关文件。
+| Intent | English Triggers | 中文触发词 |
+|-----------|------------------|-----------|
+| Start New Chat / Sync | "continue", "sync" | "继续", "同步状态" |
+| Task Planning | "plan", "start task" | "规划", "执行 Task Y" |
+| Start Implementation | "approved", "implement" | "确认", "批准", "开始实现" |
+| Run Verification Tests | "test", "validate", "run tests" | "运行测试", "验证" |
+| Phase Closeout | "closeout", "tests passed" | "测试通过", "阶段完成", "收口" |
+| Rules Evolution | "evolve", "optimize rules" | "优化规则", "进化" |
+| Initialization | "initialize", "setup", "init" | "初始化", "创建项目" |
 
 ---
 
-## 🧬 设计哲学
+## ⚖️ Full Mode vs. Lite Mode
 
-本 Skill 融合了多个方案的精华：
+| Feature | Full Mode (10 files) | Lite Mode (5 files) |
+|---------|---------------------|--------------------|
+| **Recommended For** | Team environments, large projects | Solo developers, small MVPs |
+| **Seven-Mode Lifecycle** | ✅ Enabled | ✅ Enabled |
+| **NEXT.md Hard Gate** | ✅ Enabled | ✅ Enabled |
+| **EVOLUTION_LOG Output** | ✅ Enabled | ✅ Enabled |
+| **Anti-Bloat & DRY constraints** | ✅ Enabled | ✅ Enabled |
+| **Context Compactor & Safeguards** | ✅ Enabled | ✅ Enabled |
+| **RULES / TEST_LOG / DECISIONS** | ✅ Enabled | ❌ Omitted |
+| **LESSONS / PROPOSALS** | ✅ Enabled | ❌ Omitted |
 
-- **七模式状态机引擎** + **NEXT.md 硬闸门** + **提案制进化**
-- **双轨认知**（执行轨 + 演进轨）+ **新对话切断上下文污染**
-- **三项确认启动协议** + **轻重分层** + **对话自然度**
-- **结构化输出格式** + **极简状态管理**
+*Note: Lite Mode preserves the core workflow discipline and anti-drift rules, omitting only the long-term knowledge accumulation files.*
 
-**核心理念**：AI 可以自动记录事实，但不能自动修改规则。项目认知持久化在文件系统中，而非对话历史中。
+---
+
+## 🧬 Design Philosophy
+
+This Skill is built upon key agentic design paradigms:
+
+* **File-based memory over chat memory**: Prevents cognitive context degradation over long chats.
+* **Rigorous process over raw intelligence**: Strict constraints outperform unconstrained LLM reasoning.
+* **Defensive context control**: Mandatory 3-iteration test-fix limit ensures absolute focus by clearing chat history when bloated.
+* **Cyborg developer symmetry**: Clear separation of roles—Human as the architect (blueprint guardian) and AI as the execution engine (checklists & implementation scribe).
 
 ---
 
 ## 📜 License
 
-MIT — 自由使用、修改和分发。
+MIT — Feel free to use, modify, and distribute.
