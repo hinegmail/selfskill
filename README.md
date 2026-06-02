@@ -10,16 +10,16 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 
 ## ✨ Core Features
 
-| Feature | Description |
-|------|-------------|
-| 🧠 **Dual-Track Cognition** | Runs two cognitive tracks simultaneously: the Execution Track (coding) and the Evolution Track (self-reflection & knowledge persistence). |
-| 🚦 **`NEXT.md` Hard Gate** | Restricts coding to a single active task, preventing AI from expanding scope or jumping between tasks. |
-| 🔄 **Seven-Mode Engine** | Strict lifecycle flow: Init ➔ Context Audit ➔ Task Planning ➔ Implementation ➔ Validation ➔ Closeout ➔ Evolution. |
-| 📋 **Three Confirmations** | Mandatory pre-coding validation: Objective alignment + Technical path/file plan + Minimum deliverable. |
-| 🧬 **Proposal-Based Evolution** | AI automatically accumulates lessons, but rule/conventions changes require explicit user approval. |
-| 📂 **`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat. |
-| 🔌 **Multi-IDE Adapter Suite** | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows. |
-| ⚖️ **Flexible Layering** | Choose between a 5-file Lite Mode (solo/small projects) and a 10-file Full Mode (large/team projects). |
+| Feature                              | Description                                                                                                                               |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 🧠**Dual-Track Cognition**     | Runs two cognitive tracks simultaneously: the Execution Track (coding) and the Evolution Track (self-reflection & knowledge persistence). |
+| 🚦**`NEXT.md` Hard Gate**    | Restricts coding to a single active task, preventing AI from expanding scope or jumping between tasks.                                    |
+| 🔄**Seven-Mode Engine**        | Strict lifecycle flow: Init ➔ Context Audit ➔ Task Planning ➔ Implementation ➔ Validation ➔ Closeout ➔ Evolution.                   |
+| 📋**Three Confirmations**      | Mandatory pre-coding validation: Objective alignment + Technical path/file plan + Minimum deliverable.                                    |
+| 🧬**Proposal-Based Evolution** | AI automatically accumulates lessons, but rule/conventions changes require explicit user approval.                                        |
+| 📂**`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat.                              |
+| 🔌**Multi-IDE Adapter Suite**  | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows.                               |
+| ⚖️**Flexible Layering**      | Choose between a 5-file Lite Mode (solo/small projects) and a 10-file Full Mode (large/team projects).                                    |
 
 ---
 
@@ -28,6 +28,7 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 ### 1. Initialize Your Project
 
 **Windows (PowerShell)**:
+
 ```powershell
 # Initialize with Full Mode and all IDE adapters in the target folder
 .\init.ps1 -Path "D:\Projects\YourProject" -IDE "all"
@@ -40,6 +41,7 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 ```
 
 **macOS / Linux (Bash)**:
+
 ```bash
 # Initialize with Full Mode and all IDE adapters in the target folder
 ./init.sh -p ~/Projects/YourProject -i all
@@ -74,7 +76,6 @@ Open a new conversation in your preferred AI IDE and type the startup command:
 
 ## 📁 Project Structure
 
-```
 SelfSkill/
 ├── skill.md                     # Core Skill instructions (Single Source of Truth)
 ├── README.md                    # This file (English)
@@ -103,27 +104,23 @@ SelfSkill/
 │   ├── gemini_styleguide.md     # Gemini Code Assist format (.gemini/)
 │   ├── ANTIGRAVITY.md           # Antigravity Agent (Google DeepMind Agent)
 │   ├── ANTIGRAVITY.md           # Kiro AI Agent (copied as KIRO_AGENT.md)
-│   └── AGENTS.md                # Generic agent configuration (AGENTS.md)
-│
-└── docs/                        # Reference materials (Local-only, ignored in .gitignore)
-    └── ...
-```
+└─── AGENTS.md                # Generic agent configuration (AGENTS.md)
 
 ---
 
 ## 🔌 Supported AI IDEs & Agents
 
-| IDE / Agent | Adapter File | Installation Location |
-|-------------|--------------|-----------------------|
-| **Cursor** (MDC) | `cursor.mdc` | `.cursor/rules/project-orchestrator.mdc` |
-| **Cursor** (Legacy) | `cursorrules` | `.cursorrules` (Root) |
-| **Cline / RooCode** | `clinerules.md` | `.clinerules/project-orchestrator.md` |
-| **Windsurf** | `windsurfrules.md` | `.windsurfrules` (Root) |
-| **Claude Code** | `CLAUDE.md` | `CLAUDE.md` (Root) |
-| **Gemini Code Assist** | `gemini_styleguide.md` | `.gemini/styleguide.md` |
-| **Antigravity Agent** | `ANTIGRAVITY.md` | `ANTIGRAVITY.md` (Root) |
-| **Kiro AI Agent** | `ANTIGRAVITY.md` | `KIRO_AGENT.md` (Root) |
-| **Generic Agent** | `AGENTS.md` | `AGENTS.md` (Root) |
+| IDE / Agent                  | Adapter File             | Installation Location                      |
+| ---------------------------- | ------------------------ | ------------------------------------------ |
+| **Cursor** (MDC)       | `cursor.mdc`           | `.cursor/rules/project-orchestrator.mdc` |
+| **Cursor** (Legacy)    | `cursorrules`          | `.cursorrules` (Root)                    |
+| **Cline / RooCode**    | `clinerules.md`        | `.clinerules/project-orchestrator.md`    |
+| **Windsurf**           | `windsurfrules.md`     | `.windsurfrules` (Root)                  |
+| **Claude Code**        | `CLAUDE.md`            | `CLAUDE.md` (Root)                       |
+| **Gemini Code Assist** | `gemini_styleguide.md` | `.gemini/styleguide.md`                  |
+| **Antigravity Agent**  | `ANTIGRAVITY.md`       | `ANTIGRAVITY.md` (Root)                  |
+| **Kiro AI Agent**      | `ANTIGRAVITY.md`       | `KIRO_AGENT.md` (Root)                   |
+| **Generic Agent**      | `AGENTS.md`            | `AGENTS.md` (Root)                       |
 
 ---
 
@@ -153,30 +150,30 @@ SelfSkill/
 
 ## 💬 Quick Trigger Keywords
 
-| Intent | English Triggers | 中文触发词 |
-|-----------|------------------|-----------|
-| Start New Chat / Sync | "continue", "sync" | "继续", "同步状态" |
-| Task Planning | "plan", "start task" | "规划", "执行 Task Y" |
-| Start Implementation | "approved", "implement" | "确认", "批准", "开始实现" |
-| Run Verification Tests | "test", "validate", "run tests" | "运行测试", "验证" |
-| Phase Closeout | "closeout", "tests passed" | "测试通过", "阶段完成", "收口" |
-| Rules Evolution | "evolve", "optimize rules" | "优化规则", "进化" |
-| Initialization | "initialize", "setup", "init" | "初始化", "创建项目" |
+| Intent                 | English Triggers                | 中文触发词                     |
+| ---------------------- | ------------------------------- | ------------------------------ |
+| Start New Chat / Sync  | "continue", "sync"              | "继续", "同步状态"             |
+| Task Planning          | "plan", "start task"            | "规划", "执行 Task Y"          |
+| Start Implementation   | "approved", "implement"         | "确认", "批准", "开始实现"     |
+| Run Verification Tests | "test", "validate", "run tests" | "运行测试", "验证"             |
+| Phase Closeout         | "closeout", "tests passed"      | "测试通过", "阶段完成", "收口" |
+| Rules Evolution        | "evolve", "optimize rules"      | "优化规则", "进化"             |
+| Initialization         | "initialize", "setup", "init"   | "初始化", "创建项目"           |
 
 ---
 
 ## ⚖️ Full Mode vs. Lite Mode
 
-| Feature | Full Mode (10 files) | Lite Mode (5 files) |
-|---------|---------------------|--------------------|
-| **Recommended For** | Team environments, large projects | Solo developers, small MVPs |
-| **Seven-Mode Lifecycle** | ✅ Enabled | ✅ Enabled |
-| **NEXT.md Hard Gate** | ✅ Enabled | ✅ Enabled |
-| **EVOLUTION_LOG Output** | ✅ Enabled | ✅ Enabled |
-| **Anti-Bloat & DRY constraints** | ✅ Enabled | ✅ Enabled |
-| **Context Compactor & Safeguards** | ✅ Enabled | ✅ Enabled |
-| **RULES / TEST_LOG / DECISIONS** | ✅ Enabled | ❌ Omitted |
-| **LESSONS / PROPOSALS** | ✅ Enabled | ❌ Omitted |
+| Feature                                  | Full Mode (10 files)              | Lite Mode (5 files)         |
+| ---------------------------------------- | --------------------------------- | --------------------------- |
+| **Recommended For**                | Team environments, large projects | Solo developers, small MVPs |
+| **Seven-Mode Lifecycle**           | ✅ Enabled                        | ✅ Enabled                  |
+| **NEXT.md Hard Gate**              | ✅ Enabled                        | ✅ Enabled                  |
+| **EVOLUTION_LOG Output**           | ✅ Enabled                        | ✅ Enabled                  |
+| **Anti-Bloat & DRY constraints**   | ✅ Enabled                        | ✅ Enabled                  |
+| **Context Compactor & Safeguards** | ✅ Enabled                        | ✅ Enabled                  |
+| **RULES / TEST_LOG / DECISIONS**   | ✅ Enabled                        | ❌ Omitted                  |
+| **LESSONS / PROPOSALS**            | ✅ Enabled                        | ❌ Omitted                  |
 
 *Note: Lite Mode preserves the core workflow discipline and anti-drift rules, omitting only the long-term knowledge accumulation files.*
 
