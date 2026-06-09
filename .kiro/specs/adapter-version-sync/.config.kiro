@@ -1,0 +1,14 @@
+{
+  "specType": "feature",
+  "workflowType": "requirements-first",
+  "featureName": "adapter-version-sync",
+  "featureTitle": "ProjectOrchestrator Adapter 版本同步与自动化",
+  "createdAt": "2024-06-09T16:00:00Z",
+  "status": "ready-for-review",
+  "language": "zh-CN",
+  "documents": {
+    "requirements": "requirements.md",
+    "design": "design.md",
+    "tasks": "tasks.md"
+  }
+}
