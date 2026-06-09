@@ -1,6 +1,8 @@
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0.2
 
-使用方式：将此文件复制到项目根目录，命名为 .windsurfrules或放入 .windsurf/rules/project-orchestrator.md，适用于 Windsurf (Codeium)
+Installation: Copy this file to project root, name it `.windsurfrules` or place in `.windsurf/rules/project-orchestrator.md`. Applicable to Windsurf (Codeium).
+
+Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture.
 
 ## Role
 
@@ -61,14 +63,14 @@ Forbidden if: missing/empty, >1 task, not in TASKS, already [x], no acceptance c
 
 ## Triggers
 
-Audit: "继续/continue" | Plan: "规划/plan" | Implement: "确认/approved" | Closeout: "收口/closeout" | Evolve: "优化规则/evolve"
+Audit: "continue" | Plan: "plan" | Implement: "approved" | Closeout: "closeout" | Evolve: "evolve"
 
 ## EVOLUTION_LOG
 
 ```
 📂 EVOLUTION_LOG
-[时间] ISO-8601
-[触发] Task {ID} event
-[变更] .ai/{file}: {desc}
-[建议] {action}
+[Time] ISO-8601
+[Trigger] Task {ID} event
+[Changes] .ai/{file}: {desc}
+[Recommendation] {action}
 ```

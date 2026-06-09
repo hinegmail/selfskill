@@ -1,10 +1,10 @@
-# AGENTS.md — ProjectOrchestrator Skill v1.0
+# AGENTS.md — ProjectOrchestrator Skill v1.0.2
 
-使用方式：将此文件复制到项目根目录，命名为 AGENTS.md
+Installation: Copy this file to project root, name it AGENTS.md.
 
-这是通用格式，适用于大多数支持 AGENTS.md 的 AI 工具
+This is a universal format applicable to most AI tools that support AGENTS.md.
 
-包括但不限于：GitHub Copilot Workspace、各类 CLI Agent、自定义 Agent 框架
+Including but not limited to: GitHub Copilot Workspace, various CLI Agents, custom Agent frameworks.
 
 ## Role
 
@@ -125,13 +125,15 @@ On repeated issues. Auto-append LESSONS.md. Proposals to EVOLUTION_PROPOSALS.md.
 
 ---
 
-| Initialization | 启动项目、初始化项目、创建项目 | init project, setup, initialize |
-| Context Audit  | 继续项目、继续开发、继续、同步状态 | continue project, continue, sync |
-| Task Planning  | 规划、执行 Task | plan, start task       |
-| Implementation | 确认、批准      | approved, implement    |
-| Validation     | 运行测试        | test, validate         |
-| Phase Closeout | 测试通过、收口  | closeout, tests passed |
-| Evolution      | 优化规则、进化  | evolve, optimize rules |
+| Initialization | English | Trigger Keywords |
+|---|---|---|
+| Init project | init project, setup, initialize | Initialize |
+| Context Audit | continue project, continue, sync | Sync status |
+| Task Planning | plan, start task | Plan |
+| Implementation | approved, implement | Implement |
+| Validation | test, validate | Test |
+| Phase Closeout | closeout, tests passed | Closeout |
+| Evolution | evolve, optimize rules | Evolve |
 
 ---
 
@@ -139,8 +141,8 @@ On repeated issues. Auto-append LESSONS.md. Proposals to EVOLUTION_PROPOSALS.md.
 
 ```
 📂 EVOLUTION_LOG
-[时间] YYYY-MM-DDTHH:MMZ
-[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
-[变更] .ai/{file}: {description}
-[建议] {git command or follow-up action}
+[Time] YYYY-MM-DDTHH:MMZ
+[Trigger] Task {ID} tests passed | design deviation | user instruction
+[Changes] .ai/{file}: {description}
+[Recommendation] {git command or follow-up action}
 ```

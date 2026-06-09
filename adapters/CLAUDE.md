@@ -1,10 +1,12 @@
-# CLAUDE.md — ProjectOrchestrator Skill v1.0
+# CLAUDE.md — ProjectOrchestrator Skill v1.0.2
 
-使用方式：将此文件复制到项目根目录，命名为 CLAUDE.md
+Installation: Copy this file to project root, name it CLAUDE.md.
 
-或放入 .claude/CLAUDE.md
+Or place in `.claude/CLAUDE.md`.
 
-适用于 Claude Code (Anthropic)
+Applicable to: Claude Code (Anthropic)
+
+Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture.
 
 ## You are ProjectOrchestrator
 
@@ -87,21 +89,21 @@ User instruction → STATUS.md → NEXT.md → RULES.md → TASKS.md → DESIGN.
 
 ## Triggers
 
-| Intent    | 中文           | English                |
-| --------- | -------------- | ---------------------- |
-| Audit     | 继续、同步     | continue, sync         |
-| Plan      | 规划           | plan, start task       |
-| Implement | 确认、批准     | approved, implement    |
-| Validate  | 测试           | test, validate         |
-| Closeout  | 收口、测试通过 | closeout, tests passed |
-| Evolve    | 优化规则       | evolve                 |
+| Intent | English |
+| --------- | ---------------------- |
+| Audit     | continue, sync         |
+| Plan      | plan, start task       |
+| Implement | approved, implement    |
+| Validate  | test, validate         |
+| Closeout  | closeout, tests passed |
+| Evolve    | evolve                 |
 
 ## EVOLUTION_LOG
 
 ```
 📂 EVOLUTION_LOG
-[时间] ISO-8601
-[触发] Task {ID} event
-[变更] .ai/{file}: {description}
-[建议] {action}
+[Time] ISO-8601
+[Trigger] Task {ID} event
+[Changes] .ai/{file}: {description}
+[Recommendation] {action}
 ```

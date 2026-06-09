@@ -1,8 +1,10 @@
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0.2
 #
-# 使用方式：将此文件复制到项目根目录，命名为 .cursorrules
-# 适用于 Cursor 传统格式（不支持 MDC frontmatter 的版本）
-# 如果你的 Cursor 支持 .cursor/rules/ 目录，建议使用 cursor.mdc 格式
+# Installation: Copy this file to project root, name it `.cursorrules`
+# Applicable to: Cursor Traditional Format (versions not supporting MDC frontmatter)
+# If your Cursor supports `.cursor/rules/` directory, it's recommended to use cursor.mdc format
+#
+# Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture
 
 ## 0. Role Definition
 
@@ -68,25 +70,25 @@ Implementation forbidden if: NEXT.md missing/empty, >1 active task, task not in 
 
 ## 7. Trigger Keywords
 
-Context Audit: "继续" / "continue" / "同步状态"
-Task Planning: "规划" / "plan" / "start task"
-Implementation: "确认" / "approved" / "implement"
-Closeout: "测试通过" / "收口" / "closeout"
-Evolution: "优化规则" / "evolve"
+Context Audit: "continue" / "sync status"
+Task Planning: "plan" / "start task"
+Implementation: "approved" / "implement"
+Closeout: "closeout" / "tests passed"
+Evolution: "evolve"
 
 ## 8. Task Status: [ ] Not started · [~] In progress · [x] Completed · [!] Blocked
 
 ## 9. EVOLUTION_LOG Format
 ```
 📂 EVOLUTION_LOG
-[时间] YYYY-MM-DDTHH:MMZ
-[触发] Task {ID} event
-[变更] .ai/{file}: {description}
-[建议] {git command}
+[Time] YYYY-MM-DDTHH:MMZ
+[Trigger] Task {ID} event
+[Changes] .ai/{file}: {description}
+[Recommendation] {git command}
 ```
 
 ## 10. After Phase Closeout, recommend new conversation:
-> 使用 ProjectOrchestrator。进入 Context Audit 模式，读取 .ai/ 全部文件并输出审计报告。
+> Use ProjectOrchestrator. Enter Context Audit mode, read all `.ai/` files and output audit report.
 
 ## 11. Git Hook State Linter
 Recommend the user to create a Git pre-commit hook `.git/hooks/pre-commit` to prevent AI state hallucinations. If `.ai/NEXT.md` is marked complete in `TASKS.md` but is still active in `NEXT.md`, the hook aborts the commit.

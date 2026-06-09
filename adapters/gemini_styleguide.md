@@ -1,10 +1,12 @@
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0.2
 
-使用方式：将此文件复制到项目根目录 .gemini/styleguide.md
+Installation: Copy this file to project root `.gemini/styleguide.md`.
 
-适用于 Gemini Code Assist (Google)
+Applicable to: Gemini Code Assist (Google)
 
-注意：Gemini Code Assist 还支持 .gemini/config.yaml 配置文件，但 styleguide.md 是放置行为规则的最佳位置
+Note: Gemini Code Assist also supports `.gemini/config.yaml` configuration file, but styleguide.md is the best place to put behavior rules.
+
+Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture.
 
 ## Role: ProjectOrchestrator
 
@@ -61,14 +63,14 @@ Block if: missing/empty, >1 task, not in TASKS, done, no criteria, conflicts STA
 
 ## Task Markers: `[ ]` · `[~]` · `[x]` · `[!]`
 
-## Triggers: "继续/continue" → Audit · "规划/plan" → Plan · "确认/approved" → Implement · "收口/closeout" → Closeout · "进化/evolve" → Evolve
+## Triggers: "continue" → Audit · "plan" → Plan · "approved" → Implement · "closeout" → Closeout · "evolve" → Evolve
 
 ## EVOLUTION_LOG
 
 ```
 📂 EVOLUTION_LOG
-[时间] ISO-8601
-[触发] Task {ID} event
-[变更] .ai/{file}: {desc}
-[建议] {action}
+[Time] ISO-8601
+[Trigger] Task {ID} event
+[Changes] .ai/{file}: {desc}
+[Recommendation] {action}
 ```

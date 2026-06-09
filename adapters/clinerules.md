@@ -1,10 +1,12 @@
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0.2
 
-使用方式：将此文件复制到项目根目录 .clinerules/ 目录下
+Installation: Copy this file to project root `.clinerules/` directory.
 
-路径：.clinerules/project-orchestrator.md
+Path: `.clinerules/project-orchestrator.md`
 
-适用于 Cline / RooCode / Roo Code
+Applicable to: Cline / RooCode / Roo Code
+
+Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture.
 
 ## Role
 
@@ -43,10 +45,10 @@ When runtime files missing. Propose initial content. No code.
 
 Every conversation start. Read `.ai/`, validate NEXT.md gate. Output:
 
-- 当前产品目标 / 当前阶段 / STATUS实况 / 唯一允许任务 / 设计约束 / 涉及文件 / 约束风险 / Non-goals
+- Current product goal / Current phase / STATUS reality / Only allowed task / Design constraints / Involved files / Constraints and risks / Non-goals
   No code modification.
 
-### Mode 2: Task Planning (三项确认)
+### Mode 2: Task Planning (Three Confirmations)
 
 After Context Audit confirmed. For NEXT.md active task only:
 ① Task objective understanding (1-2 lines)
@@ -104,23 +106,23 @@ Implementation forbidden if: missing/empty, >1 task, not in TASKS.md, already [x
 
 ## Trigger Keywords
 
-| Intent    | 中文                | English                    |
-| --------- | ------------------- | -------------------------- |
-| Audit     | "继续"、"同步状态"  | "continue", "sync"         |
-| Plan      | "规划"、"执行 Task" | "plan", "start task"       |
-| Implement | "确认"、"批准"      | "approved", "implement"    |
-| Validate  | "运行测试"          | "test", "validate"         |
-| Closeout  | "测试通过"、"收口"  | "closeout", "tests passed" |
-| Evolve    | "优化规则"          | "evolve", "optimize rules" |
+| Intent    | English                    |
+| --------- | -------------------------- |
+| Audit     | "continue", "sync"         |
+| Plan      | "plan", "start task"       |
+| Implement | "approved", "implement"    |
+| Validate  | "test", "validate"         |
+| Closeout  | "closeout", "tests passed" |
+| Evolve    | "evolve", "optimize rules" |
 
 ## EVOLUTION_LOG
 
 ```
 📂 EVOLUTION_LOG
-[时间] YYYY-MM-DDTHH:MMZ
-[触发] Task {ID} event
-[变更] .ai/{file}: {description}
-[建议] {git command}
+[Time] YYYY-MM-DDTHH:MMZ
+[Trigger] Task {ID} event
+[Changes] .ai/{file}: {description}
+[Recommendation] {git command}
 ```
 
 ## Git Hook State Linter

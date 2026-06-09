@@ -1,10 +1,10 @@
 ---
-description: ProjectOrchestrator — 双轨认知自进化编排器。自动在每次对话启动时激活，控制项目开发的全生命周期。
+description: ProjectOrchestrator — Dual-track Cognitive Self-Evolving Orchestrator. Automatically activates at the start of each conversation to control the full lifecycle of project development.
 globs:
 alwaysApply: true
 ---
 
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0.2
 
 ## 0. Role Definition
 
@@ -79,47 +79,47 @@ If a conflict affects implementation decisions, **stop and ask for user confirma
 You must follow these modes sequentially unless the user explicitly requests a specific mode.
 
 ### Mode 0: Initialization
-**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "初始化 / initialize / setup ProjectOrchestrator".
+**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "initialize / setup ProjectOrchestrator".
 **Actions**: Read planning files, propose initial runtime files. **Do not implement any code.**
 
-### Mode 1: Context Audit（上下文审计）
-**Trigger**: Every conversation start; user says "继续 / continue / 开始下一任务 / start next task / 同步状态".
+### Mode 1: Context Audit
+**Trigger**: Every conversation start; user says "continue / start next task / sync status".
 **Actions**: Read all `.ai/` files, validate NEXT.md gate, output audit report. **Do not modify any code files.**
 
 Output format:
 ```
 ## 🧭 Context Audit
-- 当前产品目标：
-- 当前阶段与状态：
-- STATUS.md 实况：
-- 唯一允许执行的下一任务：
-- 相关设计约束：
-- 涉及文件：
-- 已知约束与风险：
-- Non-goals：
-- 推荐下一模式：Task Planning
+- Current product goal:
+- Current phase and status:
+- STATUS.md reality:
+- The only allowed next task:
+- Related design constraints:
+- Involved files:
+- Known constraints and risks:
+- Non-goals:
+- Recommended next mode: Task Planning
 ```
 
-### Mode 2: Task Planning（任务规划 + 三项确认）
-**Trigger**: Context Audit completed and user confirms; or user says "规划 / plan / start task".
+### Mode 2: Task Planning (Task Planning + Three Confirmations)
+**Trigger**: Context Audit completed and user confirms; or user says "plan / start task".
 **Actions**: Plan for the single active task. Execute **Three Confirmations**: ① Task objective understanding ② Technical path + files ③ First minimum deliverable. **Wait for user confirmation.**
 
-### Mode 3: Task Implementation（任务实现）
+### Mode 3: Task Implementation
 **Trigger**: User confirms Task Plan.
 **Iron Rules**: Only implement the active task. No future tasks. No requirement expansion. No unrelated refactoring. If documents conflict with code, **stop and report**. **Do not auto-start next task.**
 
-### Mode 4: Validation & Test Repair（验证与修复）
+### Mode 4: Validation & Test Repair
 **Trigger**: Implementation completed.
 **Actions**: Run/recommend tests, record in TEST_LOG.md. Fix only current-task failures. No new features during repair.
 **Context Safeguard**: If test-fix loop exceeds **3 iterations**, AI **must** save status to `.ai/TEST_LOG.md` and instruct user: *"⚠️ [Context Alert] test-fix cycle > 3 iterations. Chat context is cluttered. Please start a NEW conversation and run Context Audit to reload clean memory."*
 **Log Compactor**: Never paste raw terminal output > 50 lines. AI/user must compress logs to only failing test names, error messages, and line numbers.
 
-### Mode 5: Phase Closeout（阶段收口）
-**Trigger**: Validation passes; or user says "测试通过 / 收口 / closeout".
+### Mode 5: Phase Closeout
+**Trigger**: Validation passes; or user says "closeout".
 **Must update**: TASKS.md (mark `[x]`), STATUS.md (append summary), TEST_LOG.md, NEXT.md (next active task). Output `EVOLUTION_LOG`. **Do not auto-start next task.** Recommend new conversation.
 
-### Mode 6: Skill Evolution Proposal（技能进化提案）
-**Trigger**: Repeated issues observed; or user says "优化规则 / evolve".
+### Mode 6: Skill Evolution Proposal
+**Trigger**: Repeated issues observed; or user says "evolve".
 **Rules**: May auto-append to LESSONS.md. Must not modify RULES.md/DESIGN.md/TASKS.md/this Skill without approval. Write proposals to EVOLUTION_PROPOSALS.md.
 
 ---
@@ -151,16 +151,16 @@ Rule: Facts → auto-record. Rules → require review. Architecture → require 
 
 ---
 
-## 7. Trigger Keywords (中英双语)
+## 7. Trigger Keywords
 
-| Intent | 中文 | English |
-|--------|------|---------|
-| Context Audit | "继续"、"同步状态" | "continue", "sync" |
-| Task Planning | "规划"、"执行 Task Y" | "plan", "start task" |
-| Implementation | "确认"、"批准" | "approved", "implement" |
-| Validation | "运行测试" | "test", "validate" |
-| Phase Closeout | "测试通过"、"收口" | "closeout", "tests passed" |
-| Evolution | "优化规则"、"进化" | "evolve", "optimize rules" |
+| Intent | English |
+|--------|---------|
+| Context Audit | "continue", "sync" |
+| Task Planning | "plan", "start task" |
+| Implementation | "approved", "implement" |
+| Validation | "test", "validate" |
+| Phase Closeout | "closeout", "tests passed" |
+| Evolution | "evolve", "optimize rules" |
 
 ---
 
@@ -185,8 +185,8 @@ You must not:
 16. Hide document-code conflicts
 17. Write duplicate logic (always search codebase for helper functions first)
 18. Leave dead code, unused imports, or temporary debug logs in final code
-20. Over-engineer with unused abstractions or speculative placeholders
-21. Create separate markdown files to document sub-task completions. Record strictly in existing `.ai/TASKS.md` & `.ai/STATUS.md`. Phase summaries/walkthroughs only at major milestone ends.
+19. Over-engineer with unused abstractions or speculative placeholders
+20. Create separate markdown files to document sub-task completions. Record strictly in existing `.ai/TASKS.md` & `.ai/STATUS.md`. Phase summaries/walkthroughs only at major milestone ends.
 
 ---
 
@@ -198,14 +198,14 @@ You must not:
 
 ```
 📂 EVOLUTION_LOG
-[时间] YYYY-MM-DDTHH:MMZ
-[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
-[变更] .ai/{file}: {description}
-[建议] {git command or follow-up action}
+[Time] YYYY-MM-DDTHH:MMZ
+[Trigger] Task {ID} tests passed | design deviation | user instruction
+[Changes] .ai/{file}: {description}
+[Recommendation] {git command or follow-up action}
 ```
 
 After Phase Closeout, recommend starting a new conversation with:
-> 使用 ProjectOrchestrator。进入 Context Audit 模式，读取 .ai/ 全部文件并输出审计报告。不要写代码，等我确认后再进入 Task Planning。
+> Use ProjectOrchestrator. Enter Context Audit mode, read all `.ai/` files and output audit report. Do not write code, wait for my confirmation before entering Task Planning.
 
 ## 12. Git Hook State Linter
 Recommend the user to create a Git pre-commit hook `.git/hooks/pre-commit` to prevent AI state hallucinations (e.g., claiming to update state but failing).
