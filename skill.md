@@ -108,9 +108,13 @@ Confirm the proposed files, then enter Context Audit mode.
 
 **Actions**:
 1. Read all `.ai/` files in priority order.
-2. Validate the NEXT.md gate (see §5).
-3. Output the audit report.
-4. **Do not modify any code files.**
+2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`PRD.md`, `DESIGN.md`, `TASKS.md`) exist:
+   - Proactively redirect to **Mode 0: Initialization**.
+   - Read the original files and extract project metadata, high-level architecture, milestones, and Line-Range index map.
+   - Propose complete content for `STEERING.md`, `STATUS.md`, and `NEXT.md` in the chat, and request user approval to write them.
+3. Validate the NEXT.md gate (see §5).
+4. Output the audit report.
+5. **Do not modify any code files.**
 
 **Output**:
 ```
@@ -148,7 +152,7 @@ Confirm the proposed files, then enter Context Audit mode.
 Task Planning
 ```
 
-**If `.ai/STATUS.md` or `.ai/NEXT.md` is missing**: Enter Initialization mode instead.
+**If `.ai/STATUS.md`, `.ai/NEXT.md`, or `.ai/STEERING.md` is missing, or contains default placeholder templates**: Enter Initialization mode instead.
 
 ---
 
@@ -481,13 +485,13 @@ At the end of every major milestone or phase:
 
 | Intent | 中文触发词 | English Triggers |
 |--------|-----------|-----------------|
-| Context Audit | "继续"、"开始下一任务"、"同步状态" | "continue", "start next task", "sync" |
+| Context Audit | "继续项目"、"继续开发"、"继续"、"同步状态" | "continue project", "continue", "sync" |
 | Task Planning | "开始阶段 X"、"执行 Task Y"、"规划" | "plan", "start task", "start phase" |
 | Implementation | "确认"、"批准"、"开始实现" | "approved", "implement", "go ahead" |
 | Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
 | Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
 | Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
-| Initialization | "初始化"、"创建项目" | "initialize", "setup", "init" |
+| Initialization | "启动项目"、"初始化项目"、"新建项目"、"创建项目" | "init project", "setup", "initialize" |
 
 ---
 
@@ -552,7 +556,8 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 **Recommended startup prompt for new conversation**:
 
-> 使用 ProjectOrchestrator。进入 Context Audit 模式，读取 .ai/ 全部文件并输出审计报告。不要写代码，等我确认后再进入 Task Planning。
+- For existing project (continue development): **"继续项目"** (or **"continue project"** / **"继续开发"**) to load files and enter Context Audit mode.
+- For new project (initial setup/migration): **"启动项目"** (or **"init project"**) to trigger Mode 0 auto-extraction.
 
 By combining "local file persistence for cognition" with "new conversation for clean context", the AI reloads clean project state from the file system every time.
 

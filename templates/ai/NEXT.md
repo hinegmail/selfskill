@@ -1,39 +1,13 @@
-﻿# Next Task (NEXT) — 唯一执行闸门
+# 唯一活跃任务闸门 (NEXT)
 
-## Active Task
-- **Task ID**：{ID}
-- **任务名称**：{name}
+> [!IMPORTANT]
+> 根据 ProjectOrchestrator 铁律，AI 绝对禁止超出本文件标注的范围编写任何业务代码。
+> 严禁在此处堆叠多个任务。只有当本任务完成并收口后，方可在此处设置下一个任务。
 
-## 来源
-定义于 `.ai/TASKS.md` 阶段 {N}。
-
-## 目标
-{基于 DESIGN.md 和 PRD.md 的具体实现目标}
-
-## 验收标准
-- [ ] {标准 1}
-- [ ] {标准 2}
-- [ ] {标准 3}
-
-## 允许范围
-仅修改与该任务直接相关的文件。
-
-## 禁止范围
-- 不预执行后续任务
-- 不重构无关模块
-- 不新增 PRD 之外的需求
-- 不修改 DESIGN 中的架构（除非显式批准）
-- 不引入未经批准的新依赖
-
-## 实现前必须
-1. 完成 Context Audit
-2. 完成 Task Planning
-3. 获得用户确认
-
-## 完成后必须更新
-- `.ai/STATUS.md`
-- `.ai/TASKS.md`
-- `.ai/TEST_LOG.md`
-- `.ai/NEXT.md`
-- `.ai/DECISIONS.md`（如有决策）
-- `.ai/LESSONS.md`（如有教训）
+* **Active Task**: [Task 1: 后端项目框架初始化](file:///d:/Users/Administrator/Documents/Projects/selfskill/templates/ai/TASKS.md#L48-L61)
+* **验收条件**:
+  - [ ] 后端项目目录结构完整（包含 routes, services, models, middleware 等子目录）。
+  - [ ] 核心依赖完成安装与确认（如 FastAPI/Express 的 package.json 或 requirements.txt）。
+  - [ ] 配置环境变量示例文件 `.env.example`。
+  - [ ] 开发服务可成功启动并响应 `GET /health` 健康检查端点。
+  - [ ] 系统日志组件（Logger）完成初始化。

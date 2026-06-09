@@ -80,7 +80,7 @@ else {
 }
 
 # Core files (both Lite and Full)
-$coreFiles = @("PRD.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md")
+$coreFiles = @("PRD.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
 
 # Full mode extra files
 $fullFiles = @("RULES.md", "TEST_LOG.md", "DECISIONS.md", "LESSONS.md", "EVOLUTION_PROPOSALS.md")

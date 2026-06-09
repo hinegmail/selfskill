@@ -1,4 +1,4 @@
-﻿# AGENTS.md — ProjectOrchestrator Skill v1.0
+# AGENTS.md — ProjectOrchestrator Skill v1.0
 
 使用方式：将此文件复制到项目根目录，命名为 AGENTS.md
 
@@ -125,11 +125,8 @@ On repeated issues. Auto-append LESSONS.md. Proposals to EVOLUTION_PROPOSALS.md.
 
 ---
 
-## Trigger Keywords
-
-| Intent         | 中文            | English                |
-| -------------- | --------------- | ---------------------- |
-| Context Audit  | 继续、同步状态  | continue, sync         |
+| Initialization | 启动项目、初始化项目、创建项目 | init project, setup, initialize |
+| Context Audit  | 继续项目、继续开发、继续、同步状态 | continue project, continue, sync |
 | Task Planning  | 规划、执行 Task | plan, start task       |
 | Implementation | 确认、批准      | approved, implement    |
 | Validation     | 运行测试        | test, validate         |
