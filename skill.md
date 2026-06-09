@@ -29,7 +29,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 | File | Purpose |
 |------|---------|
-| `.ai/PRD.md` | Product requirements: user value, business rules, acceptance goals |
+| `.ai/requirements.md` | Product requirements: user value, business rules, acceptance goals |
 | `.ai/DESIGN.md` | Technical design: architecture, modules, APIs, data models, constraints |
 | `.ai/TASKS.md` | Complete task list: phases, task IDs, dependencies, acceptance criteria, status |
 
@@ -47,7 +47,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 ### Lite Mode (small projects / solo developers)
 
-Use only: `PRD.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`
+Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`
 
 Omit: `RULES.md`, `TEST_LOG.md`, `DECISIONS.md`, `LESSONS.md`, `EVOLUTION_PROPOSALS.md`
 
@@ -63,7 +63,7 @@ Retain: Seven-mode engine, NEXT.md gate, EVOLUTION_LOG output, Forbidden Behavio
 4. `.ai/RULES.md` — project AI rules + conventions
 5. `.ai/TASKS.md` — task definitions
 6. `.ai/DESIGN.md` — technical design
-7. `.ai/PRD.md` — product requirements
+7. `.ai/requirements.md` — product requirements
 8. `.ai/LESSONS.md` — advisory lessons
 9. `.ai/DECISIONS.md` — historical decisions
 10. AI assumptions (lowest)
@@ -81,7 +81,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
 **Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "启动项目 / 初始化项目 / setup / initialize / init".
 
 **Actions**:
-1. Read `.ai/PRD.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
+1. Read `.ai/requirements.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
 2. If `.ai/STEERING.md` is missing but the above original documents exist:
    - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
    - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
@@ -92,7 +92,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
      - ① **项目名称**与核心商业价值定位是什么？
      - ② 核心**技术栈**与工程框架是什么？
      - ③ **核心功能职责与模块**如何规划？
-   - Once the user answers, automatically generate the initial skeleton files for `PRD.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
+   - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
 4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
 5. **Do not implement any code.** Wait for user confirmation.
 
@@ -119,12 +119,12 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
 **Actions**:
 1. **Timestamp-based Smart Load (时间戳智能审计过滤)**:
    - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value.
-   - Query the last modified metadata of `.ai/PRD.md` and `.ai/DESIGN.md` (via tool execution).
-   - If the timestamps of PRD/DESIGN match the `last_audit_timestamp` in `STATUS.md`:
+   - Query the last modified metadata of `.ai/requirements.md` and `.ai/DESIGN.md` (via tool execution).
+   - If the timestamps of requirements/DESIGN match the `last_audit_timestamp` in `STATUS.md`:
      - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
    - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
-     - Perform a full re-audit by reading `PRD.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
-2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`PRD.md`, `DESIGN.md`, `TASKS.md`) exist:
+     - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
+2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
    - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
 3. Validate the NEXT.md gate (see §5).
 4. Output the audit report.
@@ -216,7 +216,7 @@ Task Planning
 2. ...
 
 ### 需求来源
-（reference PRD.md sections）
+（reference requirements.md sections）
 
 ### 设计依据
 （reference DESIGN.md sections）
@@ -242,7 +242,7 @@ Task Planning
 **Iron Rules**:
 1. Only implement the active task in `.ai/NEXT.md`.
 2. Do not execute future tasks.
-3. Do not expand requirements beyond `.ai/PRD.md`.
+3. Do not expand requirements beyond `.ai/requirements.md`.
 4. Do not refactor unrelated modules.
 5. Do not rewrite tested modules unless the current task requires it.
 6. Do not change public interfaces unless the current task requires it or user approves.
@@ -496,7 +496,7 @@ Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** i
 
 | File | Why |
 |------|-----|
-| `.ai/PRD.md` | Product intent must not drift |
+| `.ai/requirements.md` | Product intent must not drift |
 | `.ai/DESIGN.md` | Architecture changes need review |
 | `.ai/TASKS.md` structure | Task reorganization affects roadmap |
 | `.ai/RULES.md` | Permanent rules must be deliberate |
@@ -507,7 +507,7 @@ Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** i
 ### 🧬 Token Economy & Context Chunking (按需读取优化)
 To save API costs and prevent compliance decay in long conversations:
 - **Phase Audit Sync**: AI must read all `.ai/` files *only* in Mode 1 (Context Audit) at conversation startup.
-- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/PRD.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them** to save context tokens. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` loaded in the active chat context.
+- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them** to save context tokens. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` loaded in the active chat context.
 
 ### 🧠 Cognitive Distillation of Lessons (认知蒸馏规则)
 At the end of every major milestone or phase:
@@ -540,7 +540,7 @@ You must not:
 3. Skip Context Audit mode.
 4. Execute more than one task at a time.
 5. Automatically start the next task after completing one.
-6. Invent requirements not found in `.ai/PRD.md`.
+6. Invent requirements not found in `.ai/requirements.md`.
 7. Ignore acceptance criteria in `.ai/TASKS.md`.
 8. Ignore the `.ai/NEXT.md` gate.
 9. Rewrite completed and tested modules without explicit need.

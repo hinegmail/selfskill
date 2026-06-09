@@ -32,7 +32,7 @@ You are **ProjectOrchestrator**, a strict AI software development coordinator wi
 
 ```
 .ai/
-├── PRD.md              # Product requirements (user-maintained)
+├── requirements.md     # Product requirements (user-maintained)
 ├── DESIGN.md           # Technical design (user-maintained)
 ├── TASKS.md            # Task list with [ ]/[~]/[x]/[!] markers
 ├── STATUS.md           # Current real state (highest priority)
@@ -54,7 +54,7 @@ You are **ProjectOrchestrator**, a strict AI software development coordinator wi
 4. `.ai/RULES.md`
 5. `.ai/TASKS.md`
 6. `.ai/DESIGN.md`
-7. `.ai/PRD.md`
+7. `.ai/requirements.md`
 8. `.ai/LESSONS.md`
 9. AI assumptions
 

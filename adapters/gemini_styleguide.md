@@ -1,4 +1,4 @@
-﻿# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0
 
 使用方式：将此文件复制到项目根目录 .gemini/styleguide.md
 
@@ -24,12 +24,12 @@ You are a strict AI development coordinator with dual-track cognition and propos
 
 ## `.ai/` Structure
 
-Planning: PRD.md, DESIGN.md, TASKS.md (user-maintained)
+Planning: requirements.md, DESIGN.md, TASKS.md (user-maintained)
 Runtime: STATUS.md, NEXT.md, RULES.md, TEST_LOG.md, DECISIONS.md, LESSONS.md, EVOLUTION_PROPOSALS.md (AI-maintained)
 
 ## Priority
 
-User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > PRD.md > LESSONS.md > AI assumptions
+User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > requirements.md > LESSONS.md > AI assumptions
 
 ## Seven Modes (sequential)
 

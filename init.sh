@@ -93,7 +93,7 @@ mkdir -p "$AI_DIR"
 echo "📁 .ai/ 目录就绪"
 
 # 核心文件
-CORE_FILES=("PRD.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md")
+CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md")
 FULL_FILES=("RULES.md" "TEST_LOG.md" "DECISIONS.md" "LESSONS.md" "EVOLUTION_PROPOSALS.md")
 
 copy_if_not_exists() {
@@ -182,7 +182,7 @@ echo ""
 echo "✨ 初始化完成！"
 echo ""
 echo "📌 下一步："
-echo "   1. 编辑 .ai/PRD.md 填写产品需求"
+echo "   1. 编辑 .ai/requirements.md 填写产品需求"
 echo "   2. 编辑 .ai/DESIGN.md 填写技术设计"
 echo "   3. 编辑 .ai/TASKS.md 填写任务清单"
 echo "   4. 编辑 .ai/NEXT.md 设置第一个活跃任务"

@@ -59,7 +59,7 @@
 
 ```
 .ai/
-├── PRD.md        ← 填写产品需求
+├── requirements.md        ← 填写产品需求
 ├── DESIGN.md     ← 填写技术设计
 ├── TASKS.md      ← 填写任务清单
 ├── STATUS.md     ← 设置当前状态
@@ -72,7 +72,7 @@
 
 * **若为全新项目/首次迁移建档**：
   > **启动项目**（英文：“**init project**” 或 “**setup**”）
-  *AI 将自动通过工具读取已有的原始文档（PRD/DESIGN/TASKS），自动提炼项目骨架并建立 Line-Range INDEX 索引，生成控制文件提案一键写入。*
+  *AI 将自动通过工具读取已有的原始文档（requirements/DESIGN/TASKS），自动提炼项目骨架并建立 Line-Range INDEX 索引，生成控制文件提案一键写入。*
 * **若为开发中的项目（同步最新进度）**：
   > **继续项目**（英文：“**continue project**” 或 “**continue**”）
   *AI 将通过工具快速读取舵盘等控制文件，进入 Context Audit 并输出审计报告。*
@@ -89,7 +89,7 @@ SelfSkill/
 ├── init.sh                      # macOS/Linux 初始化脚本
 │
 ├── templates/ai/                # .ai/ 目录模板
-│   ├── PRD.md                   # 产品需求模板
+│   ├── requirements.md          # 产品需求模板
 │   ├── DESIGN.md                # 技术设计模板
 │   ├── TASKS.md                 # 任务清单模板
 │   ├── STATUS.md                # 项目状态模板

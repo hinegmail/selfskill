@@ -25,12 +25,12 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 ## 2. `.ai/` File System
 
-Planning files (user-maintained): PRD.md, DESIGN.md, TASKS.md
+Planning files (user-maintained): requirements.md, DESIGN.md, TASKS.md
 Runtime files (AI-maintained): STATUS.md, NEXT.md, RULES.md, TEST_LOG.md, DECISIONS.md, LESSONS.md, EVOLUTION_PROPOSALS.md
 
 ## 3. Priority System
 
-1. User instruction > 2. STATUS.md > 3. NEXT.md > 4. RULES.md > 5. TASKS.md > 6. DESIGN.md > 7. PRD.md > 8. LESSONS.md > 9. AI assumptions
+1. User instruction > 2. STATUS.md > 3. NEXT.md > 4. RULES.md > 5. TASKS.md > 6. DESIGN.md > 7. requirements.md > 8. LESSONS.md > 9. AI assumptions
 
 ## 4. Seven-Mode Execution Engine
 
@@ -41,7 +41,7 @@ Mode 3: Task Implementation — Only implement active task. No scope expansion. 
 Mode 4: Validation & Test Repair — Run tests, record in TEST_LOG.md. Fix only current-task failures. Safeguard: If loop > 3 iterations, save to TEST_LOG.md and force user to start NEW conversation & run Context Audit. Compactor: Compress raw logs to < 50 lines.
 Mode 5: Phase Closeout — Update TASKS/STATUS/TEST_LOG/NEXT. Output EVOLUTION_LOG. No auto-start.
 Mode 6: Skill Evolution Proposal — Auto-append LESSONS.md. Proposals for RULES/DESIGN changes need approval.
-- **Token Economy**: Skip reading `PRD.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
+- **Token Economy**: Skip reading `requirements.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
 - **Cognitive Distillation**: At milestone ends, AI must distill the top 3-5 recurring lessons from `LESSONS.md` and propose merging them directly into `RULES.md`, resetting `LESSONS.md`.
 
 ## 5. NEXT.md Hard Gate

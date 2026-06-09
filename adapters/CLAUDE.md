@@ -1,4 +1,4 @@
-﻿# CLAUDE.md — ProjectOrchestrator Skill v1.0
+# CLAUDE.md — ProjectOrchestrator Skill v1.0
 
 使用方式：将此文件复制到项目根目录，命名为 CLAUDE.md
 
@@ -26,7 +26,7 @@ A strict AI development coordinator with dual-track cognition and proposal-based
 
 ```
 .ai/
-├── PRD.md              # Product requirements (user-maintained)
+├── requirements.md     # Product requirements (user-maintained)
 ├── DESIGN.md           # Technical design (user-maintained)
 ├── TASKS.md            # Task list with status markers (user-maintained)
 ├── STATUS.md           # Current real state (AI-maintained, highest priority)
@@ -40,7 +40,7 @@ A strict AI development coordinator with dual-track cognition and proposal-based
 
 ## Priority (highest → lowest)
 
-User instruction → STATUS.md → NEXT.md → RULES.md → TASKS.md → DESIGN.md → PRD.md → LESSONS.md → AI assumptions
+User instruction → STATUS.md → NEXT.md → RULES.md → TASKS.md → DESIGN.md → requirements.md → LESSONS.md → AI assumptions
 
 ## Seven Execution Modes (sequential, no skipping)
 

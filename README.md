@@ -59,7 +59,7 @@ After initialization, edit the following files to match your project specificati
 
 ```
 .ai/
-├── PRD.md        ← Define product requirements & business logic
+├── requirements.md        ← Define product requirements & business logic
 ├── DESIGN.md     ← Outline system architecture & database schema
 ├── TASKS.md      ← Write down the task list & milestones
 ├── STATUS.md     ← Document the current project status
@@ -85,7 +85,7 @@ SelfSkill/
 ├── init.sh                   # Bash initialization script (macOS/Linux)
 │
 ├── templates/ai/             # .ai/ templates
-│   ├── PRD.md                # Product Requirements Document template
+│   ├── requirements.md       # Product Requirements Document template
 │   ├── DESIGN.md             # Technical Design Document template
 │   ├── TASKS.md              # Task list template ([ ]/[~]/[x]/[!] markers)
 │   ├── STATUS.md             # Real project status log (highest reality truth)

@@ -17,7 +17,7 @@ You must strictly follow the **ProjectOrchestrator 7-Mode Lifecycle** and the **
 ### Mode 1: Context Audit (上下文审计)
 
 * **Agent 动作**：主动使用文件读取工具（如 `view_file` 或 `grep_search`）读取 `.ai/` 目录下的所有文件。
-* **工具链**：`list_dir` 获取 `.ai/` 目录结构 ──> `view_file` 按优先级依次读取 `STATUS.md`、`NEXT.md`、`PRD.md` 等。
+* **工具链**：`list_dir` 获取 `.ai/` 目录结构 ──> `view_file` 按优先级依次读取 `STATUS.md`、`NEXT.md`、`requirements.md` 等。
 * **禁止行为**：严禁在未完整读取 `.ai/` 文档前编写任何业务代码。
 
 ### Mode 2: Task Planning (任务规划)
@@ -62,4 +62,4 @@ You must strictly follow the **ProjectOrchestrator 7-Mode Lifecycle** and the **
 为了保持大模型的思考敏捷度，当你在长对话中处理测试修复时：
 
 * 仅主动读取 `STATUS.md`、`NEXT.md` 和 `TEST_LOG.md`。
-* 如果项目 `PRD.md` 和 `DESIGN.md` 未发生变动，**禁止**在 Mode 3/4/5 重复全量读取它们，节省 Context Tokens。
+* 如果项目 `requirements.md` 和 `DESIGN.md` 未发生变动，**禁止**在 Mode 3/4/5 重复全量读取它们，节省 Context Tokens。

@@ -80,7 +80,7 @@ else {
 }
 
 # Core files (both Lite and Full)
-$coreFiles = @("PRD.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
+$coreFiles = @("requirements.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
 
 # Full mode extra files
 $fullFiles = @("RULES.md", "TEST_LOG.md", "DECISIONS.md", "LESSONS.md", "EVOLUTION_PROPOSALS.md")
@@ -203,7 +203,7 @@ Write-Host ""
 Write-Host "[OK] Initialization complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Edit .ai/PRD.md    - fill in product requirements" -ForegroundColor White
+Write-Host "  1. Edit .ai/requirements.md - fill in product requirements" -ForegroundColor White
 Write-Host "  2. Edit .ai/DESIGN.md - fill in technical design" -ForegroundColor White
 Write-Host "  3. Edit .ai/TASKS.md  - fill in task list" -ForegroundColor White
 Write-Host "  4. Edit .ai/NEXT.md   - set the first active task" -ForegroundColor White

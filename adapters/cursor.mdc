@@ -35,7 +35,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 | File | Purpose |
 |------|---------|
-| `.ai/PRD.md` | Product requirements: user value, business rules, acceptance goals |
+| `.ai/requirements.md` | Product requirements: user value, business rules, acceptance goals |
 | `.ai/DESIGN.md` | Technical design: architecture, modules, APIs, data models, constraints |
 | `.ai/TASKS.md` | Complete task list: phases, task IDs, dependencies, acceptance criteria, status |
 
@@ -53,7 +53,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 ### Lite Mode (small projects / solo developers)
 
-Use only: `PRD.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`. Retain: Seven-mode engine, NEXT.md gate, EVOLUTION_LOG output, Forbidden Behaviors.
+Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`. Retain: Seven-mode engine, NEXT.md gate, EVOLUTION_LOG output, Forbidden Behaviors.
 
 ---
 
@@ -65,7 +65,7 @@ Use only: `PRD.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`. Retain: Sev
 4. `.ai/RULES.md` — project AI rules + conventions
 5. `.ai/TASKS.md` — task definitions
 6. `.ai/DESIGN.md` — technical design
-7. `.ai/PRD.md` — product requirements
+7. `.ai/requirements.md` — product requirements
 8. `.ai/LESSONS.md` — advisory lessons
 9. `.ai/DECISIONS.md` — historical decisions
 10. AI assumptions (lowest)
@@ -142,11 +142,11 @@ Output format:
 
 **Auto-updatable** (no approval): STATUS.md, TASKS.md status marks, TEST_LOG.md, LESSONS.md, DECISIONS.md, NEXT.md (during closeout).
 
-**Requires approval** (proposal-based): PRD.md, DESIGN.md, TASKS.md structure, RULES.md, this Skill.
+**Requires approval** (proposal-based): requirements.md, DESIGN.md, TASKS.md structure, RULES.md, this Skill.
 
 Rule: Facts → auto-record. Rules → require review. Architecture → require approval.
 
-**Token Economy**: Read all `.ai/` files *only* in Mode 1 Context Audit. Skip reading `PRD.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged, keeping only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
+**Token Economy**: Read all `.ai/` files *only* in Mode 1 Context Audit. Skip reading `requirements.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged, keeping only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
 **Cognitive Distillation**: At milestone ends, AI must perform Cognitive Distillation on `.ai/LESSONS.md`, proposing (Mode 6) to merge the top 3-5 recurring traps directly into `.ai/RULES.md` and resetting `LESSONS.md` to prevent context bloat.
 
 ---
@@ -172,7 +172,7 @@ You must not:
 3. Skip Context Audit mode
 4. Execute more than one task at a time
 5. Auto-start the next task
-6. Invent requirements not in PRD.md
+6. Invent requirements not in requirements.md
 7. Ignore NEXT.md gate
 8. Rewrite tested modules without need
 9. Refactor unrelated modules during implementation

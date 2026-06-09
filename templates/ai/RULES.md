@@ -7,7 +7,7 @@
 
 1. **Memory Reset & Smart Audit (认知重置与智能审计)**:
    - Do not rely on chat history. You must load `.ai/` files via file tools at the start of every session.
-   - **Timestamp Smart Load**: Prioritize reading `STEERING.md`, `STATUS.md`, `NEXT.md`, and `RULES.md`. Avoid reading raw docs (`PRD.md`/`DESIGN.md`) exceeding 30K if their timestamps match the `last_audit_timestamp` in `STATUS.md`. Retrieve details strictly via INDEX line ranges.
+   - **Timestamp Smart Load**: Prioritize reading `STEERING.md`, `STATUS.md`, `NEXT.md`, and `RULES.md`. Avoid reading raw docs (`requirements.md`/`DESIGN.md`) exceeding 30K if their timestamps match the `last_audit_timestamp` in `STATUS.md`. Retrieve details strictly via INDEX line ranges.
    - **Auto-Initialization**: If `STEERING.md` or other control files are blank placeholders or missing, you **must automatically demote to Mode 0 (Initialization)**. Proactively read raw docs, extract metadata, milestones, and line indexes, and propose the generated skeletal files in the chat. Do not request manual creation.
 
 2. **NEXT.md Single Gate (NEXT闸门拦截)**:

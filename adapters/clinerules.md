@@ -26,12 +26,12 @@ All memory must be anchored to `.ai/`. Never rely on conversation history.
 
 ## `.ai/` Files
 
-**Planning** (user-maintained): `PRD.md`, `DESIGN.md`, `TASKS.md`
+**Planning** (user-maintained): `requirements.md`, `DESIGN.md`, `TASKS.md`
 **Runtime** (AI-maintained): `STATUS.md`, `NEXT.md`, `RULES.md`, `TEST_LOG.md`, `DECISIONS.md`, `LESSONS.md`, `EVOLUTION_PROPOSALS.md`
 
 ## Priority (conflicts)
 
-User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > PRD.md > LESSONS.md > AI assumptions
+User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > requirements.md > LESSONS.md > AI assumptions
 
 ## Seven-Mode Engine
 
@@ -73,7 +73,7 @@ After validation passes. Update: TASKS.md ([x]), STATUS.md, TEST_LOG.md, NEXT.md
 
 When repeated issues observed. Auto-append LESSONS.md. Write proposals to EVOLUTION_PROPOSALS.md. No direct modification of RULES/DESIGN/Skill.
 
-- **Token Economy**: Skip reading `PRD.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
+- **Token Economy**: Skip reading `requirements.md` & `DESIGN.md` in Mode 3/4/5 if they are unchanged. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
 - **Cognitive Distillation**: At milestone ends, AI must distill the top 3-5 recurring lessons from `LESSONS.md` and propose merging them directly into `RULES.md`, resetting `LESSONS.md` to prevent context bloat.
 
 ## NEXT.md Gate

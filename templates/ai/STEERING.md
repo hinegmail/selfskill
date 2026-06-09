@@ -43,7 +43,7 @@
 
 | 原始大文件 | 章节/模块名称 | 行范围 (Line Range) | 核心内容提要 |
 | :--- | :--- | :--- | :--- |
-| **[PRD.md](file:///d:/Users/Administrator/Documents/Projects/selfskill/templates/ai/PRD.md)** | 项目概述与术语定义 | L1 - L57 | 产品定位、适用场景以及核心术语说明表 |
+| **[requirements.md](file:///d:/Users/Administrator/Documents/Projects/selfskill/templates/ai/requirements.md)** | 项目概述与术语定义 | L1 - L57 | 产品定位、适用场景以及核心术语说明表 |
 | | 核心用户角色与行级安全性 | L58 - L118 | 三类角色 RBAC 定义、JSONB 权限标签结构与 GUC 注入 RLS 校验逻辑 |
 | | 登录与账号状态转移管理 | L119 - L253 | 企业微信 OAuth2.0 接入流程规范、本地登录与账号锁定机制 |
 | | 产品主数据管理 | L254 - L295 | products 产品主表核心字段定义与产品状态和知识库归档状态的联动 |

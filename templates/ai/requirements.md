@@ -200,7 +200,7 @@ THE ZaiYou AI Promoter 系统 SHALL 支持以下营销场景：
 
 #### Access Token 生命周期管理
 
-THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
+THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token management 规范：
 
 1. WHEN 获取到 access_token，THE 系统 SHALL 存储 token 和 expires_in 值，计算过期时间为 `current_time + expires_in（秒）`
 
@@ -287,7 +287,7 @@ THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
 
 3. WHILE 产品状态为 'inactive'，THE ZaiYou_AI_Promoter 系统 SHALL 在 RAG 检索中自动过滤掉该产品相关的 knowledge_chunks（metadata_cache.status != 'published'）
 
-4. WHEN AI生成任务提交时，IF 关联的 product_id 的 status='inactive'，THEN THE ZaiYou_AI_Promoter 系统 SHALL 返回HTTP 400错误，消息为："该产品已下线停用，无法发起新的生成任务"
+4. WHEN AI生成任务提交时，IF 关联 of product_id 的 status='inactive'，THEN THE ZaiYou_AI_Promoter 系统 SHALL 返回HTTP 400错误，消息为："该产品已下线停用，无法发起新的生成任务"
 
 5. THE ZaiYou_AI_Promoter 系统 SHALL 记录每次产品状态变更的时间、操作人、变更原因至audit_logs表
 
@@ -436,7 +436,7 @@ THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
 
 ### 需求 13：Prompt模板配置与字段管理（P0）
 
-**用户故事**：作为系统管理员，我想要定义和管理Prompt模板，包括系统提示词、少样本示例和字词平替规则，以控制AI生成的风格和质量。
+**用户故事**：作为系统管理员，我想要定义和管理Prompt模板，包括系统提示词、少样本示例和字词平替规则，以控制AI生成的风格 and 质量。
 
 #### 验收标准
 
@@ -522,7 +522,7 @@ THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
 
 #### 验收标准
 
-1. WHEN 生成任务提交后，THE ZaiYou_AI_Promoter 系统 SHALL 立即建立数据库连接并注入会话级GUC环境变量
+1. WHEN 生成任务提交后，THE ZaiYou_AI_Promoter 系统 的后端 SHALL 立即建立数据库连接并注入会话级GUC环境变量
 
 2. THE ZaiYou_AI_Promoter 系统 SHALL 从 scenario 和 extra_requirements 拼接用户查询文本
 
@@ -874,9 +874,9 @@ THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
 
 1. THE ZaiYou_AI_Promoter 系统 的RAG混合检索 SHALL 对通用关键词达到≥95%的召回率（基于测试集评估）
 
-2. WHERE 用户在scenario中输入"山海经系列"等产品系列名称，THE ZaiYou_AI_Promoter 系统 的全文索引路 SHALL 能准确匹配包含该关键词的所有知识块
+2. WHERE 用户在scenario中输入"山海经系列"等产品系列名称，THE ZaiYou_AI_Promoter 系统 的全文索引路 SHALL能准确匹配包含该关键词的所有知识块
 
-3. WHERE 知识库存在多个版本相似内容（如新旧文案版本），THE ZaiYou_AI_Promoter 系统 的RRF融合 SHALL 能合理排序，优先返回最新或最相关的版本
+3. WHERE 知识库存在多个版本相似内容（如新旧文案版本），THE ZaiYou_AI_Promoter 系统 的RRF融合 SHALL能合理排序，优先返回最新或最相关的版本
 
 ---
 
@@ -929,7 +929,7 @@ THE ZaiYou_AI_Promoter 系统 SHALL 实现以下 token 管理规范：
 | **知识库** | 多格式上传 | 支持.docx/.pdf/.md/.txt/.xlsx格式 |
 | | 结构化切片 | Excel按行转JSON，文本类按500~800字切片 |
 | | 双路索引 | pgvector语义索引+tsvector全文索引 |
-| | metadata_cache | knowledge_chunks冗余权限和文档元数据 |
+| | metadata_cache | knowledge_chunks冗余权限 and 文档元数据 |
 | | 发布审核工作流 | draft→pending→published/rejected→archived状态转移 |
 | **竞品资料** | 上传与分类 | 支持竞品资料上传，分类和发布审核 |
 | **Prompt模板** | 模板配置 | 支持system_prompt、few_shot_examples、thesaurus_rules JSONB配置 |
@@ -1023,7 +1023,7 @@ Response:
 
 | 版本 | 日期 | 作者 | 变更说明 |
 |------|------|------|---------|
-| 1.0 | 2026-01-15 | 系统生成 | 初版需求文档，基于PRD V2.3生成，覆盖P0核心功能 |
+| 1.0 | 2026-01-15 | 系统生成 | 初版需求文档，基于 requirements V2.3 生成，覆盖P0核心功能 |
 
 ---
 

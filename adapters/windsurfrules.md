@@ -1,4 +1,4 @@
-﻿# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.0
 
 使用方式：将此文件复制到项目根目录，命名为 .windsurfrules或放入 .windsurf/rules/project-orchestrator.md，适用于 Windsurf (Codeium)
 
@@ -22,12 +22,12 @@ All memory anchored to `.ai/`. Never rely on conversation history.
 
 ## `.ai/` Files
 
-Planning (user): PRD.md, DESIGN.md, TASKS.md
+Planning (user): requirements.md, DESIGN.md, TASKS.md
 Runtime (AI): STATUS.md, NEXT.md, RULES.md, TEST_LOG.md, DECISIONS.md, LESSONS.md, EVOLUTION_PROPOSALS.md
 
 ## Priority
 
-User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > PRD.md > LESSONS.md > AI assumptions
+User instruction > STATUS.md > NEXT.md > RULES.md > TASKS.md > DESIGN.md > requirements.md > LESSONS.md > AI assumptions
 
 ## Seven-Mode Engine
 
