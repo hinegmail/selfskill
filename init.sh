@@ -10,12 +10,13 @@
 #   -i, --ide IDES        IDE列表, 逗号分隔 (默认: all)
 #                          可选: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, all
 #   -l, --lite            轻量模式 (仅创建5个核心文件)
+#   -f, --force           强制覆盖已存在的 .ai/ 模板文件
 #   -s, --source PATH     SelfSkill 源目录 (默认: 脚本所在目录)
 #   -h, --help            显示帮助
 #
 # 示例:
 #   ./init.sh -p ~/Projects/MyApp -i cursor,cline --lite
-#   ./init.sh -p . -i all
+#   ./init.sh -p . -i all --force
 #   ./init.sh
 
 set -euo pipefail
@@ -27,6 +28,7 @@ set -euo pipefail
 TARGET_PATH="."
 IDE_LIST="all"
 LITE_MODE=false
+FORCE_MODE=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_SOURCE="$SCRIPT_DIR"
 
@@ -46,6 +48,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -l|--lite)
             LITE_MODE=true
+            shift
+            ;;
+        -f|--force)
+            FORCE_MODE=true
             shift
             ;;
         -s|--source)
@@ -96,29 +102,39 @@ echo "📁 .ai/ 目录就绪"
 CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md")
 FULL_FILES=("RULES.md" "TEST_LOG.md" "DECISIONS.md" "LESSONS.md" "EVOLUTION_PROPOSALS.md")
 
-copy_if_not_exists() {
+# 复制模板文件函数，如果指定了 --force 则强制覆盖已存在的文件
+copy_template_file() {
     local src="$1"
     local dst="$2"
     local name="$3"
-    if [[ ! -f "$dst" ]]; then
+    if [[ -f "$dst" ]]; then
+        if [[ "$FORCE_MODE" = true ]]; then
+            if [[ -f "$src" ]]; then
+                cp "$src" "$dst"
+                echo "  *️⃣  $name (已覆盖)"
+            else
+                echo "  ⚠️  模板不存在: $name"
+            fi
+        else
+            echo "  ⏭️  $name (已存在，跳过)"
+        fi
+    else
         if [[ -f "$src" ]]; then
             cp "$src" "$dst"
             echo "  ✅ $name"
         else
             echo "  ⚠️  模板不存在: $name"
         fi
-    else
-        echo "  ⏭️  $name (已存在，跳过)"
     fi
 }
 
 for file in "${CORE_FILES[@]}"; do
-    copy_if_not_exists "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
+    copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
 done
 
 if [[ "$LITE_MODE" = false ]]; then
     for file in "${FULL_FILES[@]}"; do
-        copy_if_not_exists "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
+        copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
     done
 fi
 
@@ -135,38 +151,56 @@ else
     IFS=',' read -ra IDES <<< "$IDE_LIST"
 fi
 
+# 安装 IDE 适配器函数，适配器（规则文件）在存在时总是强制覆盖更新
+install_adapter() {
+    local src="$1"
+    local dst="$2"
+    local label="$3"
+    if [[ -f "$src" ]]; then
+        local parentDir
+        parentDir=$(dirname "$dst")
+        mkdir -p "$parentDir"
+        if [[ -f "$dst" ]]; then
+            cp "$src" "$dst"
+            echo "  *️⃣  $label (已更新)"
+        else
+            cp "$src" "$dst"
+            echo "  ✅ $label"
+        fi
+    else
+        echo "  ⚠️  适配器模板不存在: $label"
+    fi
+}
+
 for ide in "${IDES[@]}"; do
     ide=$(echo "$ide" | xargs) # trim whitespace
     case "$ide" in
         cursor)
-            mkdir -p "$TARGET_PATH/.cursor/rules"
-            copy_if_not_exists "$ADAPTERS_DIR/cursor.mdc" "$TARGET_PATH/.cursor/rules/project-orchestrator.mdc" ".cursor/rules/project-orchestrator.mdc"
+            install_adapter "$ADAPTERS_DIR/cursor.mdc" "$TARGET_PATH/.cursor/rules/project-orchestrator.mdc" ".cursor/rules/project-orchestrator.mdc"
             ;;
         cursor-legacy)
-            copy_if_not_exists "$ADAPTERS_DIR/cursorrules" "$TARGET_PATH/.cursorrules" ".cursorrules"
+            install_adapter "$ADAPTERS_DIR/cursorrules" "$TARGET_PATH/.cursorrules" ".cursorrules"
             ;;
         cline)
-            mkdir -p "$TARGET_PATH/.clinerules"
-            copy_if_not_exists "$ADAPTERS_DIR/clinerules.md" "$TARGET_PATH/.clinerules/project-orchestrator.md" ".clinerules/project-orchestrator.md"
+            install_adapter "$ADAPTERS_DIR/clinerules.md" "$TARGET_PATH/.clinerules/project-orchestrator.md" ".clinerules/project-orchestrator.md"
             ;;
         windsurf)
-            copy_if_not_exists "$ADAPTERS_DIR/windsurfrules.md" "$TARGET_PATH/.windsurfrules" ".windsurfrules"
+            install_adapter "$ADAPTERS_DIR/windsurfrules.md" "$TARGET_PATH/.windsurfrules" ".windsurfrules"
             ;;
         claude)
-            copy_if_not_exists "$ADAPTERS_DIR/CLAUDE.md" "$TARGET_PATH/CLAUDE.md" "CLAUDE.md"
+            install_adapter "$ADAPTERS_DIR/CLAUDE.md" "$TARGET_PATH/CLAUDE.md" "CLAUDE.md"
             ;;
         gemini)
-            mkdir -p "$TARGET_PATH/.gemini"
-            copy_if_not_exists "$ADAPTERS_DIR/gemini_styleguide.md" "$TARGET_PATH/.gemini/styleguide.md" ".gemini/styleguide.md"
+            install_adapter "$ADAPTERS_DIR/gemini_styleguide.md" "$TARGET_PATH/.gemini/styleguide.md" ".gemini/styleguide.md"
             ;;
         agents)
-            copy_if_not_exists "$ADAPTERS_DIR/AGENTS.md" "$TARGET_PATH/AGENTS.md" "AGENTS.md"
+            install_adapter "$ADAPTERS_DIR/AGENTS.md" "$TARGET_PATH/AGENTS.md" "AGENTS.md"
             ;;
         antigravity)
-            copy_if_not_exists "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/ANTIGRAVITY.md" "ANTIGRAVITY.md"
+            install_adapter "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/ANTIGRAVITY.md" "ANTIGRAVITY.md"
             ;;
         kiro)
-            copy_if_not_exists "$ADAPTERS_DIR/KIRO_AGENT.md" "$TARGET_PATH/KIRO_AGENT.md" "KIRO_AGENT.md"
+            install_adapter "$ADAPTERS_DIR/KIRO_AGENT.md" "$TARGET_PATH/KIRO_AGENT.md" "KIRO_AGENT.md"
             ;;
         *)
             echo "  ⚠️  未知 IDE: $ide"

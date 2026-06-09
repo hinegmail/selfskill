@@ -20,9 +20,12 @@
     SelfSkill project root (containing skill.md, templates/, adapters/).
     Auto-detected by default.
 
+.PARAMETER Force
+    Force overwrite existing .ai/ files.
+
 .EXAMPLE
     .\init.ps1 -Path "D:\Projects\MyApp" -IDE "cursor,cline" -Lite
-    .\init.ps1 -Path "." -IDE "all"
+    .\init.ps1 -Path "." -IDE "all" -Force
     .\init.ps1
 #>
 
@@ -30,7 +33,8 @@ param(
     [string]$Path = ".",
     [string]$IDE = "all",
     [switch]$Lite,
-    [string]$SkillSource = ""
+    [string]$SkillSource = "",
+    [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -80,19 +84,25 @@ else {
 }
 
 # Core files (both Lite and Full)
-$coreFiles = @("requirements.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
+$coreFiles = @("REQUIREMENTS.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
 
 # Full mode extra files
 $fullFiles = @("RULES.md", "TEST_LOG.md", "DECISIONS.md", "LESSONS.md", "EVOLUTION_PROPOSALS.md")
 
+# 复制模板文件函数，如果指定了 -Force 则强制覆盖已存在的文件
 function Copy-TemplateFile {
     param([string]$FileName)
     $src = Join-Path $TemplatesDir $FileName
     $dst = Join-Path $AiDir $FileName
-    if (-not (Test-Path $dst)) {
+    $exists = Test-Path $dst
+    if ($Force -or -not $exists) {
         if (Test-Path $src) {
-            Copy-Item $src $dst
-            Write-Host "  [+] .ai/$FileName" -ForegroundColor Green
+            Copy-Item $src $dst -Force
+            if ($exists) {
+                Write-Host "  [*] .ai/$FileName (overwritten)" -ForegroundColor Green
+            } else {
+                Write-Host "  [+] .ai/$FileName" -ForegroundColor Green
+            }
         }
         else {
             Write-Host "  [!] Template missing: $FileName" -ForegroundColor Yellow
@@ -127,18 +137,24 @@ else {
     $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }
 }
 
+# 安装 IDE 适配器函数，适配器（规则文件）在存在时总是强制覆盖更新
 function Install-Adapter {
     param([string]$SrcFile, [string]$DstFile, [string]$Label)
-    if (-not (Test-Path $DstFile)) {
+    if (Test-Path $SrcFile) {
         $parentDir = Split-Path -Parent $DstFile
         if (-not (Test-Path $parentDir)) {
             New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
         }
-        Copy-Item $SrcFile $DstFile
-        Write-Host "  [+] $Label" -ForegroundColor Green
+        $exists = Test-Path $DstFile
+        Copy-Item $SrcFile $DstFile -Force
+        if ($exists) {
+            Write-Host "  [*] $Label (updated)" -ForegroundColor Green
+        } else {
+            Write-Host "  [+] $Label" -ForegroundColor Green
+        }
     }
     else {
-        Write-Host "  [=] $Label (exists, skipped)" -ForegroundColor DarkGray
+        Write-Host "  [!] Adapter template missing: $Label" -ForegroundColor Yellow
     }
 }
 
