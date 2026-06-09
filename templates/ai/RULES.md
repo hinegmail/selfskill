@@ -1,25 +1,38 @@
 # 项目 AI 规则与编码约定 (RULES)
 
-## AI 核心行为规则 (Orchestration Rules)
+## 🧠 AI 核心行为规则 (AI Orchestration Rules)
 
-1. **认知重置与按需审计**：
-   - 不依赖聊天历史，每次会话启动必须先通过工具读取 `.ai/` 目录下的 `STEERING.md`、`STATUS.md`、`NEXT.md` 及 `RULES.md` 恢复上下文。
-   - 严禁在审计阶段直接读取超过 30K 的超长原始文档（如 `PRD.md`、`DESIGN.md`）。必须通过 `STEERING.md` 里的 INDEX 索引路标，进行精准片段提取（按需加载）。
-   - **自动化舵盘与自建档**：若项目控制文件（`STEERING.md`、`STATUS.md` 或 `NEXT.md`）为空白、占位模板或缺失，AI 即使被指示进入 Context Audit 模式，也**必须自动拦截并降级到 Mode 0 (Initialization) 流程**，主动读取已有的超长原始文档（PRD/DESIGN/TASKS），自动提炼并填充更新上述控制文件，等待用户确认后写入，免除开发者的手动抄写负担。
-2. **NEXT.md 单闸门拦截**：
-   - 只能执行 `.ai/NEXT.md` 标注的唯一活跃任务，一次只做一个任务。
-   - 严禁擅自扩展或执行未来任务。若 NEXT.md 为空、冲突或有多个任务，停止并提请确认。
-3. **七模式执行引擎 (Mode 0-6)**：
-   - 必须严格顺次执行（审计 -> 规划与三项确认 -> 实现 -> 验证 -> 阶段收口 -> 自进化）。
-   - 严禁跳过 Mode 1/2 直接修改业务代码。
-4. **三项确认协议**：
-   - Mode 2 阶段必须给出：① 对任务的理解；② 预计读/写的文件列表与技术路径；③ 第一个最小可交付物。获得用户确认后方可进行 Mode 3。
-5. **3次测试修复熔断 (Context Blurring Mitigation)**：
-   - 在测试-测试修复期间不增功能、不重构无关模块，修复迭代中，若在当前会话尝试修复同一报错超过 **3次**，必须立即保存当前进度到 `.ai/TEST_LOG.md`，输出熔断警告并挂起，引导用户开启全新会话以清空 Context 噪音。
-6. **双轨日志写入**：
-   - 每次由于测试通过、架构决策或规则演进更新 `.ai/` 文件时，必须在回复末尾附带标准的 `📂 EVOLUTION_LOG` 块。
-7. **状态同步更新**：
-   - 任务或阶段完成后，必须同步更新 `STATUS.md`、`TASKS.md`（标记为 `[x]`）、`TEST_LOG.md` 以及 `NEXT.md`（设置下一活跃任务），以保证项目认知的完整持久化。
+* **Orchestrator Configurations**:
+  - `mitigation_threshold`: 3  # The maximum retry limit for the test-fix-retest loop before triggering a halt.
+
+1. **Memory Reset & Smart Audit (认知重置与智能审计)**:
+   - Do not rely on chat history. You must load `.ai/` files via file tools at the start of every session.
+   - **Timestamp Smart Load**: Prioritize reading `STEERING.md`, `STATUS.md`, `NEXT.md`, and `RULES.md`. Avoid reading raw docs (`PRD.md`/`DESIGN.md`) exceeding 30K if their timestamps match the `last_audit_timestamp` in `STATUS.md`. Retrieve details strictly via INDEX line ranges.
+   - **Auto-Initialization**: If `STEERING.md` or other control files are blank placeholders or missing, you **must automatically demote to Mode 0 (Initialization)**. Proactively read raw docs, extract metadata, milestones, and line indexes, and propose the generated skeletal files in the chat. Do not request manual creation.
+
+2. **NEXT.md Single Gate (NEXT闸门拦截)**:
+   - You are permitted to execute exactly one active task specified in `.ai/NEXT.md`.
+   - Coding future or un-designated tasks is strictly forbidden. Halt and report if `NEXT.md` is empty, conflicts with `STATUS.md`, or has multiple tasks.
+
+3. **7-Mode Execution Lifecycle (七模式状态机引擎)**:
+   - You must proceed strictly and sequentially through Mode 0 to Mode 6 (Init -> Audit -> Planning -> Implementation -> Validation -> Closeout -> Evolution).
+   - Jumping directly to coding (Mode 3) without executing and confirming Mode 1/2 is strictly forbidden.
+
+4. **Three Confirmations & Lessons Search (三项确认与避坑检索)**:
+   - In Mode 2 (Planning), you **must** execute `grep_search` on `.ai/LESSONS.md` using keywords from the current task. Cite any matched historical pitfalls under "历史避坑经验".
+   - You must present the **Three Confirmations Protocol**: ① Task objective understanding; ② Technical path + files (incorporating lessons); ③ First minimum deliverable. Wait for explicit user approval before writing code.
+
+5. **Context Blurring Mitigation (测试修复熔断机制)**:
+   - During implementation and validation, do not add new features or refactor unrelated code.
+   - If the test-fix-retest loop in the current chat exceeds `mitigation_threshold` (default: 3), you **must** halt development.
+   - Compile a **"Root Cause Analysis (根因诊断反思)"** list, write it directly into `.ai/TEST_LOG.md`, and output a notice requesting the user to start a new clean session.
+
+6. **Dual-Track Logging (双轨日志写入)**:
+   - Every state update to `.ai/` files must include a standard `📂 EVOLUTION_LOG` block at the end of the response.
+
+7. **State Sync & Design Alignment (状态同步与设计对齐)**:
+   - After validation passes, you must update `STATUS.md` (including `last_audit_timestamp` to the current timestamp), `TASKS.md`, `TEST_LOG.md`, and `NEXT.md`.
+   - **Design Alignment**: Read `DESIGN.md` (via line index in `steering.md`) and compare actual code changes. If architectural deviations exist, you **must** submit a patch proposal to `EVOLUTION_PROPOSALS.md` rather than silently mutating `DESIGN.md`.
 
 ## 开发规则（含防臃肿与去重约束）
 

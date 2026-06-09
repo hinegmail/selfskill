@@ -78,13 +78,23 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 ### Mode 0: Initialization
 
-**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "初始化 / initialize / setup".
+**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "启动项目 / 初始化项目 / setup / initialize / init".
 
 **Actions**:
 1. Read `.ai/PRD.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
-2. Determine which runtime files are missing.
-3. Propose initial content for missing files.
-4. **Do not implement any code.** Wait for user confirmation.
+2. If `.ai/STEERING.md` is missing but the above original documents exist:
+   - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
+   - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
+   - Propose the complete contents for `.ai/STEERING.md` to avoid developer manual labor.
+3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
+   - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
+   - Ask the user 3 key design questions in the chat:
+     - ① **项目名称**与核心商业价值定位是什么？
+     - ② 核心**技术栈**与工程框架是什么？
+     - ③ **核心功能职责与模块**如何规划？
+   - Once the user answers, automatically generate the initial skeleton files for `PRD.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
+4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
+5. **Do not implement any code.** Wait for user confirmation.
 
 **Output**:
 ```
@@ -94,24 +104,28 @@ You must follow these modes sequentially unless the user explicitly requests a s
 （list found files）
 
 ### Missing Files
-（list missing files with proposed initial content）
+（list missing files with proposed initial content or wizard questions）
 
 ### Recommended Next Step
-Confirm the proposed files, then enter Context Audit mode.
+Confirm the proposed files (or answer the wizard questions), then enter Context Audit mode.
 ```
 
 ---
 
 ### Mode 1: Context Audit（上下文审计）
 
-**Trigger**: Every conversation start; user says "继续 / continue / 开始下一任务 / start next task / 同步状态 / sync".
+**Trigger**: Every conversation start; user says "继续项目 / continue project / 继续开发 / continue / 同步状态 / sync".
 
 **Actions**:
-1. Read all `.ai/` files in priority order.
+1. **Timestamp-based Smart Load (时间戳智能审计过滤)**:
+   - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value.
+   - Query the last modified metadata of `.ai/PRD.md` and `.ai/DESIGN.md` (via tool execution).
+   - If the timestamps of PRD/DESIGN match the `last_audit_timestamp` in `STATUS.md`:
+     - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
+   - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
+     - Perform a full re-audit by reading `PRD.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
 2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`PRD.md`, `DESIGN.md`, `TASKS.md`) exist:
-   - Proactively redirect to **Mode 0: Initialization**.
-   - Read the original files and extract project metadata, high-level architecture, milestones, and Line-Range index map.
-   - Propose complete content for `STEERING.md`, `STATUS.md`, and `NEXT.md` in the chat, and request user approval to write them.
+   - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
 3. Validate the NEXT.md gate (see §5).
 4. Output the audit report.
 5. **Do not modify any code files.**
@@ -164,12 +178,15 @@ Task Planning
 
 **Actions**:
 1. Plan implementation for the single active task in `.ai/NEXT.md`.
-2. Execute the **Three Confirmations Protocol** (三项确认):
+2. **Mandatory Lessons Query (历史避坑强制检索)**:
+   - The AI **must** use `grep_search` to query `.ai/LESSONS.md` using keywords from the current task (e.g., core database tables, specific APIs, or components).
+   - If any matched historical pitfalls or lessons are found, they **must** be cited under "历史避坑经验" in the plan.
+3. Execute the **Three Confirmations Protocol** (三项确认):
    - ① My understanding of the task objective (1-2 lines)
-   - ② Technical implementation path + involved files/interfaces
+   - ② Technical implementation path + involved files/interfaces (incorporating findings from LESSONS.md)
    - ③ First minimum deliverable
-3. List acceptance criteria, risks, and non-goals.
-4. **Do not modify any code files.** Wait for user confirmation.
+4. List acceptance criteria, risks, and non-goals.
+5. **Do not modify any code files.** Wait for user confirmation.
 
 **Output**:
 ```
@@ -177,6 +194,9 @@ Task Planning
 
 ### 任务
 （Task ID + name）
+
+### 历史避坑经验（如有）
+（lessons cited from LESSONS.md）
 
 ### 目标理解（三项确认 ①）
 （1-2 lines）
@@ -271,9 +291,12 @@ Validation
 2. Record all test activity in `.ai/TEST_LOG.md`.
 
 **Context Blurring Mitigation Protocol (Context Compression Safeguard)**:
-- **Iteration Limit**: If a test-fix-retest loop exceeds **3 iterations** in the current conversation, the AI **must** halt development.
-- **Action**: Summarize all current test results, failures, fixed files, and pending items, write them directly into `.ai/TEST_LOG.md`, and output a prominent notice asking the user to start a new clean session:
-  > *⚠️ [Context Alert] Current test-fix cycle has exceeded 3 iterations, and the conversation context is cluttered. To avoid attention drift, I have saved the latest status to `.ai/TEST_LOG.md`. Please start a NEW conversation and run "Context Audit" to reload clean memory.*
+- **Iteration Limit**: The AI must check the custom `mitigation_threshold` configuration in `.ai/RULES.md` (defaulting to 3 if the configuration is missing or empty). If the test-fix-retest loop in the current conversation session exceeds this threshold, the AI **must** halt development.
+- **Action (Root Cause Compaction)**:
+  - The AI **must** consolidate and analyze the root causes of the consecutive failures across these iterations (e.g., compile a brief post-mortem of why previous fixes failed and what is the core mismatch).
+  - Write a **"Root Cause Analysis (根因诊断反思)"** list directly into `.ai/TEST_LOG.md`.
+  - Output a prominent notice requesting the user to start a new clean session:
+    > *⚠️ [Context Alert] Current test-fix cycle has exceeded the limit of {threshold} iterations. To prevent cognitive decay and save tokens, I have compiled a Root Cause Analysis and saved it to `.ai/TEST_LOG.md`. Please start a NEW conversation and say "继续项目" to reload clean memory.*
 - **Log Compactor**: Never paste or process raw terminal output longer than 50 lines in chat. Compress terminal outputs to list only failing test files, test names, error messages, and line numbers.
 
 **If tests fail**:
@@ -326,14 +349,23 @@ Phase Closeout（如全部通过）
 
 **Precondition**: Current task or phase has passed validation.
 
+**Actions & Document Alignments**:
+1. **Design Deviation Alignment (设计偏离智能对齐)**:
+   - Read the corresponding design section of `DESIGN.md` (via line range index in `steering.md`).
+   - Compare the actual code changes against the design. If any architectural deviations exist (e.g., database schema changes, new endpoint interfaces, different variable styles):
+     - The AI **must** generate a minimum design update patch.
+     - Propose this patch in **`EVOLUTION_PROPOSALS.md`** (e.g., `PROPOSAL-DESIGN-UPDATE`) for user approval, instead of rewriting the entire DESIGN.md.
+2. **Audit Timestamp Baseline**:
+   - Update `last_audit_timestamp` in `.ai/STATUS.md` to the current UTC timestamp, establishing a successful baseline for the timestamp-based smart loading in the next session.
+
 **Must update the following files**:
 1. `.ai/TASKS.md` — mark completed task as `[x]`
-2. `.ai/STATUS.md` — append phase summary (reverse chronological): completed features, key files, technical decisions, known issues
+2. `.ai/STATUS.md` — append phase summary (reverse chronological): completed features, key files, technical decisions, known issues. Update `last_audit_timestamp`.
 3. `.ai/TEST_LOG.md` — append final test conclusion
 4. `.ai/DECISIONS.md` — if design deviations or important decisions were made
 5. `.ai/LESSONS.md` — if reusable lessons were discovered
 6. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state "no active task"
-7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended
+7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended (including design sync patch)
 
 **Output**:
 ```
@@ -342,8 +374,12 @@ Phase Closeout（如全部通过）
 ### 完成任务
 （Task ID + name）
 
+### 设计偏离更新（如有）
+- [ ] 偏离检测已记录：(Brief summary or "无设计偏离")
+- [ ] EVOLUTION_PROPOSALS.md 已提交：(Proposal ID)
+
 ### 已更新文档
-- STATUS.md: （what was updated）
+- STATUS.md: （what was updated, including audit baseline timestamp）
 - TASKS.md: （what was marked）
 - TEST_LOG.md: （final conclusion）
 - NEXT.md: （next active task）
@@ -374,7 +410,7 @@ Phase Closeout（如全部通过）
 [建议] git add .ai/* && git commit -m "ai: closeout task {ID}" && git tag v{version}
 
 ### 🔄 下一会话推荐启动提示词
-> 使用 ProjectOrchestrator。进入 Context Audit 模式，读取 .ai/ 全部文件并输出审计报告。不要写代码，等我确认后再进入 Task Planning。
+> 继续项目
 ```
 
 **After closeout**: Recommend user to start a new conversation for a clean context.
