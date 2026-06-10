@@ -1,0 +1,110 @@
+## 5. NEXT.md Hard Gate
+
+Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** if any of the following is true:
+
+- `.ai/NEXT.md` does not exist
+- `.ai/NEXT.md` is empty
+- `.ai/NEXT.md` contains more than one active task
+- `.ai/NEXT.md` references a task not found in `.ai/TASKS.md`
+- The referenced task is already marked `[x]` (completed)
+- The referenced task has no acceptance criteria
+- The referenced task conflicts with `.ai/STATUS.md`
+- The active task is too broad to complete safely in one focused pass
+
+**Response when gate fails**: Stop immediately. Propose a corrected `.ai/NEXT.md`. Do not write code.
+
+---
+
+## 6. Controlled Self-Evolution Rules
+
+### Automatically updatable (no approval needed)
+
+| File | When |
+|------|------|
+| `.ai/STATUS.md` | After each task completion |
+| `.ai/TASKS.md` | Mark task status (`[x]`, `[~]`, `[!]`) after validation |
+| `.ai/TEST_LOG.md` | During validation and repair |
+| `.ai/LESSONS.md` | When project-specific lessons are discovered |
+| `.ai/DECISIONS.md` | For factual decision records |
+| `.ai/NEXT.md` | During Phase Closeout |
+
+### Requires user approval (proposal-based)
+
+| File | Why |
+|------|-----|
+| `.ai/requirements.md` | Product intent must not drift |
+| `.ai/DESIGN.md` | Architecture changes need review |
+| `.ai/TASKS.md` structure | Task reorganization affects roadmap |
+| `.ai/RULES.md` | Permanent rules must be deliberate |
+| This Skill | Meta-rules must be stable |
+
+**Rule of thumb**: Project facts → auto-record. Project rules → require review. Architecture changes → require approval. Skill evolution → require approval.
+
+---
+
+## 7. Trigger Keywords (中英双语)
+
+| Intent | 中文触发词 | English Triggers |
+|--------|-----------|-----------------|
+| Context Audit | "继续项目"、"继续开发"、"继续"、"同步状态" | "continue project", "continue", "sync" |
+| Task Planning | "开始阶段 X"、"执行 Task Y"、"规划" | "plan", "start task", "start phase" |
+| Implementation | "确认"、"批准"、"开始实现" | "approved", "implement", "go ahead" |
+| Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
+| Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
+| Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
+| Initialization | "启动项目"、"初始化项目"、"新建项目"、"创建项目" | "init project", "setup", "initialize" |
+
+---
+
+## 8. Forbidden Behaviors
+
+You must not:
+
+1. Continue development based only on chat memory.
+2. Start implementation before reading `.ai/` documents.
+3. Skip Context Audit mode.
+4. Execute more than one task at a time.
+5. Automatically start the next task after completing one.
+6. Invent requirements not found in `.ai/requirements.md`.
+7. Ignore acceptance criteria in `.ai/TASKS.md`.
+8. Ignore the `.ai/NEXT.md` gate.
+9. Rewrite completed and tested modules without explicit need.
+10. Refactor unrelated modules during feature implementation.
+11. Add new features during test repair.
+12. Treat old `DESIGN.md` text as newer than `STATUS.md`.
+13. Silently change architecture.
+14. Silently rewrite `.ai/DESIGN.md` or `.ai/TASKS.md` structure.
+15. Modify this Skill without user approval.
+16. Convert one-time fixes into permanent rules without review.
+17. Mark tasks complete without validation or approval.
+18. Hide unresolved conflicts between documents and code.
+19. Write duplicate logic or duplicate utility functions.
+20. Leave dead code, unused imports, or temporary debug logs in the final implementation.
+21. Over-engineer code by introducing unused abstraction layers.
+22. Create separate, one-off markdown documentation files for individual sub-tasks.
+
+---
+
+## 9. Task Status Markers
+
+Use these markers in `.ai/TASKS.md`:
+
+- `[ ]` — Not started
+- `[~]` — In progress
+- `[x]` — Completed (validation passed)
+- `[!]` — Blocked (document the blocker)
+
+---
+
+## 10. EVOLUTION_LOG Format
+
+Every write-back to `.ai/` files must include this log block at the end of the response:
+
+```text
+📂 EVOLUTION_LOG
+[时间] YYYY-MM-DDTHH:MMZ
+[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
+[变更] .ai/{file}: {description}
+[变更] .ai/{file}: {description}
+[建议] {recommended git command or follow-up action}
+```

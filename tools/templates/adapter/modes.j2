@@ -1,0 +1,88 @@
+## 4. Seven-Mode Execution Engine
+
+You must follow these modes sequentially unless the user explicitly requests a specific mode. Do not skip modes. Do not jump from implementation to the next task.
+
+### Mode 0: Initialization
+
+**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "启动项目 / 初始化项目 / setup / initialize / init".
+
+**Actions**:
+1. Read `.ai/requirements.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
+2. If `.ai/STEERING.md` is missing but the above original documents exist:
+   - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
+   - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
+   - Propose the complete contents for `.ai/STEERING.md` to avoid developer manual labor.
+3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
+   - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
+   - Ask the user 3 key design questions in the chat.
+   - Once the user answers, automatically generate the initial skeleton files.
+4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
+5. **Do not implement any code.** Wait for user confirmation.
+
+### Mode 1: Context Audit（上下文审计）
+
+**Trigger**: Every conversation start; or user says "继续项目 / continue project / 继续开发 / continue / 同步状态 / sync".
+
+**Actions**:
+1. Read `.ai/STATUS.md` first.
+2. Validate the NEXT.md gate.
+3. Output the audit report.
+4. **Do not modify any code files.**
+
+### Mode 2: Task Planning（任务规划 + 三项确认）
+
+**Trigger**: Context Audit completed and user confirms.
+
+**Actions**:
+1. Plan implementation for the single active task in `.ai/NEXT.md`.
+2. Execute the **Three Confirmations Protocol**.
+3. List acceptance criteria, risks, and non-goals.
+4. **Do not modify any code files.** Wait for user confirmation.
+
+### Mode 3: Task Implementation（任务实现）
+
+**Trigger**: User confirms the Task Plan.
+
+**Iron Rules**:
+1. Only implement the active task in `.ai/NEXT.md`.
+2. Do not execute future tasks.
+3. Do not expand requirements beyond `.ai/requirements.md`.
+4. Do not refactor unrelated modules.
+5. Do not rewrite tested modules unless the current task requires it.
+6. Do not change public interfaces unless the current task requires it or user approves.
+7. Do not introduce new dependencies unless the current task requires it or user approves.
+8. If documents and code conflict, **stop and report**.
+9. If the task description is ambiguous, **stop and ask for clarification**.
+
+### Mode 4: Validation & Test Repair（验证与测试修复）
+
+**Trigger**: Implementation completed; or user provides test results / error logs.
+
+**Actions**:
+1. Run or recommend the smallest relevant test set.
+2. Record all test activity in `.ai/TEST_LOG.md`.
+3. Fix **only** current-task-related failures.
+
+### Mode 5: Phase Closeout（阶段收口）
+
+**Trigger**: Validation passes.
+
+**Actions**:
+1. Compare actual code changes against the design.
+2. Update the following files:
+   - `.ai/TASKS.md` — mark completed task as `[x]`
+   - `.ai/STATUS.md` — append phase summary
+   - `.ai/TEST_LOG.md` — append final test conclusion
+   - `.ai/DECISIONS.md` — if important decisions were made
+   - `.ai/LESSONS.md` — if reusable lessons were discovered
+   - `.ai/NEXT.md` — regenerate with next active task
+
+### Mode 6: Skill Evolution Proposal（技能进化提案）
+
+**Trigger**: Repeated process issues or optimization opportunities observed.
+
+**Rules**:
+- You **may** automatically append project-specific lessons to `.ai/LESSONS.md`.
+- You **must not** directly modify this Skill, `.ai/RULES.md`, `.ai/DESIGN.md`, or `.ai/TASKS.md` structure.
+- You must write proposals to `.ai/EVOLUTION_PROPOSALS.md`.
+- Only after user approval may a proposal be applied.

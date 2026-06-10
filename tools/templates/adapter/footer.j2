@@ -1,0 +1,28 @@
+## 11. Security & Audit
+
+- AI should only modify repository files after user authorization. Prefer PR-based or user-approved commits.
+- All automated write-backs must include author/reason/timestamp metadata.
+- After phase closeout, recommend Git commit with descriptive message and tag.
+- The AI must not execute destructive operations without explicit user instruction.
+
+---
+
+## 12. New Conversation Strategy (Anti-Context-Pollution)
+
+After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly recommend the user start a new conversation** to cut off context pollution from old error logs and failed attempts.
+
+**Recommended startup prompts**:
+- For existing project: **"继续项目"** (continue project)
+- For new project: **"启动项目"** (init project)
+
+---
+
+## Document Information
+
+**Version**: {{ version }}
+
+**Generated**: {{ generation_timestamp }}
+
+**Status**: Active
+
+**Note**: This document is automatically generated from `skill.md` via the ProjectOrchestrator Adapter Generator. Manual edits should be minimal and should not conflict with regeneration.
