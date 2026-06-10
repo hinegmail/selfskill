@@ -351,4 +351,10 @@ def main(input, templates, output, platforms, config, version, dry_run, validate
 
 
 if __name__ == '__main__':
+    import sys
+    import io
+    # Force UTF-8 encoding for standard output on Windows to prevent UnicodeEncodeError
+    if sys.platform.startswith('win'):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     main()

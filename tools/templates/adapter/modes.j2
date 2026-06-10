@@ -14,34 +14,156 @@ You must follow these modes sequentially unless the user explicitly requests a s
    - Propose the complete contents for `.ai/STEERING.md` to avoid developer manual labor.
 3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
    - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
-   - Ask the user 3 key design questions in the chat.
-   - Once the user answers, automatically generate the initial skeleton files.
+   - Ask the user 3 key design questions in the chat:
+     - ① **项目名称**与核心商业价值定位是什么？
+     - ② 核心**技术栈**与工程框架是什么？
+     - ③ **核心功能职责与模块**如何规划？
+   - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
 4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
 5. **Do not implement any code.** Wait for user confirmation.
 
+**Output**:
+```
+## 🚀 Initialization
+
+### Existing Files
+（list found files）
+
+### Missing Files
+（list missing files with proposed initial content or wizard questions）
+
+### Recommended Next Step
+Confirm the proposed files (or answer the wizard questions), then enter Context Audit mode.
+```
+
+---
+
 ### Mode 1: Context Audit（上下文审计）
 
-**Trigger**: Every conversation start; or user says "继续项目 / continue project / 继续开发 / continue / 同步状态 / sync".
+**Trigger**: Every conversation start; user says "继续项目 / continue project / 继续开发 / continue / 同步状态 / sync".
 
 **Actions**:
-1. Read `.ai/STATUS.md` first.
-2. Validate the NEXT.md gate.
-3. Output the audit report.
-4. **Do not modify any code files.**
+1. **Timestamp-based Smart Load (时间戳智能审计过滤)**:
+   - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value.
+   - Query the last modified metadata of `.ai/requirements.md` and `.ai/DESIGN.md` (via tool execution).
+   - If the timestamps of requirements/DESIGN match the `last_audit_timestamp` in `STATUS.md`:
+     - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
+   - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
+     - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
+2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
+   - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
+3. Validate the NEXT.md gate (see §5).
+4. Output the audit report.
+5. **Do not modify any code files.**
+
+**Output**:
+```
+## 🧭 Context Audit
+
+### 当前产品目标
+（1-2 sentences from PRD）
+
+### 当前阶段与状态
+（phase, completed tasks count / total, test status）
+
+### STATUS.md 实况
+（key facts from STATUS.md）
+
+### 唯一允许执行的下一任务
+（from NEXT.md — Task ID + name）
+
+### 相关设计约束
+（relevant DESIGN.md sections）
+
+### 涉及文件
+- 需检查：...
+- 预计修改：...
+
+### 已知约束与风险
+（from RULES.md, LESSONS.md, STATUS.md）
+
+### 本次不会做的事（Non-goals）
+（explicit scope boundaries）
+
+### 文档冲突或警告
+（if any）
+
+### 推荐下一模式
+Task Planning
+```
+
+**If `.ai/STATUS.md`, `.ai/NEXT.md`, or `.ai/STEERING.md` is missing, or contains default placeholder templates**: Enter Initialization mode instead.
+
+---
 
 ### Mode 2: Task Planning（任务规划 + 三项确认）
 
-**Trigger**: Context Audit completed and user confirms.
+**Trigger**: Context Audit completed and user confirms; or user says "开始阶段 X / 执行 Task Y / plan / start task".
+
+**Precondition**: Context Audit must be completed. NEXT.md gate must pass.
 
 **Actions**:
 1. Plan implementation for the single active task in `.ai/NEXT.md`.
-2. Execute the **Three Confirmations Protocol**.
-3. List acceptance criteria, risks, and non-goals.
-4. **Do not modify any code files.** Wait for user confirmation.
+2. **Mandatory Lessons Query (历史避坑强制检索)**:
+   - The AI **must** use `grep_search` to query `.ai/LESSONS.md` using keywords from the current task (e.g., core database tables, specific APIs, or components).
+   - If any matched historical pitfalls or lessons are found, they **must** be cited under "历史避坑经验" in the plan.
+3. Execute the **Three Confirmations Protocol** (三项确认):
+   - ① My understanding of the task objective (1-2 lines)
+   - ② Technical implementation path + involved files/interfaces (incorporating findings from LESSONS.md)
+   - ③ First minimum deliverable
+4. List acceptance criteria, risks, and non-goals.
+5. **Do not modify any code files.** Wait for user confirmation.
+
+**Output**:
+```
+## 📋 Task Plan
+
+### 任务
+（Task ID + name）
+
+### 历史避坑经验（如有）
+（lessons cited from LESSONS.md）
+
+### 目标理解（三项确认 ①）
+（1-2 lines）
+
+### 技术路径与涉及文件（三项确认 ②）
+- 需检查文件：...
+- 预计修改文件：...
+
+### 首个最小可交付物（三项确认 ③）
+（what will be delivered first）
+
+### 验收标准
+（line-by-line from TASKS.md / NEXT.md）
+
+### 实现步骤
+1. ...
+2. ...
+
+### 需求来源
+（reference requirements.md sections）
+
+### 设计依据
+（reference DESIGN.md sections）
+
+### 风险
+（potential issues）
+
+### 本次不会做的事（Non-goals）
+（explicit boundaries）
+
+### ⏳ 等待用户确认
+请回复"确认"或"批准"以进入实现模式。
+```
+
+---
 
 ### Mode 3: Task Implementation（任务实现）
 
-**Trigger**: User confirms the Task Plan.
+**Trigger**: User confirms the Task Plan; or user says "确认 / 批准 / 开始实现 / approved / implement".
+
+**Precondition**: Task Plan confirmed by user. NEXT.md gate valid.
 
 **Iron Rules**:
 1. Only implement the active task in `.ai/NEXT.md`.
@@ -54,6 +176,38 @@ You must follow these modes sequentially unless the user explicitly requests a s
 8. If documents and code conflict, **stop and report**.
 9. If the task description is ambiguous, **stop and ask for clarification**.
 
+**Output** (after implementation):
+```
+## 🛠️ Implementation Result
+
+### 任务
+（Task ID + name）
+
+### 修改的文件
+（file-by-file list）
+
+### 变更说明
+（what changed and why, per file）
+
+### 验收标准检查
+- [x] Criterion 1 — satisfied
+- [x] Criterion 2 — satisfied
+- [ ] Criterion 3 — needs testing
+
+### 建议测试命令
+（commands to run）
+
+### 需要更新的文档
+（if any .ai/ files need attention）
+
+### 推荐下一模式
+Validation
+```
+
+**Do not automatically start the next task.**
+
+---
+
 ### Mode 4: Validation & Test Repair（验证与测试修复）
 
 **Trigger**: Implementation completed; or user provides test results / error logs.
@@ -61,28 +215,173 @@ You must follow these modes sequentially unless the user explicitly requests a s
 **Actions**:
 1. Run or recommend the smallest relevant test set.
 2. Record all test activity in `.ai/TEST_LOG.md`.
-3. Fix **only** current-task-related failures.
+
+**Context Blurring Mitigation Protocol (Context Compression Safeguard)**:
+- **Iteration Limit**: The AI must check the custom `mitigation_threshold` configuration in `.ai/RULES.md` (defaulting to 3 if the configuration is missing or empty). If the test-fix-retest loop in the current conversation session exceeds this threshold, the AI **must** halt development.
+- **Action (Root Cause Compaction)**:
+  - The AI **must** consolidate and analyze the root causes of the consecutive failures across these iterations (e.g., compile a brief post-mortem of why previous fixes failed and what is the core mismatch).
+  - Write a **"Root Cause Analysis (根因诊断反思)"** list directly into `.ai/TEST_LOG.md`.
+  - Output a prominent notice requesting the user to start a new clean session:
+    > *⚠️ [Context Alert] Current test-fix cycle has exceeded the limit of {threshold} iterations. To prevent cognitive decay and save tokens, I have compiled a Root Cause Analysis and saved it to `.ai/TEST_LOG.md`. Please start a NEW conversation and say "继续项目" to reload clean memory.*
+- **Log Compactor**: Never paste or process raw terminal output longer than 50 lines in chat. Compress terminal outputs to list only failing test files, test names, error messages, and line numbers.
+
+**If tests fail**:
+- Fix **only** current-task-related failures.
+- Do not add new features.
+- Do not refactor unrelated modules.
+- Do not change task scope.
+- Do not start the next task.
+
+**For each failure, record**:
+- Failing command
+- Error summary
+- Root cause analysis
+- Files changed for fix
+- Retest command
+- Retest result
+
+**Output**:
+```
+## ✅ Validation Result
+
+### 任务
+（Task ID + name）
+
+### 测试命令
+（commands executed）
+
+### 结果
+（pass / fail summary）
+
+### 失败项（如有）
+| # | 失败命令 | 错误摘要 | 根因 | 修复文件 | 复测结果 |
+|---|---------|---------|------|---------|---------|
+| 1 | ... | ... | ... | ... | ✅ Pass |
+
+### 最终验证状态
+✅ 全部通过 / ❌ 仍有未解决项
+
+### 推荐下一模式
+Phase Closeout（如全部通过）
+```
+
+**When all tests pass**: Enter Phase Closeout. Do not start new development.
+
+---
 
 ### Mode 5: Phase Closeout（阶段收口）
 
-**Trigger**: Validation passes.
+**Trigger**: Validation passes; or user says "测试通过 / 阶段完成 / 收口 / closeout / tests passed / phase complete".
 
-**Actions**:
-1. Compare actual code changes against the design.
-2. Update the following files:
-   - `.ai/TASKS.md` — mark completed task as `[x]`
-   - `.ai/STATUS.md` — append phase summary
-   - `.ai/TEST_LOG.md` — append final test conclusion
-   - `.ai/DECISIONS.md` — if important decisions were made
-   - `.ai/LESSONS.md` — if reusable lessons were discovered
-   - `.ai/NEXT.md` — regenerate with next active task
+**Precondition**: Current task or phase has passed validation.
+
+**Actions & Document Alignments**:
+1. **Design Deviation Alignment (设计偏离智能对齐)**:
+   - Read the corresponding design section of `DESIGN.md` (via line range index in `steering.md`).
+   - Compare the actual code changes against the design. If any architectural deviations exist (e.g., database schema changes, new endpoint interfaces, different variable styles):
+     - The AI **must** generate a minimum design update patch.
+     - Propose this patch in **`EVOLUTION_PROPOSALS.md`** (e.g., `PROPOSAL-DESIGN-UPDATE`) for user approval, instead of rewriting the entire DESIGN.md.
+2. **Audit Timestamp Baseline**:
+   - Update `last_audit_timestamp` in `.ai/STATUS.md` to the current UTC timestamp, establishing a successful baseline for the timestamp-based smart loading in the next session.
+
+**Must update the following files**:
+1. `.ai/TASKS.md` — mark completed task as `[x]`
+2. `.ai/STATUS.md` — append phase summary (reverse chronological): completed features, key files, technical decisions, known issues. Update `last_audit_timestamp`.
+3. `.ai/TEST_LOG.md` — append final test conclusion
+4. `.ai/DECISIONS.md` — if design deviations or important decisions were made
+5. `.ai/LESSONS.md` — if reusable lessons were discovered
+6. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state "no active task"
+7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended (including design sync patch)
+
+**Output**:
+```
+## 🗂️ Phase Closeout
+
+### 完成任务
+（Task ID + name）
+
+### 设计偏离更新（如有）
+- [ ] 偏离检测已记录：(Brief summary or "无设计偏离")
+- [ ] EVOLUTION_PROPOSALS.md 已提交：(Proposal ID)
+
+### 已更新文档
+- STATUS.md: （what was updated, including audit baseline timestamp）
+- TASKS.md: （what was marked）
+- TEST_LOG.md: （final conclusion）
+- NEXT.md: （next active task）
+- [DECISIONS.md]: （if applicable）
+- [LESSONS.md]: （if applicable）
+
+### 修改的代码文件
+（summary list）
+
+### 测试结果
+（final pass/fail summary）
+
+### 关键决策（如有）
+（brief description）
+
+### 经验教训（如有）
+（brief description）
+
+### 下一 Active Task
+（Task ID + name, or "无活跃任务"）
+
+📂 EVOLUTION_LOG
+[时间] {ISO-8601}
+[触发] Task {ID} 测试通过
+[变更] .ai/TASKS.md: 标记 Task {ID} 为已完成
+[变更] .ai/STATUS.md: 追加阶段总结
+[变更] .ai/NEXT.md: Active = Task {next_ID}
+[建议] git add .ai/* && git commit -m "ai: closeout task {ID}" && git tag v{version}
+
+### 🔄 下一会话推荐启动提示词
+> 继续项目
+```
+
+**After closeout**: Recommend user to start a new conversation for a clean context.
+
+**Do not automatically start the next task.**
+
+---
 
 ### Mode 6: Skill Evolution Proposal（技能进化提案）
 
-**Trigger**: Repeated process issues or optimization opportunities observed.
+**Trigger**: Repeated process issues, rule defects, or optimization opportunities observed; or user says "优化规则 / 更新约定 / propose / 进化 / optimize rules / evolve".
 
 **Rules**:
 - You **may** automatically append project-specific lessons to `.ai/LESSONS.md`.
 - You **must not** directly modify this Skill, `.ai/RULES.md`, `.ai/DESIGN.md`, or `.ai/TASKS.md` structure.
 - You must write proposals to `.ai/EVOLUTION_PROPOSALS.md`.
 - Only after user approval may a proposal be applied.
+
+**Each proposal must include**:
+- Proposal ID (PROPOSAL-NNNN)
+- Problem observed
+- Evidence
+- Proposed change
+- Target file
+- Expected benefit
+- Risk
+- Scope (project-specific / general)
+- Approval required (Yes/No)
+- Status (Proposed / Approved / Rejected / Applied)
+
+**Output**:
+```
+## 🧬 Evolution Proposal
+
+### PROPOSAL-{ID}: {Title}
+
+| Field | Content |
+|-------|---------|
+| 问题 | ... |
+| 证据 | ... |
+| 建议变更 | ... |
+| 目标文件 | ... |
+| 预期收益 | ... |
+| 风险 | ... |
+| 范围 | 项目特定 / 通用 |
+| 需要审批 | 是 |
+| 状态 | Proposed |
+```

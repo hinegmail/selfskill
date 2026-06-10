@@ -1,11 +1,8 @@
-"""
-Validators Module
-Validates generated adapters and configurations.
-"""
 import re
 from pathlib import Path
 from typing import List, Tuple, Dict
 from abc import ABC, abstractmethod
+
 
 
 class BaseValidator(ABC):
@@ -111,14 +108,14 @@ class VersionValidator(BaseValidator):
         errors = []
         
         # Look for version pattern (v1.0.2 or similar)
-        version_match = re.search(r'v(\d+\.\d+\.\d+)', content)
+        version_match = re.search(r'v(\d+\.\d+(?:\.\d+)?)', content)
         if not version_match:
-            errors.append("No version found in format v{major}.{minor}.{patch}")
+            errors.append("No version found in format v{major}.{minor} or v{major}.{minor}.{patch}")
         else:
             version = version_match.group(1)
-            # Validate semantic versioning
+            # Validate semantic versioning (2 or 3 parts)
             parts = version.split('.')
-            if len(parts) != 3:
+            if len(parts) not in (2, 3):
                 errors.append(f"Invalid version format: {version}")
         
         return len(errors) == 0, errors
@@ -170,35 +167,58 @@ class LanguageValidator(BaseValidator):
         """
         errors = []
         
-        # Pattern to detect Chinese characters (excluding trigger keywords table)
+        # Pattern to detect Chinese characters
         chinese_pattern = re.compile(r'[\u4e00-\u9fff]+')
         
         lines = content.split('\n')
         in_table = False
+        in_code_block = False
+        check_comments = False
+        
+        # Programming languages where we restrict Chinese code comments
+        PROGRAMMING_LANGS = {
+            'python', 'py', 'javascript', 'js', 'typescript', 'ts', 
+            'bash', 'sh', 'powershell', 'ps1', 'go', 'golang',
+            'rust', 'rs', 'cpp', 'c', 'java'
+        }
+        
         chinese_lines = []
         
         for i, line in enumerate(lines, 1):
+            stripped = line.strip()
+            
+            # Toggle code block status on ```
+            if stripped.startswith('```'):
+                if in_code_block:
+                    in_code_block = False
+                    check_comments = False
+                else:
+                    in_code_block = True
+                    lang = stripped[3:].strip().lower()
+                    if lang in PROGRAMMING_LANGS:
+                        check_comments = True
+                    else:
+                        check_comments = False
+                continue
+            
             # Skip markdown tables
             if '|' in line:
                 in_table = True
-            elif in_table and not line.strip():
+            elif in_table and not stripped:
                 in_table = False
             
             if in_table:
                 continue
             
-            # Skip headers starting with ##
-            if line.startswith('##'):
+            # Skip markdown headers outside code blocks
+            if not in_code_block and stripped.startswith('#'):
                 continue
             
-            # Check for Chinese in code blocks comments
-            if '```' in line:
-                continue
-            
-            # Detect Chinese code comments (e.g., # 中文注释, // 中文注释)
-            if re.match(r'^\s*[#/]\s*', line):
-                if chinese_pattern.search(line):
-                    chinese_lines.append((i, line.strip()))
+            # Detect Chinese code comments inside programming code blocks
+            if in_code_block and check_comments:
+                if stripped.startswith('#') or stripped.startswith('//') or stripped.startswith('/*'):
+                    if chinese_pattern.search(line):
+                        chinese_lines.append((i, stripped))
         
         if chinese_lines:
             errors.append(f"Found Chinese code comments at lines: {[cl[0] for cl in chinese_lines[:5]]}")
@@ -328,4 +348,10 @@ def validate_dir(dir_path):
 
 
 if __name__ == '__main__':
+    import sys
+    import io
+    # Force UTF-8 encoding for standard output on Windows to prevent UnicodeEncodeError
+    if sys.platform.startswith('win'):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     cli()

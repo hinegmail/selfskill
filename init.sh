@@ -99,7 +99,7 @@ mkdir -p "$AI_DIR"
 echo "📁 .ai/ 目录就绪"
 
 # 核心文件
-CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md")
+CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md" "STEERING.md")
 FULL_FILES=("RULES.md" "TEST_LOG.md" "DECISIONS.md" "LESSONS.md" "EVOLUTION_PROPOSALS.md")
 
 # 复制模板文件函数，如果指定了 --force 则强制覆盖已存在的文件

@@ -1,19 +1,41 @@
-## 11. Security & Audit
+## 11. New Conversation Strategy (Anti-Context-Pollution)
 
-- AI should only modify repository files after user authorization. Prefer PR-based or user-approved commits.
-- All automated write-backs must include author/reason/timestamp metadata.
-- After phase closeout, recommend Git commit with descriptive message and tag.
-- The AI must not execute destructive operations without explicit user instruction.
+After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly recommend the user start a new conversation** to cut off context pollution from old error logs, failed attempts, and temporary fixes.
+
+**Recommended startup prompt for new conversation**:
+
+- For existing project (continue development): **"继续项目"** (or **"continue project"** / **"继续开发"**) to load files and enter Context Audit mode.
+- For new project (initial setup/migration): **"启动项目"** (or **"init project"**) to trigger Mode 0 auto-extraction.
+
+By combining "local file persistence for cognition" with "new conversation for clean context", the AI reloads clean project state from the file system every time.
 
 ---
 
-## 12. New Conversation Strategy (Anti-Context-Pollution)
+## 12. Security & Audit
 
-After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly recommend the user start a new conversation** to cut off context pollution from old error logs and failed attempts.
-
-**Recommended startup prompts**:
-- For existing project: **"继续项目"** (continue project)
-- For new project: **"启动项目"** (init project)
+- AI should only modify repository files after user authorization. Prefer PR-based or user-approved commits.
+- All automated write-backs must include author/reason/timestamp metadata.
+- After phase closeout, recommend Git commit with descriptive message and tag (e.g., `v0.2-phase2`).
+- The AI must not execute destructive operations (database drops, production deployments) without explicit user instruction.
+- **Git Hook State Linter (AI 状态强校验钩子)**:
+  Recommend the user to create a Git pre-commit hook `.git/hooks/pre-commit` to prevent AI state hallucinations (e.g., claiming to update state but failing).
+  
+  Pre-commit Hook Script (`.git/hooks/pre-commit`):
+  ```bash
+  #!/bin/sh
+  # ProjectOrchestrator Integrity Linter - Git pre-commit hook
+  if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
+    ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
+    if [ ! -z "$ACTIVE_TASK" ]; then
+      # If task is marked complete [x] in TASKS.md but is still listed as Active in NEXT.md
+      if grep -q "\[x\] $ACTIVE_TASK" .ai/TASKS.md && grep -q "Active = $ACTIVE_TASK" .ai/NEXT.md; then
+        echo "❌ [ProjectOrchestrator Linter] Integrity Error: $ACTIVE_TASK is marked complete [x] in TASKS.md but is still set as Active in NEXT.md!"
+        echo "Please update NEXT.md to set the next active task before committing."
+        exit 1
+      fi
+    fi
+  fi
+  ```
 
 ---
 

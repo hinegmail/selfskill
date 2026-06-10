@@ -42,8 +42,8 @@ class SkillParser:
         Raises:
             ValueError: If version cannot be extracted.
         """
-        # Match pattern like "# ProjectOrchestrator Skill v1.0.2"
-        match = re.search(r'v(\d+\.\d+\.\d+)', self.content)
+        # Match pattern like "# ProjectOrchestrator Skill v1.0" or "v1.0.2"
+        match = re.search(r'v(\d+\.\d+(?:\.\d+)?)', self.content)
         if match:
             return match.group(1)
         raise ValueError("Version not found in skill file")

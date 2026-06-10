@@ -133,7 +133,8 @@ def hello():
 ```
 """
         is_valid, errors = validator.validate(content, "test.md")
-        # Note: detection may depend on implementation
+        assert is_valid is False
+        assert len(errors) > 0
     
     def test_chinese_in_trigger_keywords_table(self):
         """Test that Chinese in trigger keywords table is allowed."""

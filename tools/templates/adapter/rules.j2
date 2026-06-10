@@ -40,6 +40,17 @@ Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** i
 
 **Rule of thumb**: Project facts → auto-record. Project rules → require review. Architecture changes → require approval. Skill evolution → require approval.
 
+### 🧬 Token Economy & Context Chunking (按需读取优化)
+To save API costs and prevent compliance decay in long conversations:
+- **Phase Audit Sync**: AI must read all `.ai/` files *only* in Mode 1 (Context Audit) at conversation startup.
+- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them** to save context tokens. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` loaded in the active chat context.
+
+### 🧠 Cognitive Distillation of Lessons (认知蒸馏规则)
+At the end of every major milestone or phase:
+- The AI **must** evaluate the accumulated lessons in `.ai/LESSONS.md`.
+- It must perform **Cognitive Distillation** to distill the top 3-5 most critical, recurring, project-specific traps or rules.
+- It must submit a proposal to `.ai/EVOLUTION_PROPOSALS.md` to merge these distilled rules directly into `.ai/RULES.md` (under "踩坑教训" or "开发规则"). Once approved by the user, these rules are consolidated and `.ai/LESSONS.md` is reset, keeping the context clean and preventing memory bloat.
+
 ---
 
 ## 7. Trigger Keywords (中英双语)
@@ -78,10 +89,10 @@ You must not:
 16. Convert one-time fixes into permanent rules without review.
 17. Mark tasks complete without validation or approval.
 18. Hide unresolved conflicts between documents and code.
-19. Write duplicate logic or duplicate utility functions.
-20. Leave dead code, unused imports, or temporary debug logs in the final implementation.
-21. Over-engineer code by introducing unused abstraction layers.
-22. Create separate, one-off markdown documentation files for individual sub-tasks.
+19. Write duplicate logic or duplicate utility functions. (Always search the codebase for existing helper functions/classes before writing new ones).
+20. Leave dead code, unused imports, or temporary debug logs (like console.log, print) in the final implementation.
+22. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
+23. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
 
 ---
 
