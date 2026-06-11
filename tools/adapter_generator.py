@@ -353,6 +353,27 @@ def main(input, templates, output, platforms, config, version, dry_run, validate
 if __name__ == '__main__':
     import sys
     import io
+    import logging
+    from datetime import datetime
+    from pathlib import Path
+
+    # Determine log directory: tools/logs
+    log_dir = Path(__file__).parent / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate timestamped log file path
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = log_dir / f"project_orchestrator_{timestamp}.log"
+
+    # Set up basic logging to both stdout and a file
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(str(log_file), encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
     # Force UTF-8 encoding for standard output on Windows to prevent UnicodeEncodeError
     if sys.platform.startswith('win'):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')

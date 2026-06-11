@@ -13,8 +13,14 @@ class TestAdapterGenerator:
     @pytest.fixture
     def test_environment(self):
         """Create a test environment with skill file, templates, and output dir."""
-        # Create skill file
-        skill_content = """# ProjectOrchestrator Skill v1.0.2
+        import tempfile
+        
+        # 使用 TemporaryDirectory 确保整个测试环境在此作用域结束后自动级联清除
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            
+            # Create skill file
+            skill_content = """# ProjectOrchestrator Skill v1.0.2
 
 ## 0. Role Definition
 
@@ -75,64 +81,45 @@ You must not:
 1. Continue based on chat memory.
 2. Skip audit mode.
 """
-        
-        skill_file = Path(tempfile.gettempdir()) / "test_skill.md"
-        skill_file.write_text(skill_content, encoding='utf-8')
-        
-        # Create template directory
-        template_dir = Path(tempfile.gettempdir()) / "test_templates"
-        template_dir.mkdir(exist_ok=True)
-        
-        # Create base templates
-        (template_dir / "base.j2").write_text("Base content: {{ version }}")
-        (template_dir / "modes.j2").write_text("Modes content")
-        (template_dir / "rules.j2").write_text("Rules content")
-        (template_dir / "footer.j2").write_text("Footer: {{ version }}")
-        
-        # Create platforms directory
-        platforms_dir = template_dir / "platforms"
-        platforms_dir.mkdir(exist_ok=True)
-        
-        # Create platform templates
-        for platform in ['kiro', 'antigravity', 'claude', 'cursor', 'clinerules', 'windsurfer', 'gemini', 'agents']:
-            platform_file = platforms_dir / f"{platform}.j2"
-            platform_file.write_text(
-                "{%- include 'base.j2' -%}\n---\n"
-                "{%- include 'modes.j2' -%}\n---\n"
-                "{%- include 'rules.j2' -%}\n---\n"
-                "{%- include 'footer.j2' -%}"
-            )
-        
-        # Create output directory
-        output_dir = Path(tempfile.gettempdir()) / "test_output"
-        output_dir.mkdir(exist_ok=True)
-        
-        env_dict = {
-            'skill_file': str(skill_file),
-            'template_dir': str(template_dir),
-            'output_dir': str(output_dir),
-        }
-        
-        yield env_dict
-        
-        # Cleanup
-        import shutil
-        try:
-            skill_file.unlink(missing_ok=True)
-        except Exception:
-            pass
-        
-        try:
-            if template_dir.exists():
-                shutil.rmtree(template_dir)
-        except Exception:
-            pass
-        
-        try:
-            if output_dir.exists():
-                shutil.rmtree(output_dir)
-        except Exception:
-            pass
+            
+            skill_file = tmpdir_path / "test_skill.md"
+            skill_file.write_text(skill_content, encoding='utf-8')
+            
+            # Create template directory
+            template_dir = tmpdir_path / "test_templates"
+            template_dir.mkdir(exist_ok=True)
+            
+            # Create base templates
+            (template_dir / "base.j2").write_text("Base content: {{ version }}")
+            (template_dir / "modes.j2").write_text("Modes content")
+            (template_dir / "rules.j2").write_text("Rules content")
+            (template_dir / "footer.j2").write_text("Footer: {{ version }}")
+            
+            # Create platforms directory
+            platforms_dir = template_dir / "platforms"
+            platforms_dir.mkdir(exist_ok=True)
+            
+            # Create platform templates
+            for platform in ['kiro', 'antigravity', 'claude', 'cursor', 'clinerules', 'windsurfer', 'gemini', 'agents']:
+                platform_file = platforms_dir / f"{platform}.j2"
+                platform_file.write_text(
+                    "{%- include 'base.j2' -%}\n---\n"
+                    "{%- include 'modes.j2' -%}\n---\n"
+                    "{%- include 'rules.j2' -%}\n---\n"
+                    "{%- include 'footer.j2' -%}"
+                )
+            
+            # Create output directory
+            output_dir = tmpdir_path / "test_output"
+            output_dir.mkdir(exist_ok=True)
+            
+            env_dict = {
+                'skill_file': str(skill_file),
+                'template_dir': str(template_dir),
+                'output_dir': str(output_dir),
+            }
+            
+            yield env_dict
     
     def test_init_with_valid_paths(self, test_environment):
         """Test initialization with valid paths."""

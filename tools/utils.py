@@ -5,7 +5,10 @@ Utility functions for the adapter generation tools.
 
 import os
 import yaml
+import logging
 from pathlib import Path
+
+logger = logging.getLogger("project_orchestrator")
 
 
 def load_yaml_file(file_path):
@@ -22,7 +25,7 @@ def load_yaml_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
     except Exception as e:
-        print(f"Error loading YAML file {file_path}: {e}")
+        logger.error(f"Error loading YAML file {file_path}: {e}")
         return {}
 
 
@@ -42,7 +45,7 @@ def save_yaml_file(data, file_path):
             yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
         return True
     except Exception as e:
-        print(f"Error saving YAML file {file_path}: {e}")
+        logger.error(f"Error saving YAML file {file_path}: {e}")
         return False
 
 
@@ -56,11 +59,13 @@ def ensure_directory(dir_path):
     Returns:
         bool: True if directory exists or was created successfully.
     """
+    if not dir_path:
+        return False
     try:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
         return True
     except Exception as e:
-        print(f"Error creating directory {dir_path}: {e}")
+        logger.error(f"Error creating directory {dir_path}: {e}")
         return False
 
 
@@ -79,7 +84,7 @@ def read_file(file_path, encoding='utf-8'):
         with open(file_path, 'r', encoding=encoding) as f:
             return f.read()
     except Exception as e:
-        print(f"Error reading file {file_path}: {e}")
+        logger.error(f"Error reading file {file_path}: {e}")
         return None
 
 
@@ -100,7 +105,7 @@ def write_file(file_path, content, encoding='utf-8'):
             f.write(content)
         return True
     except Exception as e:
-        print(f"Error writing file {file_path}: {e}")
+        logger.error(f"Error writing file {file_path}: {e}")
         return False
 
 
@@ -123,5 +128,5 @@ def list_files(dir_path, extension=None):
                     files.append(str(item))
         return files
     except Exception as e:
-        print(f"Error listing files in {dir_path}: {e}")
+        logger.error(f"Error listing files in {dir_path}: {e}")
         return []

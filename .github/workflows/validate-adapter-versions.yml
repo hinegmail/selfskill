@@ -35,7 +35,7 @@ jobs:
     - name: Validate adapter versions
       working-directory: ./tools
       run: |
-        python -m adapter_generator.py validate-versions
+        python adapter_generator.py --validate
       continue-on-error: true
     
     - name: Check SKILL_VERSION.md
