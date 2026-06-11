@@ -271,6 +271,107 @@ You must not:
         assert len(result.generated_files) == 1
         assert result.success is True
 
+    def test_load_config_invalid_yaml(self, test_environment):
+        """Test loading configuration with invalid YAML content."""
+        invalid_yaml = Path(test_environment['output_dir']) / "invalid.yaml"
+        invalid_yaml.write_text("invalid:\n\t- config", encoding='utf-8')
+        
+        with pytest.raises(ValueError):
+            AdapterGenerator(
+                skill_file=test_environment['skill_file'],
+                template_dir=test_environment['template_dir'],
+                output_dir=test_environment['output_dir'],
+                config_file=str(invalid_yaml)
+            )
+
+    def test_generate_parse_error(self, test_environment):
+        """Test generation failure due to parsing errors of skill file."""
+        bad_skill = Path(test_environment['output_dir']) / "bad_skill.md"
+        bad_skill.write_text("# ProjectOrchestrator Skill NoVersion\n\nSome invalid content", encoding='utf-8')
+        
+        generator = AdapterGenerator(
+            skill_file=str(bad_skill),
+            template_dir=test_environment['template_dir'],
+            output_dir=test_environment['output_dir'],
+        )
+        
+        result = generator.generate()
+        assert result.success is False
+        assert any("Failed to parse skill.md" in err for err in result.errors)
+
+    def test_generate_validate_syntax_error(self, test_environment):
+        """Test generation validation failure with syntax invalid skill file."""
+        bad_skill = Path(test_environment['output_dir']) / "bad_skill.md"
+        bad_skill.write_text("# ProjectOrchestrator Skill v1.0.2\n\nNo required sections here.", encoding='utf-8')
+        
+        generator = AdapterGenerator(
+            skill_file=str(bad_skill),
+            template_dir=test_environment['template_dir'],
+            output_dir=test_environment['output_dir'],
+        )
+        
+        result = generator.generate(validate=True)
+        assert result.success is False
+        assert any("Skill file failed syntax validation" in err for err in result.errors)
+
+    def test_validate_setup_missing_template(self, test_environment):
+        """Test validate method when some adapter templates are missing."""
+        generator = AdapterGenerator(
+            skill_file=test_environment['skill_file'],
+            template_dir=test_environment['template_dir'],
+            output_dir=test_environment['output_dir'],
+        )
+        
+        Path(test_environment['template_dir'], 'platforms', 'kiro.j2').unlink()
+        
+        is_valid, errors = generator.validate()
+        assert is_valid is False
+        assert any("Template not found" in err for err in errors)
+
+    def test_generate_template_render_error(self, test_environment):
+        """Test generation error when template rendering fails."""
+        generator = AdapterGenerator(
+            skill_file=test_environment['skill_file'],
+            template_dir=test_environment['template_dir'],
+            output_dir=test_environment['output_dir'],
+        )
+        
+        Path(test_environment['template_dir'], 'platforms', 'kiro.j2').write_text("{{ skill_data.undefined_var.attr }}", encoding='utf-8')
+        
+        result = generator.generate()
+        assert result.success is False
+        assert any("Failed to generate kiro" in err for err in result.errors)
+
+    def test_main_cli_success(self, test_environment):
+        """Test main CLI entry point execution success."""
+        from click.testing import CliRunner
+        from adapter_generator import main
+        
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            '--input', test_environment['skill_file'],
+            '--templates', test_environment['template_dir'],
+            '--output', test_environment['output_dir'],
+            '--dry-run'
+        ])
+        
+        assert result.exit_code == 0
+        assert "Generation completed" in result.output
+
+    def test_main_cli_failure(self, test_environment):
+        """Test main CLI entry point execution failure."""
+        from click.testing import CliRunner
+        from adapter_generator import main
+        
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            '--input', '/nonexistent/skill.md',
+            '--templates', test_environment['template_dir'],
+            '--output', test_environment['output_dir']
+        ])
+        
+        assert result.exit_code != 0
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--cov=adapter_generator'])

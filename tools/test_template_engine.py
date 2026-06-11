@@ -156,6 +156,41 @@ class TestTemplateEngine:
         assert "<h1>Test</h1>" in result
         assert "&lt;" not in result
 
+    def test_load_syntax_error(self, template_dir):
+        """Test loading a template with syntax errors."""
+        engine = TemplateEngine(template_dir)
+        with pytest.raises(TemplateSyntaxError):
+            engine.load("error.j2")
+
+    def test_render_runtime_error(self, template_dir):
+        """Test rendering error triggers RuntimeError."""
+        engine = TemplateEngine(template_dir)
+        tmpl_path = Path(template_dir) / "render_err.j2"
+        tmpl_path.write_text("{{ value() }}")
+        with pytest.raises(RuntimeError):
+            engine.render("render_err.j2", {"value": 1})
+
+    def test_render_object_runtime_error(self, template_dir):
+        """Test render_object error triggers RuntimeError."""
+        engine = TemplateEngine(template_dir)
+        tmpl_path = Path(template_dir) / "render_err.j2"
+        tmpl_path.write_text("{{ value() }}")
+        template = engine.load("render_err.j2")
+        with pytest.raises(RuntimeError):
+            engine.render_object(template, {"value": 1})
+
+    def test_render_string_syntax_error(self, template_dir):
+        """Test render_string syntax error."""
+        engine = TemplateEngine(template_dir)
+        with pytest.raises(TemplateSyntaxError):
+            engine.render_string("{% if unclosed %}", {})
+
+    def test_render_string_runtime_error(self, template_dir):
+        """Test render_string runtime error triggers RuntimeError."""
+        engine = TemplateEngine(template_dir)
+        with pytest.raises(RuntimeError):
+            engine.render_string("{{ value() }}", {"value": 1})
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--cov=template_engine'])
