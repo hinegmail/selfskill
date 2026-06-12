@@ -126,9 +126,12 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
      - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
 2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
    - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
-3. Validate the NEXT.md gate (see §5).
-4. Output the audit report.
-5. **Do not modify any code files.**
+3. **Adaptive Rule Reload (扩展规则热加载)**:
+   - Check if `.ai/RULES.md` exists. If it exists and contains custom guidelines or evolved conventions:
+     - **Must read** `.ai/RULES.md` and merge its rules/conventions into the active context instructions. This ensures that even in non-compiled environments, the AI dynamically adapts to evolved instructions.
+4. Validate the NEXT.md gate (see §5).
+5. Output the audit report.
+6. **Do not modify any code files.**
 
 **Output**:
 ```
@@ -561,6 +564,20 @@ Phase Closeout（如全部通过）
 | 范围 | 项目特定 / 通用 |
 | 需要审批 | 是 |
 | 状态 | Proposed |
+
+---
+
+### Mode 6.5: Apply Approved Proposal（应用已批准提案）
+
+**Trigger**: User says "应用提案 [ID]" or "批准并执行 [ID]" or "apply proposal [ID]" (case-insensitive).
+
+**Actions**:
+1. **Locate & Verify**: Find the specified proposal ID (e.g., `PROPOSAL-NNNN`) in `.ai/EVOLUTION_PROPOSALS.md`. Check that its current status is `Proposed` or `Approved`.
+2. **Extract Changes**: Parse the exact text patches, file paths, and target lines defined in the proposal.
+3. **Execute modifications**: Read the target file, apply the changes precisely, and ensure file structural integrity and syntax correctness.
+4. **Update Proposal Status**: Modify the proposal's status field in `.ai/EVOLUTION_PROPOSALS.md` from `Proposed/Approved` to `Applied`.
+5. **Trigger Compile Hook**: If the modified file is this Skill itself (within the `selfskill` codebase), proactively notify the user or execute `python tools/adapter_generator.py` to regenerate all IDE-specific adapters, keeping rules in sync.
+6. **Log Evolution**: Document the modification in the required `EVOLUTION_LOG` block.
 ```
 
 ---
@@ -630,6 +647,7 @@ At the end of every major milestone or phase:
 | Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
 | Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
 | Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
+| Apply Proposal | "应用提案"、"批准并执行" | "apply proposal", "execute proposal" |
 | Initialization | "启动项目"、"初始化项目"、"新建项目"、"创建项目" | "init project", "setup", "initialize" |
 
 ---
@@ -652,7 +670,7 @@ You must not:
 12. Treat old `DESIGN.md` text as newer than `STATUS.md`.
 13. Silently change architecture.
 14. Silently rewrite `.ai/DESIGN.md` or `.ai/TASKS.md` structure.
-15. Modify this Skill without user approval.
+15. Modify this Skill without formal proposal submission and explicit user approval in the chat. (Modifications via Mode 6.5 Apply Proposal are fully permitted once approved).
 16. Convert one-time fixes into permanent rules without review.
 17. Mark tasks complete without validation or approval.
 18. Hide unresolved conflicts between documents and code.

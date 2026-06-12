@@ -16,7 +16,7 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 | 🚦**`NEXT.md` Hard Gate**    | Restricts coding to a single active task, preventing AI from expanding scope or jumping between tasks.                                    |
 | 🔄**Seven-Mode Engine**        | Strict lifecycle flow: Init ➔ Context Audit ➔ Task Planning ➔ Implementation ➔ Validation ➔ Closeout ➔ Evolution.                   |
 | 📋**Three Confirmations**      | Mandatory pre-coding validation: Objective alignment + Technical path/file plan + Minimum deliverable.                                    |
-| 🧬**Proposal-Based Evolution** | AI automatically accumulates lessons, but rule/conventions changes require explicit user approval.                                        |
+| 🧬**Proposal-Based Evolution** | AI automatically accumulates lessons, and rule/convention changes require explicit user approval (applied via Mode 6.5). |
 | 📂**`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat.                              |
 | 🔌**Multi-IDE Adapter Suite**  | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows.                               |
 | ⚖️**Flexible Layering**      | Choose between a 5-file Lite Mode (solo/small projects) and a 10-file Full Mode (large/team projects).                                    |
@@ -160,6 +160,7 @@ SelfSkill/
 | Run Verification Tests | "test", "validate", "run tests" | "运行测试", "验证"             |
 | Phase Closeout         | "closeout", "tests passed"      | "测试通过", "阶段完成", "收口" |
 | Rules Evolution        | "evolve", "optimize rules"      | "优化规则", "进化"             |
+| Apply Proposal         | "apply proposal", "execute"     | "应用提案", "批准并执行"       |
 | Initialization         | "initialize", "setup", "init"   | "初始化", "创建项目"           |
 
 ---
