@@ -227,17 +227,108 @@ Task Planning
 ### 本次不会做的事（Non-goals）
 （explicit boundaries）
 
-### ⏳ 等待用户确认
-请回复"确认"或"批准"以进入实现模式。
+---
+
+🚀 **规划完成，准备就绪！**
+
+以上规划已完成检查，技术路径清晰，验收标准明确。
+
+您现在可以：
+① 说 **"执行"** 或 **"开始"** → 我立即进入实现模式开始编码
+② 提出 **疑问或建议** → 我调整规划
+③ 要求 **重新规划** → 我重新分析任务
+
+等待您的下一步指令...
+```
+
+---
+
+## 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
+
+**Purpose**: Define the complete set of user expressions and patterns that automatically trigger Mode 3 entry.
+
+**Key Principle**: User does NOT need to memorize special commands. Any natural affirmative response will work.
+
+### Affirmative Triggers (肯定信号 - 任何一个都自动进入Mode 3)
+
+**Direct Execution Commands**:
+- "执行" / "执行这个" / "执行任务" / "执行规划"
+- "开始" / "开始实现" / "开始编码" / "开始编写"
+- "确认" / "批准" / "同意" / "认可"
+- "可以" / "可以开始" / "没问题" / "没有问题"
+- "好的" / "好" / "嗯" / "明白了"
+- "OK" / "okay" / "好吧" / "走起"
+- "继续" / "继续开发" / "我们继续"
+
+**Affirmative Responses to "准备就绪" Prompt**:
+- "是的" / "对" / "对的" / "对的吗" (positive confirmation)
+- "很好" / "看起来不错" / "不错"
+- 任何不含"不"、"改"、"重"的简短回复都视为肯定
+
+**Emoji/Shorthand**:
+- "👍" / ":+1:" / "✓" / "✅"
+- "🚀" (rocket = let's go)
+
+### Technical Question → Auto-Transition Pattern
+
+**When user asks implementation-related questions**:
+- "这里是不是应该用X技术?" 
+- "需要考虑性能吗?"
+- "用什么库?"
+- "怎么处理Y场景?"
+- 任何以 "?" 结尾且与实现相关的问题
+
+**Behavior**: 
+AI answers the question, then **automatically enters Mode 3** to proceed with implementation.
+
+### Rejection/Modification Triggers (拒绝信号 - 回到Mode 2重新规划)
+
+**Explicit Rejection**:
+- "重新规划" / "改一下" / "改改" / "重来"
+- "我不同意" / "有问题" / "不对" / "不行"
+- "这样不行" / "不好" / "有问题"
+
+**Modification Requests**:
+- "改改XX部分"
+- "XX改成Y"
+- "不用这个库"
+
+**When rejection detected**: AI stays in Mode 2 and asks "哪里有问题？请告诉我。"
+
+### Auto-Detection Algorithm (自动检测算法)
+
+```
+if user_message in affirmative_triggers_list:
+    ENTER_MODE_3()
+    
+elif contains_any(user_message, affirmative_patterns):
+    ENTER_MODE_3()
+    
+elif contains_any(user_message, technical_question_patterns):
+    AI_answers_question()
+    ENTER_MODE_3()
+    
+elif contains_any(user_message, rejection_triggers):
+    REMAIN_IN_MODE_2()
+    ASK_CLARIFICATION("哪里需要调整？")
+    
+else:
+    REQUEST_DIRECTION("您希望我: (1)执行规划, (2)调整规划, 还是(3)讨论细节?")
 ```
 
 ---
 
 ### Mode 3: Task Implementation（任务实现）
 
-**Trigger**: User confirms the Task Plan; or user says "确认 / 批准 / 开始实现 / approved / implement".
+**Trigger**: User provides affirmative signal matching Mode 2→3 Automatic Transition Triggers (see §3.1 above), OR user begins asking implementation-related technical questions.
 
-**Precondition**: Task Plan confirmed by user. NEXT.md gate valid.
+**Precondition**: Mode 2 output generated. NEXT.md gate valid.
+
+**Auto-Entry Logic**:
+- AI scans user's response for trigger words/patterns from the Transition Triggers list
+- If match found: **AUTOMATICALLY ENTER MODE 3** (no explicit permission needed)
+- If rejection words detected: remain in Mode 2, ask for clarification instead
+- If ambiguous: request explicit direction
 
 **Iron Rules**:
 1. Only implement the active task in `.ai/NEXT.md`.
@@ -252,10 +343,22 @@ Task Planning
 
 **Output** (after implementation):
 ```
-## 🛠️ Implementation Result
+## 🛠️ Task Implementation
 
 ### 任务
 （Task ID + name）
+
+### 当前进度
+✓ Mode 1: Context Audit 完成
+✓ Mode 2: Task Planning 完成  
+▶️ Mode 3: Task Implementation 进行中
+
+### 执行说明
+- 我现在开始实现Task中的功能需求
+- 实现完成后自动进入Mode 4: Validation & Test
+- 如需中止，您可以随时说"停止"或"暂停"
+
+---
 
 ### 修改的文件
 （file-by-file list）

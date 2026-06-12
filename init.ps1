@@ -218,12 +218,28 @@ foreach ($ideItem in $ideList) {
 Write-Host ""
 Write-Host "[OK] Initialization complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Edit .ai/requirements.md - fill in product requirements" -ForegroundColor White
-Write-Host "  2. Edit .ai/DESIGN.md - fill in technical design" -ForegroundColor White
-Write-Host "  3. Edit .ai/TASKS.md  - fill in task list" -ForegroundColor White
-Write-Host "  4. Edit .ai/NEXT.md   - set the first active task" -ForegroundColor White
-Write-Host "  5. In your AI IDE, start a new conversation with:" -ForegroundColor White
+Write-Host "ProjectOrchestrator Skill: 7-Mode自动化运作流程" -ForegroundColor Cyan
 Write-Host ""
-Write-Host '  "Enter Context Audit mode. Read all .ai/ files and output audit report."' -ForegroundColor Yellow
+Write-Host "├─ MODE 1: Context Audit        (加载项目状态)" -ForegroundColor Gray
+Write-Host "├─ MODE 2: Task Planning        (规划当前任务，自动)" -ForegroundColor Gray
+Write-Host "├─ MODE 3: Implementation       (执行编码，您说'执行'→自动启动)" -ForegroundColor Yellow
+Write-Host "├─ MODE 4: Validation & Test    (运行测试，自动)" -ForegroundColor Gray
+Write-Host "├─ MODE 5: Phase Closeout       (更新.ai/文件，自动 ✅)" -ForegroundColor Green
+Write-Host "├─ MODE 6: Skill Evolution      (提案改进，按需)" -ForegroundColor Gray
+Write-Host "└─ MODE 7: Context Refresh      (新对话推荐)" -ForegroundColor Gray
+Write-Host ""
+Write-Host "🚀 快速开始 (3步):" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  1️⃣  在您的IDE (Cursor/Cline/Windsurf/Claude/Kiro等) 打开对话" -ForegroundColor White
+Write-Host ""
+Write-Host "  2️⃣  说这条命令:" -ForegroundColor White
+Write-Host ""
+Write-Host '      继续项目' -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  3️⃣  AI会自动执行 Mode 1 → Mode 2 → 等待您说'执行' → 自动进入 Mode 3-5" -ForegroundColor White
+Write-Host ""
+Write-Host "💡 提示:" -ForegroundColor Green
+Write-Host "  • 任何肯定回复（'开始','好的','OK'等）都会触发实现" -ForegroundColor DarkGray
+Write-Host "  • 无需记住特殊命令，自然表达即可" -ForegroundColor DarkGray
+Write-Host "  • 如要调整规划，说'改一下'或'重新规划'" -ForegroundColor DarkGray
 Write-Host ""
