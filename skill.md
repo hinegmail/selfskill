@@ -120,10 +120,13 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
 1. **Timestamp-based Smart Load (时间戳智能审计过滤)**:
    - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value.
    - Query the last modified metadata of `.ai/requirements.md` and `.ai/DESIGN.md` (via tool execution).
-   - If the timestamps of requirements/DESIGN match the `last_audit_timestamp` in `STATUS.md`:
-     - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
-   - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
-     - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
+   - **Timestamp comparison logic**:
+     - Convert `last_audit_timestamp` from STATUS.md (format: `YYYY-MM-DDTHH:MM:SSZ`) to a comparable format
+     - Compare with the file's last modified time (from filesystem metadata)
+     - If the timestamps match within a reasonable tolerance (±1 minute to account for filesystem precision):
+       - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
+     - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
+       - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
 2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
    - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
 3. **Adaptive Rule Reload (扩展规则热加载)**:
@@ -518,7 +521,13 @@ Phase Closeout
 **Conditionally update the following files (OPTIONAL - but recommended)**:
 4. `.ai/TEST_LOG.md` — append final test conclusion (only if test records exist)
 5. `.ai/DECISIONS.md` — if design deviations or important decisions were made
-6. `.ai/LESSONS.md` — if reusable lessons were discovered
+6. `.ai/LESSONS.md` — **Mandatory knowledge capture**: Record any technical findings, pitfalls, or notes from this task
+   - Even without errors, record:
+     - New technical details discovered
+     - API usage considerations
+     - Special configuration requirements
+     - Any information that may be valuable for future reference
+   - Only skip if absolutely nothing worth recording exists (must provide reason)
 7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended (including design sync patch)
 
 **Output**:
@@ -591,7 +600,8 @@ Phase Closeout
 **Trigger**: Repeated process issues, rule defects, or optimization opportunities observed; or user says "优化规则 / 更新约定 / propose / 进化 / optimize rules / evolve".
 
 **Rules**:
-- You **may** automatically append project-specific lessons to `.ai/LESSONS.md`.
+- You **must** actively capture and record project-specific lessons to `.ai/LESSONS.md` during development.
+- Do not wait for "obvious" errors — record any technical insights, API behaviors, configuration quirks, or implementation details that could help future tasks.
 - You **must not** directly modify this Skill, `.ai/RULES.md`, `.ai/DESIGN.md`, or `.ai/TASKS.md` structure.
 - You must write proposals to `.ai/EVOLUTION_PROPOSALS.md`.
 - Only after user approval may a proposal be applied.
@@ -669,7 +679,7 @@ Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** i
 | `.ai/STATUS.md` | After each task completion |
 | `.ai/TASKS.md` | Mark task status (`[x]`, `[~]`, `[!]`) after validation |
 | `.ai/TEST_LOG.md` | During validation and repair |
-| `.ai/LESSONS.md` | When project-specific lessons are discovered |
+| `.ai/LESSONS.md` | Actively capture during each task: technical findings, API behaviors, configuration quirks, implementation details, and any insights valuable for future reference |
 | `.ai/DECISIONS.md` | For factual decision records |
 | `.ai/NEXT.md` | During Phase Closeout |
 
