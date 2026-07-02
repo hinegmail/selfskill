@@ -215,17 +215,17 @@ python tools/adapter_generator.py [OPTIONS]
 
 ### 可用选项
 
-| 选项 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--version` | string | 1.0.2 | 目标版本号 |
-| `--input-file` | path | skill.md | 输入的skill.md文件路径 |
-| `--output-dir` | path | adapters/ | 输出适配器文件的目录 |
-| `--platforms` | string | all | 生成的平台（逗号分隔，或"all"表示全部） |
-| `--config` | path | - | 配置文件路径（YAML格式） |
-| `--validate` | flag | false | 仅验证，不生成 |
-| `--dry-run` | flag | false | 干运行模式（预览但不保存） |
-| `--verbose` | flag | false | 详细输出 |
-| `--stats` | flag | false | 显示性能统计信息 |
+| 选项             | 类型   | 默认值    | 说明                                    |
+| ---------------- | ------ | --------- | --------------------------------------- |
+| `--version`    | string | 1.0.2     | 目标版本号                              |
+| `--input-file` | path   | skill.md  | 输入的skill.md文件路径                  |
+| `--output-dir` | path   | adapters/ | 输出适配器文件的目录                    |
+| `--platforms`  | string | all       | 生成的平台（逗号分隔，或"all"表示全部） |
+| `--config`     | path   | -         | 配置文件路径（YAML格式）                |
+| `--validate`   | flag   | false     | 仅验证，不生成                          |
+| `--dry-run`    | flag   | false     | 干运行模式（预览但不保存）              |
+| `--verbose`    | flag   | false     | 详细输出                                |
+| `--stats`      | flag   | false     | 显示性能统计信息                        |
 
 ### 示例
 
@@ -327,17 +327,16 @@ verbose: false
 ### 添加新平台
 
 1. **创建平台模板**：
+
    ```
    tools/templates/adapter/platforms/{platform}.md.j2
    ```
-
 2. **更新配置**：
    在 `generator.yml` 的 `platforms` 列表中添加新平台名称
-
 3. **更新生成器**：
    在 `adapter_generator.py` 中的平台列表中注册新平台
-
 4. **运行生成**：
+
    ```bash
    python tools/adapter_generator.py --platforms {platform} --validate
    ```
@@ -345,21 +344,22 @@ verbose: false
 ### 自定义模板
 
 1. **编辑模板文件**：
+
    ```
    tools/templates/adapter/base.j2
    tools/templates/adapter/modes.j2
    tools/templates/adapter/platforms/{platform}.md.j2
    ```
-
 2. **使用Jinja2语法**：
+
    ```jinja2
    {{ version }}
    {% for mode in modes %}
      # {{ mode.name }}
    {% endfor %}
    ```
-
 3. **测试新模板**：
+
    ```bash
    python tools/adapter_generator.py --dry-run --validate
    ```
@@ -367,6 +367,7 @@ verbose: false
 ### 添加新验证器
 
 1. **创建验证器类**：
+
    ```python
    # tools/validators.py
    class CustomValidator:
@@ -374,27 +375,26 @@ verbose: false
            # 实现验证逻辑
            return is_valid
    ```
-
 2. **集成到生成器**：
    更新 `adapter_generator.py` 的验证流程
-
 3. **测试验证器**：
+
    ```bash
    pytest tests/unit/test_validators.py -v
    ```
 
 ## 常见问题
 
-**Q：如何更新到新版本？**  
+**Q：如何更新到新版本？**
 A：更新 `requirements.txt`，然后运行 `pip install -r tools/requirements.txt --upgrade`
 
-**Q：生成失败怎么办？**  
+**Q：生成失败怎么办？**
 A：使用 `--verbose` 查看详细错误信息，检查 `skill.md` 格式是否正确
 
-**Q：可以并行生成多个平台吗？**  
+**Q：可以并行生成多个平台吗？**
 A：生成器已支持并行处理，自动使用多核优化性能
 
-**Q：如何调试模板问题？**  
+**Q：如何调试模板问题？**
 A：使用 `--dry-run` 模式预览输出，检查上下文数据
 
 ## 性能指标
@@ -424,6 +424,6 @@ MIT License
 
 ---
 
-**文档版本**：1.0  
-**最后更新**：2024-12  
+**文档版本**：1.0
+**最后更新**：2024-12
 **维护者**：ProjectOrchestrator 团队

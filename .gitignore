@@ -21,3 +21,5 @@ test_install/
 # Original docs (archived references)
 docs/
 logs/
+.venv/
+__pycache__/

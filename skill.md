@@ -377,8 +377,15 @@ else:
 ### 建议测试命令
 （commands to run）
 
-### 需要更新的文档
-（if any .ai/ files need attention）
+### 需要更新的文档（Mode 5 时执行）
+- TASKS.md: 标记本任务为 [x]
+- STATUS.md: 追加阶段总结，更新 last_audit_timestamp
+- NEXT.md: 设置下一活跃任务
+- [DESIGN.md]: 如有设计偏离，需对齐
+- [LESSONS.md]: 如有新教训，需记录
+- [TEST_LOG.md]: 如有测试记录，需追加结论
+
+**请确保测试通过后进入 Mode 5 完成文档更新。**
 
 ### 推荐下一模式
 Validation
@@ -445,7 +452,46 @@ Validation
 Phase Closeout（如全部通过）
 ```
 
-**When all tests pass**: Enter Phase Closeout. Do not start new development.
+**When all tests pass**: Automatically enter Mode 4.5: Document Sync Check. Do not start new development.
+
+---
+
+### Mode 4.5: Document Sync Check（文档同步检查）
+
+**Trigger**: Tests pass in Mode 4; automatic entry.
+
+**Actions**:
+1. **Document Update Requirements Check**:
+   - Check if `.ai/TASKS.md` needs task status marked as `[x]`
+   - Check if `.ai/STATUS.md` needs phase summary appended
+   - Check if `.ai/TEST_LOG.md` needs test conclusion appended
+   - Check if `.ai/DESIGN.md` needs design deviation alignment
+   - Check if `.ai/LESSONS.md` needs new lessons recorded
+2. **Force Mode 5 Entry**: If any document needs updating, automatically enter Mode 5: Phase Closeout.
+3. **Output Sync Report**: Display which documents need updates.
+
+**Output**:
+```
+## 📋 Document Sync Check
+
+### Current Task
+（Task ID + name）
+
+### Documents Requiring Update
+- [ ] TASKS.md - 需要标记 Task X 为 [x]
+- [ ] STATUS.md - 需要追加阶段总结
+- [ ] TEST_LOG.md - 需要追加测试结论
+- [ ] DESIGN.md - 无设计偏离（或：需要对齐设计偏离）
+- [ ] LESSONS.md - 无新教训（或：需要记录新教训）
+
+### Recommended Action
+进入 Mode 5: Phase Closeout 完成文档更新
+
+### 推荐下一模式
+Phase Closeout
+```
+
+**If all documents are already up-to-date**: Skip Mode 5 and recommend starting a new conversation.
 
 ---
 
@@ -464,13 +510,15 @@ Phase Closeout（如全部通过）
 2. **Audit Timestamp Baseline**:
    - Update `last_audit_timestamp` in `.ai/STATUS.md` to the current UTC timestamp, establishing a successful baseline for the timestamp-based smart loading in the next session.
 
-**Must update the following files**:
+**Must update the following files (BLOCKING - required before next task)**:
 1. `.ai/TASKS.md` — mark completed task as `[x]`
 2. `.ai/STATUS.md` — append phase summary (reverse chronological): completed features, key files, technical decisions, known issues. Update `last_audit_timestamp`.
-3. `.ai/TEST_LOG.md` — append final test conclusion
-4. `.ai/DECISIONS.md` — if design deviations or important decisions were made
-5. `.ai/LESSONS.md` — if reusable lessons were discovered
-6. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state "no active task"
+3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state "no active task"
+
+**Conditionally update the following files (OPTIONAL - but recommended)**:
+4. `.ai/TEST_LOG.md` — append final test conclusion (only if test records exist)
+5. `.ai/DECISIONS.md` — if design deviations or important decisions were made
+6. `.ai/LESSONS.md` — if reusable lessons were discovered
 7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended (including design sync patch)
 
 **Output**:
@@ -484,10 +532,23 @@ Phase Closeout（如全部通过）
 - [ ] 偏离检测已记录：(Brief summary or "无设计偏离")
 - [ ] EVOLUTION_PROPOSALS.md 已提交：(Proposal ID)
 
-### 已更新文档
+### ✅ 文档更新完成确认
+
+| 文件 | 状态 | 更新内容 |
+|------|------|---------|
+| TASKS.md | ✅ 已更新 | Task {ID} 标记为 [x] |
+| STATUS.md | ✅ 已更新 | 追加阶段总结，更新时间戳 |
+| NEXT.md | ✅ 已更新 | Active = Task {next_ID} |
+| TEST_LOG.md | ✅ 已更新 / ⏭️ 跳过 | 追加测试结论 / 无测试记录 |
+| DECISIONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录关键决策 / 无新决策 |
+| LESSONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录新教训 / 无新教训 |
+
+**所有必须文档已更新，可以安全进入下一任务。**
+
+### 已更新文档详情
 - STATUS.md: （what was updated, including audit baseline timestamp）
 - TASKS.md: （what was marked）
-- TEST_LOG.md: （final conclusion）
+- TEST_LOG.md: （final conclusion, if applicable）
 - NEXT.md: （next active task）
 - [DECISIONS.md]: （if applicable）
 - [LESSONS.md]: （if applicable）
@@ -646,6 +707,7 @@ At the end of every major milestone or phase:
 | Implementation | "确认"、"批准"、"开始实现" | "approved", "implement", "go ahead" |
 | Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
 | Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
+| Document Update | "更新文档"、"同步文档"、"文档收口" | "update docs", "sync docs", "document closeout" |
 | Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
 | Apply Proposal | "应用提案"、"批准并执行" | "apply proposal", "execute proposal" |
 | Initialization | "启动项目"、"初始化项目"、"新建项目"、"创建项目" | "init project", "setup", "initialize" |
@@ -732,7 +794,9 @@ By combining "local file persistence for cognition" with "new conversation for c
   Pre-commit Hook Script (`.git/hooks/pre-commit`):
   ```bash
   #!/bin/sh
-  # ProjectOrchestrator Integrity Linter - Git pre-commit hook
+  # ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook
+
+  # Check NEXT.md and TASKS.md consistency
   if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
     ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
     if [ ! -z "$ACTIVE_TASK" ]; then
@@ -744,4 +808,15 @@ By combining "local file persistence for cognition" with "new conversation for c
       fi
     fi
   fi
+
+  # Check STATUS.md timestamp update
+  if [ -f ".ai/STATUS.md" ]; then
+    LAST_UPDATE=$(grep "上次全局审计时间" .ai/STATUS.md | cut -d':' -f2 | xargs)
+    if [ "$LAST_UPDATE" = "{待AI审计更新}" ] || [ "$LAST_UPDATE" = "{待更新}" ] || [ -z "$LAST_UPDATE" ]; then
+      echo "⚠️ [ProjectOrchestrator Linter] Warning: STATUS.md last_audit_timestamp not updated"
+      echo "Consider running Mode 5: Phase Closeout to update the timestamp."
+    fi
+  fi
+
+  echo "✅ [ProjectOrchestrator Linter] Document integrity check passed"
   ```
