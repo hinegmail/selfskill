@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Windsurf adapter | Install: .windsurfrules (project root) --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

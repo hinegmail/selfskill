@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Cline / RooCode adapter | Install: .clinerules/project-orchestrator.md --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

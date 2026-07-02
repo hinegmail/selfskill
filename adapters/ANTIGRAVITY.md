@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Antigravity Agent (Google DeepMind) adapter | Install: ANTIGRAVITY.md (project root) --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

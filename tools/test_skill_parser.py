@@ -195,11 +195,65 @@ You must not:
         assert "modes" in result
         assert "keywords" in result
         assert "forbidden_behaviors" in result
+        assert "sections" in result
+        assert "all_sections" in result
         
         assert result["version"] == "1.0.2"
         assert len(result["modes"]) > 0
         assert len(result["keywords"]) > 0
         assert len(result["forbidden_behaviors"]) > 0
+        # sections should contain numbered headings only
+        assert len(result["sections"]) > 0
+        for key in result["sections"]:
+            assert key[0].isdigit(), f"Non-numbered key in sections: {key}"
+
+    def test_extract_all_sections_returns_all_headings(self, skill_file):
+        """Test that extract_all_sections returns every ## heading."""
+        parser = SkillParser(skill_file)
+        sections = parser.extract_all_sections()
+
+        assert isinstance(sections, dict)
+        assert len(sections) > 0
+        # All keys come from ## headings so none should start with ###
+        for key in sections:
+            assert not key.startswith('#'), f"Key should be heading text, not raw line: {key}"
+
+    def test_extract_all_sections_content_includes_heading(self, skill_file):
+        """Test that each section value starts with its own ## heading."""
+        parser = SkillParser(skill_file)
+        sections = parser.extract_all_sections()
+
+        for heading, content in sections.items():
+            assert content.startswith('## '), \
+                f"Section '{heading}' content does not start with '## '"
+            assert heading in content, \
+                f"Section heading '{heading}' not found in its own content"
+
+    def test_extract_all_sections_no_overlap(self, skill_file):
+        """Test that sections do not overlap (each line belongs to exactly one section)."""
+        parser = SkillParser(skill_file)
+        sections = parser.extract_all_sections()
+
+        all_content = '\n'.join(sections.values())
+        # The concatenated sections should be a subset of the original content
+        # (no content should appear in two sections)
+        total_chars = sum(len(v) for v in sections.values())
+        # Allow minor variation due to rstrip() trimming
+        assert total_chars <= len(parser.content), \
+            "Total section content exceeds original file — possible overlap"
+
+    def test_parse_sections_filtered_correctly(self, skill_file):
+        """Test that sections dict contains only numbered headings."""
+        parser = SkillParser(skill_file)
+        result = parser.parse()
+
+        # Every key in 'sections' must start with a digit
+        for key in result["sections"]:
+            assert key[0].isdigit(), f"Non-numbered key leaked into sections: {key}"
+
+        # all_sections should be a superset of sections
+        for key in result["sections"]:
+            assert key in result["all_sections"]
 
 
 if __name__ == '__main__':

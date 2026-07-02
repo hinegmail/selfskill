@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Claude Code adapter | Install: CLAUDE.md (project root) | Auto-loaded at conversation start --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

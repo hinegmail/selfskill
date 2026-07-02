@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Generic Agent adapter (OpenAI Codex, GitHub Copilot Workspace, etc.) | Install: AGENTS.md (project root) --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

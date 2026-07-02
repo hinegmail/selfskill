@@ -3,7 +3,9 @@ AdapterGenerator Module
 Main orchestration tool for generating adapters from skill definitions.
 """
 import json
+import re
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
@@ -12,6 +14,7 @@ import click
 
 from skill_parser import SkillParser
 from template_engine import TemplateEngine
+from validators import AdapterValidator
 
 
 @dataclass
@@ -23,6 +26,7 @@ class GenerationResult:
     duration_seconds: float
     success: bool
     errors: List[str]
+    validation_warnings: List[str]  # post-generation adapter validation warnings
 
 
 class AdapterGenerator:
@@ -121,6 +125,7 @@ class AdapterGenerator:
                     duration_seconds=time.time() - start_time,
                     success=False,
                     errors=[f"Failed to parse skill.md: {str(e)}"],
+                    validation_warnings=[],
                 )
             
             # Validate if requested
@@ -132,6 +137,7 @@ class AdapterGenerator:
                     duration_seconds=time.time() - start_time,
                     success=False,
                     errors=["Skill file failed syntax validation"],
+                    validation_warnings=[],
                 )
             
             # Determine which platforms to generate
@@ -169,10 +175,28 @@ class AdapterGenerator:
                     errors.append(f"Failed to generate {platform}: {str(e)}")
             
             success = len(errors) == 0
-            
+
+            # Post-generation: validate each generated adapter
+            validation_warnings = []
+            if success and not dry_run:
+                adapter_validator = AdapterValidator()
+                for platform, file_path in generated_files.items():
+                    is_valid, validator_errors = adapter_validator.validate_file(file_path)
+                    if not is_valid:
+                        for vname, verrors in validator_errors.items():
+                            for msg in verrors:
+                                validation_warnings.append(
+                                    f"{platform}/{vname}: {msg}"
+                                )
+
+            # Post-generation: auto-update SKILL_VERSION.md if it exists
+            if success and not dry_run:
+                self._update_skill_version(version, generated_files)
+
         except Exception as e:
             errors.append(f"Generation failed: {str(e)}")
             success = False
+            validation_warnings = []
         
         duration = time.time() - start_time
         
@@ -183,6 +207,7 @@ class AdapterGenerator:
             duration_seconds=duration,
             success=success,
             errors=errors,
+            validation_warnings=validation_warnings,
         )
     
     def _generate_adapter(
@@ -255,6 +280,54 @@ class AdapterGenerator:
         
         return len(errors) == 0, errors
     
+    def _update_skill_version(self, version: str, generated_files: Dict[str, str]) -> None:
+        """
+        Auto-update SKILL_VERSION.md with current version and timestamp.
+        Looks for the file relative to skill.md's parent directory.
+        Silently skips if the file does not exist.
+        """
+        skill_dir = self.skill_file.parent
+        version_file = skill_dir / '.ai' / 'SKILL_VERSION.md'
+        if not version_file.exists():
+            return
+
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        content = version_file.read_text(encoding='utf-8')
+
+        # Update version table rows: replace any v\d+\.\d+[\.\d]* cell values
+        # in the three component rows (skill.md, adapters, templates)
+        content = re.sub(
+            r'(\|\s*\*\*skill\.md\*\*\s*\|\s*)v[\d.]+(\s*\|)',
+            rf'\g<1>v{version}\g<2>',
+            content,
+        )
+        content = re.sub(
+            r'(\|\s*\*\*适配器\*\*\s*\|\s*)v[\d.]+(\s*\|)',
+            rf'\g<1>v{version}\g<2>',
+            content,
+        )
+        content = re.sub(
+            r'(\|\s*\*\*模板\*\*\s*\|\s*)v[\d.]+(\s*\|)',
+            rf'\g<1>v{version}\g<2>',
+            content,
+        )
+
+        # Update all date cells in the version table (| YYYY-MM-DD |)
+        content = re.sub(
+            r'(\|\s*✅[^\|]*\|\s*)\d{4}-\d{2}-\d{2}(\s*\|)',
+            rf'\g<1>{today}\g<2>',
+            content,
+        )
+
+        # Update "最后更新" standalone line if present
+        content = re.sub(
+            r'(\*\*最后更新\*\*：)\d{4}-\d{2}-\d{2}',
+            rf'\g<1>{today}',
+            content,
+        )
+
+        version_file.write_text(content, encoding='utf-8')
+
     @staticmethod
     def _get_timestamp() -> str:
         """Get current timestamp in ISO format."""
@@ -339,6 +412,10 @@ def main(input, templates, output, platforms, config, version, dry_run, validate
             click.echo(f"  Generated files: {len(result.generated_files)}")
             for platform, path in result.generated_files.items():
                 click.echo(f"    - {platform}: {path}")
+            if result.validation_warnings:
+                click.echo(f"\n⚠ Adapter validation warnings ({len(result.validation_warnings)}):")
+                for w in result.validation_warnings:
+                    click.echo(f"    {w}")
         else:
             click.echo("✗ Generation failed")
             for error in result.errors:

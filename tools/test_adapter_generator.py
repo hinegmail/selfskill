@@ -265,11 +265,13 @@ You must not:
             duration_seconds=2.5,
             success=True,
             errors=[],
+            validation_warnings=[],
         )
         
         assert result.version == "1.0.2"
         assert len(result.generated_files) == 1
         assert result.success is True
+        assert result.validation_warnings == []
 
     def test_load_config_invalid_yaml(self, test_environment):
         """Test loading configuration with invalid YAML content."""
@@ -297,7 +299,11 @@ You must not:
         
         result = generator.generate()
         assert result.success is False
-        assert any("Failed to parse skill.md" in err for err in result.errors)
+        # parse() raises ValueError("Skill file failed syntax validation") for syntax-invalid files
+        assert any(
+            "Failed to parse skill.md" in err or "Skill file failed syntax validation" in err
+            for err in result.errors
+        )
 
     def test_generate_validate_syntax_error(self, test_environment):
         """Test generation validation failure with syntax invalid skill file."""

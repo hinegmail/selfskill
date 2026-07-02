@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Kiro AI Agent adapter | Install: KIRO_AGENT.md (project root) --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

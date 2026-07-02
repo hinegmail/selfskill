@@ -4,41 +4,91 @@ on:
   push:
     branches: [ main, develop ]
     paths:
+      - 'skill.md'
       - 'adapters/**'
+      - 'tools/**'
       - '.ai/SKILL_VERSION.md'
       - '.github/workflows/validate-adapter-versions.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
+      - 'skill.md'
       - 'adapters/**'
+      - 'tools/**'
       - '.ai/SKILL_VERSION.md'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       working-directory: ./tools
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
-    - name: Validate adapter versions
+
+    - name: Validate skill.md syntax
       working-directory: ./tools
       run: |
-        python adapter_generator.py --validate
-      continue-on-error: true
-    
-    - name: Check SKILL_VERSION.md
+        python - <<'EOF'
+        from skill_parser import SkillParser
+        p = SkillParser('../skill.md')
+        if not p.validate_syntax():
+            print("❌ skill.md failed syntax validation")
+            exit(1)
+        print(f"✓ skill.md syntax valid (version: {p.extract_version()})")
+        EOF
+
+    - name: Regenerate adapters and check for diff
+      working-directory: ./tools
+      run: |
+        python adapter_generator.py \
+          --input ../skill.md \
+          --templates templates/adapter \
+          --output ../adapters
+        echo "--- git diff (adapters) ---"
+        cd ..
+        git diff --name-only adapters/
+        CHANGED=$(git diff --name-only adapters/ | wc -l)
+        if [ "$CHANGED" -gt 0 ]; then
+          echo ""
+          echo "❌ Adapters are out of sync with skill.md."
+          echo "   Run: python tools/adapter_generator.py"
+          echo "   Then commit the regenerated adapters."
+          exit 1
+        else
+          echo "✓ All adapters are in sync with skill.md"
+        fi
+
+    - name: Validate generated adapters
+      working-directory: ./tools
+      run: |
+        python - <<'EOF'
+        from validators import AdapterValidator
+        import sys
+        v = AdapterValidator()
+        results = v.validate_directory('../adapters')
+        failed = [(f, errs) for f, (ok, errs) in results.items() if not ok]
+        if failed:
+            print(f"❌ {len(failed)} adapter(s) failed validation:")
+            for fname, errs in failed:
+                for vname, msgs in errs.items():
+                    for m in msgs:
+                        print(f"  {fname} / {vname}: {m}")
+            sys.exit(1)
+        print(f"✓ All {len(results)} adapters passed validation")
+        EOF
+
+    - name: Check SKILL_VERSION.md exists
       run: |
         if [ -f ".ai/SKILL_VERSION.md" ]; then
           echo "✓ SKILL_VERSION.md exists"

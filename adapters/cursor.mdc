@@ -1,4 +1,8 @@
-# ProjectOrchestrator Skill v1.0
+---
+description: ProjectOrchestrator Skill v1.0 — AI software development orchestrator with dual-track cognition and self-evolution
+globs: ["**/*"]
+alwaysApply: true
+---# ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 

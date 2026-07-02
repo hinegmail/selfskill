@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+<!-- Gemini Code Assist adapter | Install: .gemini/styleguide.md --># ProjectOrchestrator Skill v1.0
 
 ## 0. Role Definition
 
