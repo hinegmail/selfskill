@@ -118,15 +118,18 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
 
 **Actions**:
 1. **Timestamp-based Smart Load (时间戳智能审计过滤)**:
-   - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value.
-   - Query the last modified metadata of `.ai/requirements.md` and `.ai/DESIGN.md` (via tool execution).
+   - Read `.ai/STATUS.md` first. Retrieve the `last_audit_timestamp` value (format: `YYYY-MM-DDTHH:MM:SSZ`).
+   - **Attempt to read file modification time** of `.ai/requirements.md` and `.ai/DESIGN.md`:
+     - On Unix/macOS: execute `stat -c %Y <file>` (returns epoch seconds) or `date -r <file> +%s`
+     - On Windows (PowerShell): execute `(Get-Item <file>).LastWriteTimeUtc.ToString('o')`
+     - If the shell tool is unavailable or returns an error: **fall back to full re-audit** (treat as timestamps not matching). Do not guess or assume files are unchanged.
    - **Timestamp comparison logic**:
-     - Convert `last_audit_timestamp` from STATUS.md (format: `YYYY-MM-DDTHH:MM:SSZ`) to a comparable format
-     - Compare with the file's last modified time (from filesystem metadata)
-     - If the timestamps match within a reasonable tolerance (±1 minute to account for filesystem precision):
-       - **Skip reading** these two large files to save API tokens and avoid context clutter. Retrieve the high-level roadmap and structural indexing strictly from `STEERING.md`.
-     - If the timestamps do not match, or `last_audit_timestamp` is missing/empty:
+     - Convert `last_audit_timestamp` from STATUS.md to epoch seconds for comparison.
+     - Compare with the file's mtime. If the difference is **≤ 60 seconds** (tolerance for filesystem precision):
+       - **Skip reading** these two large files. Load roadmap and chapter index from `STEERING.md` only.
+     - If the difference exceeds 60 seconds, mtime is unreadable, or `last_audit_timestamp` is missing/empty/placeholder:
        - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
+   - **STEERING.md reading is mandatory in all cases** — it is never skipped regardless of timestamp result.
 2. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
    - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
 3. **Adaptive Rule Reload (扩展规则热加载)**:
@@ -185,8 +188,9 @@ Task Planning
 **Actions**:
 1. Plan implementation for the single active task in `.ai/NEXT.md`.
 2. **Mandatory Lessons Query (历史避坑强制检索)**:
-   - The AI **must** use `grep_search` to query `.ai/LESSONS.md` using keywords from the current task (e.g., core database tables, specific APIs, or components).
-   - If any matched historical pitfalls or lessons are found, they **must** be cited under "历史避坑经验" in the plan.
+   - The AI **must** use `grep_search` to search `.ai/LESSONS.md` against the `### 模块/关键词` field, using module names and keywords extracted from the current task (e.g., database table names, API names, component names).
+   - Search strategy: run `grep_search` for each key term from the current task against `LESSONS.md`. Prioritize matches in `### 模块/关键词` fields, then fall back to full-text matches.
+   - If any matched lessons are found, they **must** be cited under "历史避坑经验" in the plan, including the LESSON ID and the recommended behavior.
 3. Execute the **Three Confirmations Protocol** (三项确认):
    - ① My understanding of the task objective (1-2 lines)
    - ② Technical implementation path + involved files/interfaces (incorporating findings from LESSONS.md)
@@ -405,6 +409,21 @@ Validation
 **Actions**:
 1. Run or recommend the smallest relevant test set.
 2. Record all test activity in `.ai/TEST_LOG.md`.
+3. **Context Health Check (上下文健康度自检)**:
+   Before starting any test-fix loop, evaluate the following signals. If **2 or more** are true, output a health warning and recommend starting a new conversation after the current task closes out:
+
+   | Signal | Check |
+   |--------|-------|
+   | 🔴 Fix iterations | Current test-fix-retest cycle count ≥ `mitigation_threshold` (default: 3) |
+   | 🟠 Conversation turns | Estimated turns in current chat session > 30 |
+   | 🟠 Error log volume | Total error/traceback output processed this session > 200 lines |
+   | 🟡 Memory references | AI is referencing details not in any `.ai/` file (relies on chat memory) |
+   | 🟡 Scope drift | Current work is touching files or tasks beyond what `.ai/NEXT.md` specifies |
+
+   **Output format when 2+ signals trigger**:
+   > ⚠️ **[Context Health Warning]** {N}/5 health signals active: {list triggered signals}.
+   > Recommend completing the current task, running Mode 5 Closeout, then starting a fresh conversation.
+   > Files are up-to-date in `.ai/` — a new conversation will reload clean state automatically.
 
 **Context Blurring Mitigation Protocol (Context Compression Safeguard)**:
 - **Iteration Limit**: The AI must check the custom `mitigation_threshold` configuration in `.ai/RULES.md` (defaulting to 3 if the configuration is missing or empty). If the test-fix-retest loop in the current conversation session exceeds this threshold, the AI **must** halt development.
@@ -522,6 +541,7 @@ Phase Closeout
 4. `.ai/TEST_LOG.md` — append final test conclusion (only if test records exist)
 5. `.ai/DECISIONS.md` — if design deviations or important decisions were made
 6. `.ai/LESSONS.md` — **Mandatory knowledge capture**: Record any technical findings, pitfalls, or notes from this task
+   - **Each entry must include a `### 模块/关键词` field** listing the relevant module names and technical keywords (comma-separated), enabling precise grep retrieval in future Mode 2 sessions.
    - Even without errors, record:
      - New technical details discovered
      - API usage considerations
@@ -697,8 +717,9 @@ Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** i
 
 ### 🧬 Token Economy & Context Chunking (按需读取优化)
 To save API costs and prevent compliance decay in long conversations:
-- **Phase Audit Sync**: AI must read all `.ai/` files *only* in Mode 1 (Context Audit) at conversation startup.
-- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them** to save context tokens. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` loaded in the active chat context.
+- **Phase Audit Sync**: AI **must** read `.ai/STEERING.md` at every conversation startup — this file is never skipped. Read `.ai/requirements.md` and `.ai/DESIGN.md` only when timestamp comparison (Mode 1, §4.1) determines they have been modified.
+- **Chapter-Anchor Navigation (锚点分块读取)**: When a large file (`.ai/requirements.md`, `.ai/DESIGN.md`) must be read, **never load it in full**. First locate the target chapter by searching for its heading anchor (from `STEERING.md §4 index`), then read only from that heading to the next same-level heading. This applies to any file requiring focused section retrieval.
+- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them**. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in the active context.
 
 ### 🧠 Cognitive Distillation of Lessons (认知蒸馏规则)
 At the end of every major milestone or phase:
