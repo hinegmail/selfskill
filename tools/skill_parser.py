@@ -241,6 +241,36 @@ class SkillParser:
         
         return True
     
+    def extract_all_sections(self) -> Dict[str, str]:
+        """
+        Extract all top-level (##) sections from the skill file by scanning
+        headings in order. Each section spans from its heading line to the
+        line before the next ## heading (or end of file).
+
+        Sections whose headings start with an emoji or are output-block
+        headings embedded inside Mode content (e.g. '## 🚀 Initialization')
+        are intentionally included — callers can filter by key prefix if needed.
+
+        Returns:
+            Dict[str, str]: Ordered dict mapping heading text (without '## ')
+                            to the full section content including the heading.
+        """
+        lines = self.content.split('\n')
+        sections: Dict[str, str] = {}
+        boundaries: List[tuple] = []  # (start_line, heading_text)
+
+        for i, line in enumerate(lines):
+            if line.startswith('## ') and not line.startswith('### '):
+                heading = line[3:].strip()
+                boundaries.append((i, heading))
+
+        for idx, (start, heading) in enumerate(boundaries):
+            end = boundaries[idx + 1][0] if idx + 1 < len(boundaries) else len(lines)
+            section_content = '\n'.join(lines[start:end]).rstrip()
+            sections[heading] = section_content
+
+        return sections
+
     def parse(self) -> Dict:
         """
         Parse the entire skill file.
@@ -253,10 +283,21 @@ class SkillParser:
         """
         if not self.validate_syntax():
             raise ValueError("Skill file failed syntax validation")
-        
+
+        all_sections = self.extract_all_sections()
+
+        # Build a filtered dict of numbered top-level sections only
+        # (keys matching pattern "N. Title" or "N.N Title"), preserving order.
+        numbered_sections: Dict[str, str] = {
+            k: v for k, v in all_sections.items()
+            if re.match(r'^\d+[\.\s]', k)
+        }
+
         return {
             'version': self.extract_version(),
             'modes': self.extract_modes(),
             'keywords': self.extract_keywords(),
             'forbidden_behaviors': self.extract_forbidden_behaviors(),
+            'sections': numbered_sections,
+            'all_sections': all_sections,
         }
