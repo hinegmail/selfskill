@@ -140,9 +140,20 @@ copy_template_file() {
     fi
 }
 
-# 总是安装 MODE_REFERENCE.md (compact 适配器依赖它)
+# 总是安装 MODE_REFERENCE.md (compact 适配器依赖它) — 强制覆盖
+# MODE_REFERENCE.md 是生成的技能模板（非项目数据），必须始终保持同步
 for file in "${ALWAYS_FILES[@]}"; do
-    copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
+    if [[ -f "$TEMPLATES_DIR/$file" ]]; then
+        if [[ -f "$AI_DIR/$file" ]]; then
+            cp "$TEMPLATES_DIR/$file" "$AI_DIR/$file"
+            echo "  *️⃣  .ai/$file (updated)"
+        else
+            cp "$TEMPLATES_DIR/$file" "$AI_DIR/$file"
+            echo "  ✅ .ai/$file"
+        fi
+    else
+        echo "  ⚠️  模板不存在: $file"
+    fi
 done
 
 if [[ "$MICRO_MODE" = true ]]; then

@@ -124,9 +124,23 @@ function Copy-TemplateFile {
     }
 }
 
-# Always install MODE_REFERENCE.md (compact adapters reference it)
+# Always install MODE_REFERENCE.md (compact adapters reference it) — force overwrite
+# MODE_REFERENCE.md is a generated skill template (not project data), must always stay in sync
 foreach ($file in $alwaysFiles) {
-    Copy-TemplateFile $file
+    $src = Join-Path $TemplatesDir $file
+    $dst = Join-Path $AiDir $file
+    if (Test-Path $src) {
+        $exists = Test-Path $dst
+        Copy-Item $src $dst -Force
+        if ($exists) {
+            Write-Host "  [*] .ai/$file (updated)" -ForegroundColor Green
+        } else {
+            Write-Host "  [+] .ai/$file" -ForegroundColor Green
+        }
+    }
+    else {
+        Write-Host "  [!] Template missing: $file" -ForegroundColor Yellow
+    }
 }
 
 if ($Micro) {
