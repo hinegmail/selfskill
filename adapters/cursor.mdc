@@ -100,6 +100,7 @@ If a conflict affects implementation decisions, **stop and ask for user confirma
 ---## 4. Seven-Mode Execution Engine
 
 > **Full mode output templates**: Read `.ai/MODE_REFERENCE.md` when entering a mode for the first time in a session. The compact reference below contains triggers and key rules only.
+> **Mode 2 mandatory**: You **MUST** read MODE_REFERENCE.md §Mode 2 before producing Three Confirmations output. See Action 0 below.
 
 Follow modes sequentially unless user explicitly requests a specific mode. Do not skip modes.
 
@@ -115,11 +116,14 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 2. Smart Load: Compare `last_audit_timestamp` with file mtime of requirements.md/DESIGN.md. Skip if unchanged (≤60s tolerance). STEERING.md is **always** read (except Micro Mode).
 3. Read RULES.md if exists (hot-reload evolved rules).
 4. Validate NEXT.md gate (see §5).
+5. **Micro Mode Auto-Upgrade**: If in Micro Mode and task has ≥3 criteria or >5 files, recommend upgrading to Lite Mode.
 **Micro Mode**: Read only NEXT.md + STATUS.md TL;DR. Skip STEERING.md, skip timestamp check.
 
 ### Mode 2: Task Planning + Three Confirmations
 **Trigger**: Context Audit completed and user confirms; or user says "开始阶段 X / plan / start task".
-**Actions**: Plan for single active task in NEXT.md → grep LESSONS.md for relevant lessons → Three Confirmations (① goal ② path+files ③ first deliverable). **No code.** Wait for "执行".
+**Actions**:
+0. **Mandatory**: Read `.ai/MODE_REFERENCE.md` §Mode 2 (first time only) for full output template. If file missing, use compact rules.
+1. Plan for single active task in NEXT.md → grep LESSONS.md for relevant lessons → Three Confirmations (① goal ② path+files ③ first deliverable). **No code.** Wait for "执行".
 **Micro Mode**: Skip Three Confirmations. Output 3-line quick plan (goal + files + first step). Wait for "执行".
 
 ### Mode 2→3 Auto-Transition Triggers
@@ -275,7 +279,7 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 **Version**: 1.0
 
-**Generated**: 2026-07-04T09:52:21.730976Z
+**Generated**: 2026-07-04T14:29:06.508319Z
 
 **Status**: Active
 

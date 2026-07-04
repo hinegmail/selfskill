@@ -61,6 +61,25 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 
 ---
 
+### 📊 Which Mode Should I Choose?
+
+| Criteria | Micro | Lite | Full |
+|----------|-------|------|------|
+| **Code changes** | < 50 lines, single task | < 5k lines, short-term | > 5k lines, long-term |
+| **Team size** | Solo, one-off | Solo or 1-2 people | Team (2+) |
+| **Planning files needed?** | No (just the task) | Yes (requirements + design) | Yes (full suite) |
+| **Need task traceability?** | No | Minimal | Yes (AUDIT/ADR) |
+| **`.ai/` files** | 3 + MODE_REFERENCE | 6 + MODE_REFERENCE | 11 + MODE_REFERENCE |
+
+**Quick rule of thumb**:
+- 🐹 **Micro**: Fix a bug, tweak a config, write a utility function → `init.ps1 -Micro` / `init.sh --micro`
+- 🐱 **Lite**: Personal project, prototype, weekend hack → `init.ps1 -Lite` / `init.sh --lite`
+- 🐘 **Full**: Production project, team collaboration, long-term maintenance → `init.ps1` / `init.sh`
+
+> 💡 You can start with Micro and upgrade later. The init scripts with `-Force` will add missing files without overwriting existing ones.
+
+---
+
 ### 2. Configure the `.ai/` Brain Files
 
 After initialization, edit the following files to match your project specifications:

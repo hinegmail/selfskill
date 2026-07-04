@@ -155,8 +155,14 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
    - Check if `.ai/RULES.md` exists. If it exists and contains custom guidelines or evolved conventions:
      - **Must read** `.ai/RULES.md` and merge its rules/conventions into the active context instructions. This ensures that even in non-compiled environments, the AI dynamically adapts to evolved instructions.
 5. Validate the NEXT.md gate (see §5).
-6. Output the audit report.
-7. **Do not modify any code files.**
+6. **Micro Mode Auto-Upgrade Detection (微型模式自动升级检测)**:
+   - If running in Micro Mode (only `NEXT.md` + `STATUS.md` + `LESSONS.md` exist), evaluate the active task's complexity:
+     - **Upgrade signal**: The task description in NEXT.md contains **≥ 3 acceptance criteria** OR references **> 5 files** OR involves multi-step phases (e.g., "first do X, then do Y").
+     - **Action when upgrade signal triggers**: Output a prominent recommendation:
+       > ⚠️ [Mode Upgrade Suggestion] This task has grown beyond Micro Mode scope (N criteria, M files). Consider upgrading to Lite Mode by running: `init.ps1 -Lite -Force` (Windows) or `./init.sh --lite --force` (macOS/Linux). This will add planning files (requirements.md, DESIGN.md, TASKS.md, STEERING.md) without overwriting existing ones.
+     - Do **not** force the upgrade — proceed with Micro Mode if the user confirms, but warn that planning files will be unavailable.
+7. Output the audit report.
+8. **Do not modify any code files.**
 
 **Output**:
 ```
@@ -205,6 +211,10 @@ Task Planning
 **Precondition**: Context Audit must be completed. NEXT.md gate must pass.
 
 **Actions**:
+0. **Mandatory Mode Reference Load (强制模板加载)**:
+   - If you have **NOT** read `.ai/MODE_REFERENCE.md` in this session, you **MUST** read it before producing any Mode 2 output. The compact adapter only contains triggers; the full output template is in MODE_REFERENCE.md §Mode 2.
+   - Read only the `### Mode 2` section (not the entire file) using chapter-anchor navigation.
+   - If `.ai/MODE_REFERENCE.md` does not exist, fall back to the compact rules in the adapter — output will be simpler but functional.
 1. Plan implementation for the single active task in `.ai/NEXT.md`.
 2. **Mandatory Lessons Query (历史避坑强制检索)**:
    - The AI **must** use `grep_search` to search `.ai/LESSONS.md` against the `### 模块/关键词` field, using module names and keywords extracted from the current task (e.g., database table names, API names, component names).
