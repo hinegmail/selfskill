@@ -28,7 +28,7 @@ def test_integration_generation_and_validation():
         # Generation step
         result = generator.generate(validate=True)
         assert result.success is True, f"E2E Generation failed: {result.errors}"
-        assert len(result.generated_files) == 8, f"Expected 8 platforms, got {len(result.generated_files)}"
+        assert len(result.generated_files) == 9, f"Expected 9 files (8 adapters + mode_reference), got {len(result.generated_files)}"
         
         # Validation step
         validator = AdapterValidator()
