@@ -244,6 +244,7 @@ git log --oneline | head -3  # 应显示最近的提交
 - 生成器自动输出 MODE_REFERENCE.md 到 templates/ai/
 - **收口完整性防护**：Mode 1 新增收口完整性校验（Check A/B/C），检测上次会话 Mode 5 是否未完成并触发 Recovery Protocol；Mode 5 新增收口后验证（Post-Closeout Verification），read-back 校验三个文件一致性后才输出 EVOLUTION_LOG
 - **空闲态漏洞修复**：Mode 1 Check C 扩大检测范围（覆盖「就绪中」等自由文本）；新增步骤 6 空闲态任务选定（Idle-State Task Selection），NEXT.md 空闲且 TASKS.md 有未完成任务时强制选定写入后才允许进入 Mode 2；Mode 5 规定 NEXT.md 空闲态唯一合法写法为 `no active task`；§5 Hard Gate 新增「有内容但无有效任务 ID」拦截规则
+- **收口验证强化**：Mode 5 Post-Closeout Verification 增加 NEXT.md 空闲态文本 REJECT 检测（拒绝「就绪中」等并强制重写）；STATUS.md BLOCKING 更新增加里程碑执行状态更新要求；init 脚本修复 MODE_REFERENCE.md 始终强制覆盖
 
 **发布检查清单**：✅ 全部通过（36 项测试）  
 **贡献者**：ProjectOrchestrator 团队  

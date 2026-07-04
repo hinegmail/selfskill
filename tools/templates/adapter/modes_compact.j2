@@ -52,8 +52,12 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 
 ### Mode 5: Phase Closeout
 **Trigger**: Validation passes; or user says "测试通过 / closeout / phase complete".
-**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + timestamp), NEXT.md (set next active task; if none, write **exactly** `no active task` — no other idle-state text allowed).
-**Post-Closeout Verification**: After updates, read back NEXT.md (active ≠ completed task), STATUS.md TL;DR (mentions completed task), TASKS.md (task marked [x]). Re-execute any failed update before outputting EVOLUTION_LOG.
+**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + **milestone status update** + timestamp), NEXT.md (set next active task; if none, write **exactly** `no active task` — no other idle-state text allowed).
+**Post-Closeout Verification**: After updates, read back:
+1. NEXT.md — must contain valid uncompleted task ID from TASKS.md `[ ]`, OR exact text `no active task` (only if all tasks done). **REJECT** "就绪中"/"ready"/"idle"/"等待"/empty/placeholder — re-execute update if found.
+2. STATUS.md TL;DR — mentions completed task + milestone status updated.
+3. TASKS.md — completed task marked `[x]`.
+Re-execute any failed update before outputting EVOLUTION_LOG.
 **Conditionally update**: TEST_LOG.md, DECISIONS.md, LESSONS.md (mandatory knowledge capture), EVOLUTION_PROPOSALS.md.
 **LESSONS.md Cap**: If >20 entries, trigger Cognitive Distillation — distill top 3-5 rules into RULES.md proposal, then reset LESSONS.md.
 **Micro Mode**: Update only NEXT.md, STATUS.md (TL;DR + timestamp), LESSONS.md.
