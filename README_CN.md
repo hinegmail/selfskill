@@ -19,7 +19,7 @@
 |🧬**提案制进化**|LESSONS 可自动积累，规则与 Skill 进化经用户审批后可由 AI 自动应用（通过 Mode 6.5）|
 |📂\*\*`.ai/` 单一事实来源\*\*|所有项目认知存文件，新对话即可完美恢复上下文|
 |🔌**多 IDE 适配**|一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等|
-|⚖️**轻重分层**|小项目 5 文件轻量模式，大项目 10 文件完整模式|
+|⚖️**轻重分层**|三级项目模式：**微型**（3 文件，快速脚本）、**轻量**（6 文件，小项目）、**完整**（11 文件，团队项目）|
 
 \---
 
@@ -38,6 +38,9 @@
 # 轻量模式 + 仅 Cursor
 .\\init.ps1 -Path "D:\\Projects\\YourProject" -IDE "cursor" -Lite
 
+# 微型模式（3 文件，快速脚本）
+.\\init.ps1 -Path "." -Micro
+
 # 在当前目录初始化
 .\\init.ps1
 ```
@@ -50,6 +53,9 @@
 
 # 轻量模式 + 仅 Cline
 ./init.sh -p \~/Projects/YourProject -i cline --lite
+
+# 微型模式（3 文件，快速脚本）
+./init.sh --micro
 
 # 在当前目录
 ./init.sh

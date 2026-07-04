@@ -9,7 +9,8 @@
 #   -p, --path PATH       目标项目路径 (默认: 当前目录)
 #   -i, --ide IDES        IDE列表, 逗号分隔 (默认: all)
 #                          可选: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
-#   -l, --lite            轻量模式 (仅创建5个核心文件)
+#   -l, --lite            轻量模式 (仅创建6个核心文件)
+#   -m, --micro           微型模式 (仅创建3个核心文件: NEXT.md, STATUS.md, LESSONS.md)
 #   -f, --force           强制覆盖已存在的 .ai/ 模板文件
 #   -s, --source PATH     SelfSkill 源目录 (默认: 脚本所在目录)
 #   -h, --help            显示帮助
@@ -28,6 +29,7 @@ set -euo pipefail
 TARGET_PATH="."
 IDE_LIST="all"
 LITE_MODE=false
+MICRO_MODE=false
 FORCE_MODE=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_SOURCE="$SCRIPT_DIR"
@@ -48,6 +50,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -l|--lite)
             LITE_MODE=true
+            shift
+            ;;
+        -m|--micro)
+            MICRO_MODE=true
             shift
             ;;
         -f|--force)
@@ -87,7 +93,7 @@ AI_DIR="$TARGET_PATH/.ai"
 echo ""
 echo "🚀 ProjectOrchestrator 初始化"
 echo "   目标项目: $TARGET_PATH"
-echo "   模式: $([ "$LITE_MODE" = true ] && echo '轻量 (Lite)' || echo '完整 (Full)')"
+echo "   模式: $( [ "$MICRO_MODE" = true ] && echo '微型 (Micro)' || ([ "$LITE_MODE" = true ] && echo '轻量 (Lite)' || echo '完整 (Full)'))"
 echo "   IDE: $IDE_LIST"
 echo ""
 
@@ -98,9 +104,15 @@ echo ""
 mkdir -p "$AI_DIR"
 echo "📁 .ai/ 目录就绪"
 
+# 微型模式: 仅 3 个核心文件 + MODE_REFERENCE.md
+MICRO_FILES=("NEXT.md" "STATUS.md" "LESSONS.md" "MODE_REFERENCE.md")
+
 # 核心文件
 CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md" "STEERING.md")
 FULL_FILES=("RULES.md" "TEST_LOG.md" "DECISIONS.md" "LESSONS.md" "EVOLUTION_PROPOSALS.md")
+
+# MODE_REFERENCE.md 总是安装 (compact 适配器依赖它)
+ALWAYS_FILES=("MODE_REFERENCE.md")
 
 # 复制模板文件函数，如果指定了 --force 则强制覆盖已存在的文件
 copy_template_file() {
@@ -128,14 +140,26 @@ copy_template_file() {
     fi
 }
 
-for file in "${CORE_FILES[@]}"; do
+# 总是安装 MODE_REFERENCE.md (compact 适配器依赖它)
+for file in "${ALWAYS_FILES[@]}"; do
     copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
 done
 
-if [[ "$LITE_MODE" = false ]]; then
-    for file in "${FULL_FILES[@]}"; do
+if [[ "$MICRO_MODE" = true ]]; then
+    # 微型模式: 仅核心运行时文件
+    for file in "${MICRO_FILES[@]}"; do
         copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
     done
+else
+    for file in "${CORE_FILES[@]}"; do
+        copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
+    done
+
+    if [[ "$LITE_MODE" = false ]]; then
+        for file in "${FULL_FILES[@]}"; do
+            copy_template_file "$TEMPLATES_DIR/$file" "$AI_DIR/$file" ".ai/$file"
+        done
+    fi
 fi
 
 # ============================================================

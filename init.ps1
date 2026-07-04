@@ -14,7 +14,10 @@
     Default: all
 
 .PARAMETER Lite
-    Enable lite mode (only 5 core .ai/ files).
+    Enable lite mode (only 6 core .ai/ files).
+
+.PARAMETER Micro
+    Enable micro mode (only 3 core .ai/ files: NEXT.md, STATUS.md, LESSONS.md).
 
 .PARAMETER SkillSource
     SelfSkill project root (containing skill.md, templates/, adapters/).
@@ -33,6 +36,7 @@ param(
     [string]$Path = ".",
     [string]$IDE = "all",
     [switch]$Lite,
+    [switch]$Micro,
     [string]$SkillSource = "",
     [switch]$Force
 )
@@ -62,7 +66,8 @@ if (-not $TargetPath) {
 $AiDir = Join-Path $TargetPath ".ai"
 
 $modeLabel = "Full"
-if ($Lite) { $modeLabel = "Lite" }
+if ($Micro) { $modeLabel = "Micro" }
+elseif ($Lite) { $modeLabel = "Lite" }
 
 Write-Host ""
 Write-Host "[AI] ProjectOrchestrator Init" -ForegroundColor Cyan
@@ -83,11 +88,17 @@ else {
     Write-Host "[=] .ai/ directory exists, skipping existing files" -ForegroundColor Yellow
 }
 
+# Micro mode: only 3 essential files + MODE_REFERENCE.md
+$microFiles = @("NEXT.md", "STATUS.md", "LESSONS.md", "MODE_REFERENCE.md")
+
 # Core files (both Lite and Full)
 $coreFiles = @("requirements.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md", "STEERING.md")
 
 # Full mode extra files
 $fullFiles = @("RULES.md", "TEST_LOG.md", "DECISIONS.md", "LESSONS.md", "EVOLUTION_PROPOSALS.md")
+
+# MODE_REFERENCE.md is always installed (needed by compact adapters)
+$alwaysFiles = @("MODE_REFERENCE.md")
 
 # 复制模板文件函数，如果指定了 -Force 则强制覆盖已存在的文件
 function Copy-TemplateFile {
@@ -113,13 +124,26 @@ function Copy-TemplateFile {
     }
 }
 
-foreach ($file in $coreFiles) {
+# Always install MODE_REFERENCE.md (compact adapters reference it)
+foreach ($file in $alwaysFiles) {
     Copy-TemplateFile $file
 }
 
-if (-not $Lite) {
-    foreach ($file in $fullFiles) {
+if ($Micro) {
+    # Micro mode: only essential runtime files
+    foreach ($file in $microFiles) {
         Copy-TemplateFile $file
+    }
+}
+else {
+    foreach ($file in $coreFiles) {
+        Copy-TemplateFile $file
+    }
+
+    if (-not $Lite) {
+        foreach ($file in $fullFiles) {
+            Copy-TemplateFile $file
+        }
     }
 }
 

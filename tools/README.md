@@ -6,9 +6,38 @@ Python工具包，用于自动生成和维护ProjectOrchestrator Skill适配器�
 
 - **SkillParser** - 从 `skill.md` 提取结构化内容
 - **TemplateEngine** - 使用Jinja2渲染适配器模板
-- **AdapterGenerator** - CLI工具，自动生成所有IDE适配器
+- **AdapterGenerator** - CLI工具，自动生成所有IDE适配器 + MODE_REFERENCE.md
 - **Validators** - 多层验证系统（Markdown、版本、引用、语言等）
 - **Utils** - 文件I/O、YAML处理、目录管理工具函数
+
+## 适配器架构（Compact 模式）
+
+生成器采用 **双层架构** 以优化 token 消耗：
+
+| 层级 | 文件 | 加载时机 | 行数（约） |
+|------|------|---------|-----------|
+| **Compact 适配器** | IDE 规则文件（CLAUDE.md, cursor.mdc 等） | 对话启动时自动加载 | ~200 |
+| **MODE_REFERENCE.md** | `.ai/MODE_REFERENCE.md` | 首次进入某个 Mode 时按需读取 | ~500 |
+
+### Compact 模板结构
+
+```
+tools/templates/adapter/
+├── base.j2              # 角色定义、核心原则、文件系统、优先级
+├── modes_compact.j2     # 紧凑模式定义（触发器 + 关键规则，无输出模板）
+├── rules_compact.j2     # 紧凑规则（硬闸门、自进化、触发词、禁止行为）
+├── footer_compact.j2    # 紧凑页脚（新对话策略、安全审计）
+├── mode_reference.j2    # 完整模式输出模板（生成到 .ai/MODE_REFERENCE.md）
+└── platforms/           # 各IDE平台模板（引用 compact 模板）
+```
+
+### 三级项目模式
+
+| 模式 | .ai/ 文件数 | 适用场景 | init 参数 |
+|------|-----------|---------|----------|
+| **Micro** | 3 + MODE_REFERENCE | 快速脚本/微型任务 | `--micro` / `-Micro` |
+| **Lite** | 6 + MODE_REFERENCE | 小项目/个人开发 | `--lite` / `-Lite` |
+| **Full** | 11 + MODE_REFERENCE | 团队/大型项目 | （默认） |
 
 ## 安装
 
@@ -35,7 +64,7 @@ python tools/adapter_generator.py --help
 ### 基本用法
 
 ```bash
-# 生成所有8个自动适配器（cursorrules 遗留格式为手动维护，不参与自动生成）
+# 生成所有8个自动适配器 + MODE_REFERENCE.md（cursorrules 遗留格式为手动维护，不参与自动生成）
 python tools/adapter_generator.py --version 1.0 --validate
 
 # 生成特定平台的适配器
@@ -385,7 +414,7 @@ verbose: false
 A：更新 `requirements.txt`，然后运行 `pip install -r tools/requirements.txt --upgrade`
 
 **Q：生成失败怎么办？**
-A：使用 `--verbose` 查看详细错误信息，检查 `skill.md` 格式是否正确
+A：使用 `--dry-run` 预览输出，检查 `skill.md` 格式是否正确
 
 **Q：可以并行生成多个平台吗？**
 A：生成器已支持并行处理，自动使用多核优化性能
@@ -396,9 +425,9 @@ A：使用 `--dry-run` 模式预览输出，检查上下文数据
 ## 性能指标
 
 - **解析时间**：< 1秒 (skill.md)
-- **渲染时间**：< 5秒 (所有8个自动适配器)
+- **渲染时间**：< 1秒 (所有8个自动适配器 + MODE_REFERENCE.md)
 - **验证时间**：< 3秒 (所有验证器)
-- **总耗时**：< 10秒 (端到端)
+- **总耗时**：< 5秒 (端到端)
 
 ## 依赖项
 

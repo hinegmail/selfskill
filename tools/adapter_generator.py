@@ -185,11 +185,22 @@ class AdapterGenerator:
             
             success = len(errors) == 0
 
+            # Generate MODE_REFERENCE.md for .ai/ directory (full mode templates)
+            if success and not dry_run:
+                try:
+                    mode_ref_path = self._generate_mode_reference(context)
+                    generated_files['mode_reference'] = str(mode_ref_path)
+                except Exception as e:
+                    errors.append(f"Failed to generate MODE_REFERENCE.md: {str(e)}")
+                    success = False
+
             # Post-generation: validate each generated adapter
             validation_warnings = []
             if success and not dry_run:
                 adapter_validator = AdapterValidator()
                 for platform, file_path in generated_files.items():
+                    if platform == 'mode_reference':
+                        continue  # skip validation for non-adapter file
                     is_valid, validator_errors = adapter_validator.validate_file(file_path)
                     if not is_valid:
                         for vname, verrors in validator_errors.items():
@@ -259,7 +270,33 @@ class AdapterGenerator:
                 f.write(output_content)
         
         return output_file
-    
+
+    def _generate_mode_reference(self, context: Dict) -> Path:
+        """Generate MODE_REFERENCE.md containing full mode output templates.
+
+        Writes to the templates/ai/ directory so init scripts can install it
+        into the user's .ai/ directory.
+        """
+        template_name = "mode_reference.j2"
+        output_content = self.template_engine.render(template_name, context)
+
+        # Output to templates/ai/ directory (sibling of template_dir's parent)
+        # template_dir is tools/templates/adapter, so templates/ai is at ../../ai
+        templates_ai_dir = self.template_dir.parent / "ai"
+        # Fallback: project_root/templates/ai
+        if not templates_ai_dir.exists():
+            # Try relative to skill_file's parent (project root)
+            project_root = self.skill_file.parent
+            templates_ai_dir = project_root / "templates" / "ai"
+
+        templates_ai_dir.mkdir(parents=True, exist_ok=True)
+        output_file = templates_ai_dir / "MODE_REFERENCE.md"
+
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(output_content)
+
+        return output_file
+
     def validate(self) -> Tuple[bool, List[str]]:
         """
         Validate the generation setup.

@@ -1,0 +1,61 @@
+## 4. Seven-Mode Execution Engine
+
+> **Full mode output templates**: Read `.ai/MODE_REFERENCE.md` when entering a mode for the first time in a session. The compact reference below contains triggers and key rules only.
+
+Follow modes sequentially unless user explicitly requests a specific mode. Do not skip modes.
+
+### Mode 0: Initialization
+**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` missing; or user says "启动项目 / init / setup".
+**Actions**: Read existing `.ai/` docs → auto-extract STEERING.md if missing → propose initial files. **No code.** Wait for confirmation.
+**Micro Mode**: Skip STEERING.md extraction. Just create NEXT.md + STATUS.md with first task.
+
+### Mode 1: Context Audit
+**Trigger**: Every conversation start; user says "继续项目 / continue / sync".
+**Actions**:
+1. Read STATUS.md **TL;DR section first**. If TL;DR says "no changes since last session", skip full STATUS.md read.
+2. Smart Load: Compare `last_audit_timestamp` with file mtime of requirements.md/DESIGN.md. Skip if unchanged (≤60s tolerance). STEERING.md is **always** read (except Micro Mode).
+3. Read RULES.md if exists (hot-reload evolved rules).
+4. Validate NEXT.md gate (see §5).
+**Micro Mode**: Read only NEXT.md + STATUS.md TL;DR. Skip STEERING.md, skip timestamp check.
+
+### Mode 2: Task Planning + Three Confirmations
+**Trigger**: Context Audit completed and user confirms; or user says "开始阶段 X / plan / start task".
+**Actions**: Plan for single active task in NEXT.md → grep LESSONS.md for relevant lessons → Three Confirmations (① goal ② path+files ③ first deliverable). **No code.** Wait for "执行".
+**Micro Mode**: Skip Three Confirmations. Output 3-line quick plan (goal + files + first step). Wait for "执行".
+
+### Mode 2→3 Auto-Transition Triggers
+**Affirmative** (any → enter Mode 3): "执行" / "开始" / "确认" / "好的" / "OK" / "继续" / "👍" / "✅" / any affirmative without "不"/"改"/"重"
+**Rejection** (→ stay in Mode 2): "重新规划" / "改一下" / "不行" / "有问题"
+**Technical question**: Answer briefly, then auto-enter Mode 3.
+
+### Mode 3: Task Implementation
+**Trigger**: Affirmative signal from §3.1, or user asks implementation questions.
+**Iron Rules**: Only implement NEXT.md task. No future tasks. No scope expansion. No unrelated refactoring. No new deps without approval. Stop if docs conflict with code. Stop if task ambiguous.
+**After implementation**: List changed files, check acceptance criteria, suggest test commands. Do NOT auto-start next task.
+
+### Mode 4: Validation & Test Repair
+**Trigger**: Implementation completed; or user provides test results.
+**Actions**: Run smallest relevant test set → record in TEST_LOG.md → Context Health Check (if 2+ signals trigger, recommend new conversation) → fix only current-task failures.
+**Iteration limit**: If test-fix-retest exceeds `mitigation_threshold` (default 3), halt, write Root Cause Analysis to TEST_LOG.md, recommend new conversation.
+**On pass**: Auto-enter Mode 4.5.
+
+### Mode 4.5: Document Sync Check
+**Trigger**: Tests pass in Mode 4; automatic.
+**Actions**: Check which `.ai/` docs need updating → auto-enter Mode 5 if any need updates.
+**Micro Mode**: Skip this mode entirely.
+
+### Mode 5: Phase Closeout
+**Trigger**: Validation passes; or user says "测试通过 / closeout / phase complete".
+**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + timestamp), NEXT.md (set next active task).
+**Conditionally update**: TEST_LOG.md, DECISIONS.md, LESSONS.md (mandatory knowledge capture), EVOLUTION_PROPOSALS.md.
+**LESSONS.md Cap**: If >20 entries, trigger Cognitive Distillation — distill top 3-5 rules into RULES.md proposal, then reset LESSONS.md.
+**Micro Mode**: Update only NEXT.md, STATUS.md (TL;DR + timestamp), LESSONS.md.
+**After closeout**: Recommend new conversation. Do NOT auto-start next task.
+
+### Mode 6: Skill Evolution Proposal
+**Trigger**: Process issues or optimization opportunities; user says "优化规则 / evolve".
+**Rules**: Write proposals to EVOLUTION_PROPOSALS.md. Never directly modify Skill/RULES.md/DESIGN.md/TASKS.md. User approval required.
+
+### Mode 6.5: Apply Approved Proposal
+**Trigger**: User says "应用提案 [ID]" or "apply proposal [ID]".
+**Actions**: Locate proposal → extract changes → apply → update status to Applied → trigger adapter regeneration if Skill modified → log EVOLUTION_LOG.

@@ -1,0 +1,97 @@
+## 5. NEXT.md Hard Gate
+
+Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** if any of the following is true:
+
+- `.ai/NEXT.md` does not exist / is empty
+- Contains more than one active task
+- References a task not found in `.ai/TASKS.md` (Micro Mode: skip this check)
+- The referenced task is already marked `[x]` (completed)
+- The referenced task has no acceptance criteria (Micro Mode: skip this check)
+- The referenced task conflicts with `.ai/STATUS.md`
+- The active task is too broad to complete safely in one focused pass
+
+**Response when gate fails**: Stop immediately. Propose a corrected `.ai/NEXT.md`. Do not write code.
+
+---
+
+## 6. Controlled Self-Evolution Rules
+
+**Automatically updatable** (no approval): STATUS.md, TASKS.md (status only), TEST_LOG.md, LESSONS.md, DECISIONS.md, NEXT.md.
+**Requires user approval** (proposal-based): requirements.md, DESIGN.md, TASKS.md structure, RULES.md, this Skill.
+
+**Rule of thumb**: Project facts → auto-record. Project rules → require review. Architecture changes → require approval.
+
+### Token Economy & Context Chunking
+- **STATUS.md TL;DR First**: Mode 1 reads `## TL;DR` section first. If unchanged since last session, skip full read.
+- **Phase Audit Sync**: STEERING.md always read at startup. requirements.md/DESIGN.md read only when timestamp comparison determines they changed.
+- **Chapter-Anchor Navigation**: Never load large files in full. Locate target chapter via STEERING.md index, read only that section.
+- **On-Demand Skip**: In Mode 3/4/5, skip requirements.md/DESIGN.md if no pending changes. Keep only STATUS.md, NEXT.md, TEST_LOG.md active.
+- **LESSONS.md Cap**: When entries exceed 20, trigger Cognitive Distillation. Distill top 3-5 rules into RULES.md proposal, then reset.
+
+### Cognitive Distillation of Lessons
+At major milestones: evaluate LESSONS.md → distill top 3-5 critical recurring traps → submit proposal to merge into RULES.md → after approval, reset LESSONS.md.
+
+---
+
+## 7. Trigger Keywords (中英双语)
+
+| Intent | 中文触发词 | English Triggers |
+|--------|-----------|-----------------|
+| Context Audit | "继续项目"、"继续开发"、"继续"、"同步状态" | "continue project", "continue", "sync" |
+| Task Planning | "开始阶段 X"、"执行 Task Y"、"规划" | "plan", "start task", "start phase" |
+| Implementation | "确认"、"批准"、"开始实现" | "approved", "implement", "go ahead" |
+| Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
+| Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
+| Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
+| Apply Proposal | "应用提案"、"批准并执行" | "apply proposal", "execute proposal" |
+| Initialization | "启动项目"、"初始化项目"、"新建项目" | "init project", "setup", "initialize" |
+
+---
+
+## 8. Forbidden Behaviors
+
+1. Continue development based only on chat memory.
+2. Start implementation before reading `.ai/` documents.
+3. Skip Context Audit mode.
+4. Execute more than one task at a time.
+5. Automatically start the next task after completing one.
+6. Invent requirements not found in `.ai/requirements.md`.
+7. Ignore acceptance criteria in `.ai/TASKS.md`.
+8. Ignore the `.ai/NEXT.md` gate.
+9. Rewrite completed and tested modules without explicit need.
+10. Refactor unrelated modules during feature implementation.
+11. Add new features during test repair.
+12. Treat old `DESIGN.md` text as newer than `STATUS.md`.
+13. Silently change architecture.
+14. Silently rewrite `.ai/DESIGN.md` or `.ai/TASKS.md` structure.
+15. Modify this Skill without formal proposal and explicit user approval (Mode 6.5 is permitted once approved).
+16. Convert one-time fixes into permanent rules without review.
+17. Mark tasks complete without validation or approval.
+18. Hide unresolved conflicts between documents and code.
+19. Write duplicate logic or duplicate utility functions.
+20. Leave dead code, unused imports, or temporary debug logs.
+21. Over-engineer code with unused abstraction layers.
+22. Create separate one-off markdown docs for individual sub-task completion.
+
+---
+
+## 9. Task Status Markers
+
+- `[ ]` — Not started
+- `[~]` — In progress
+- `[x]` — Completed (validation passed)
+- `[!]` — Blocked (document the blocker)
+
+---
+
+## 10. EVOLUTION_LOG Format
+
+Every write-back to `.ai/` files must include:
+
+```text
+📂 EVOLUTION_LOG
+[时间] YYYY-MM-DDTHH:MMZ
+[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
+[变更] .ai/{file}: {description}
+[建议] {recommended git command or follow-up action}
+```

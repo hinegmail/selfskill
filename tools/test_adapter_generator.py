@@ -94,6 +94,7 @@ You must not:
             (template_dir / "modes.j2").write_text("Modes content")
             (template_dir / "rules.j2").write_text("Rules content")
             (template_dir / "footer.j2").write_text("Footer: {{ version }}")
+            (template_dir / "mode_reference.j2").write_text("Mode Reference: {{ version }}")
             
             # Create platforms directory
             platforms_dir = template_dir / "platforms"
@@ -177,7 +178,7 @@ You must not:
         result = generator.generate(platforms=['kiro', 'claude'])
         
         assert result.success is True
-        assert len(result.generated_files) == 2
+        assert len(result.generated_files) == 3  # kiro, claude, mode_reference
         assert 'kiro' in result.generated_files
         assert 'claude' in result.generated_files
     

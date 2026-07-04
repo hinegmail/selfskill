@@ -19,7 +19,7 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 | 🧬**Proposal-Based Evolution** | AI automatically accumulates lessons, and rule/convention changes require explicit user approval (applied via Mode 6.5). |
 | 📂**`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat.                              |
 | 🔌**Multi-IDE Adapter Suite**  | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows.                               |
-| ⚖️**Flexible Layering**      | Choose between a 5-file Lite Mode (solo/small projects) and a 10-file Full Mode (large/team projects).                                    |
+| ⚖️**Flexible Layering**      | Three-tier project modes: **Micro** (3 files, quick scripts), **Lite** (6 files, small projects), **Full** (11 files, team projects).                                    |
 
 ---
 
@@ -36,6 +36,9 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 # Initialize with Lite Mode and only Cursor adapter
 .\init.ps1 -Path "D:\Projects\YourProject" -IDE "cursor" -Lite
 
+# Initialize with Micro Mode (3 files only, for quick scripts)
+.\init.ps1 -Path "." -Micro
+
 # Initialize in the current directory
 .\init.ps1
 ```
@@ -49,9 +52,14 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 # Initialize with Lite Mode and only Cline adapter
 ./init.sh -p ~/Projects/YourProject -i cline --lite
 
+# Initialize with Micro Mode (3 files only, for quick scripts)
+./init.sh --micro
+
 # Initialize in the current directory
 ./init.sh
 ```
+
+---
 
 ### 2. Configure the `.ai/` Brain Files
 

@@ -137,12 +137,13 @@ tail -20
 - [ ] **DECISIONS.md** 存在且非空
 - [ ] **LESSONS.md** 存在且非空
 - [ ] **EVOLUTION_PROPOSALS.md** 存在且非空
+- [ ] **MODE_REFERENCE.md** 存在且非空（compact 适配器依赖此文件）
 - [ ] **STEERING.md** 存在且非空
 
 **快速检查命令**：
 ```bash
 echo "=== templates/ai/ 检查 ===" && \
-for file in requirements.md DESIGN.md TASKS.md STATUS.md NEXT.md RULES.md TEST_LOG.md DECISIONS.md LESSONS.md EVOLUTION_PROPOSALS.md STEERING.md; do \
+for file in requirements.md DESIGN.md TASKS.md STATUS.md NEXT.md RULES.md TEST_LOG.md DECISIONS.md LESSONS.md EVOLUTION_PROPOSALS.md STEERING.md MODE_REFERENCE.md; do \
   if [ -f "templates/ai/$file" ]; then \
     size=$(wc -c < "templates/ai/$file"); \
     echo "✓ $file ($size bytes)"; \
@@ -232,6 +233,21 @@ git log --oneline | head -3  # 应显示最近的提交
 ---
 
 ## 发布历史
+
+### v1.0 — Compact Adapter + Micro Mode + Token Economy (2026-07-04)
+**标签**：`v1.0`  
+**主要改进**：
+- **P1 适配器瘦身**：适配器从 885 行缩减至 ~203 行（↓77%），完整模式输出模板移至 `.ai/MODE_REFERENCE.md` 按需加载
+- **P0 Micro Mode**：新增微型项目模式（3 文件：NEXT.md + STATUS.md + LESSONS.md），跳过三项确认和文档同步检查
+- **P2 Token 经济策略**：STATUS.md 新增 TL;DR 头部、LESSONS.md 20 条封顶+认知蒸馏、MODE_REFERENCE.md 按需加载
+- init 脚本新增 `-Micro` / `--micro` 参数
+- 生成器自动输出 MODE_REFERENCE.md 到 templates/ai/
+
+**发布检查清单**：✅ 全部通过（36 项测试）  
+**贡献者**：ProjectOrchestrator 团队  
+**依赖项**：Python 3.8+, Jinja2 3.0+
+
+---
 
 ### v1.0.2 (2024-06-09)
 **标签**：`v1.0.2`  

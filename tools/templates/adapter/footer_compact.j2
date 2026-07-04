@@ -1,0 +1,25 @@
+## 11. New Conversation Strategy
+
+After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly recommend starting a new conversation** to cut off context pollution. New conversation startup: say **"继续项目"** (existing) or **"启动项目"** (new).
+
+---
+
+## 12. Security & Audit
+
+- Only modify repository files after user authorization. Prefer PR-based or user-approved commits.
+- All automated write-backs must include author/reason/timestamp metadata.
+- After phase closeout, recommend Git commit with tag (e.g., `v0.2-phase2`).
+- Never execute destructive operations without explicit user instruction.
+- **Git Hook**: Recommend creating `.git/hooks/pre-commit` to validate NEXT.md/TASKS.md consistency and STATUS.md timestamp. Full hook script in `.ai/MODE_REFERENCE.md §12`.
+
+---
+
+## Document Information
+
+**Version**: {{ version }}
+
+**Generated**: {{ generation_timestamp }}
+
+**Status**: Active
+
+**Note**: This is a **compact adapter** — core rules only. Full mode output templates, transition trigger algorithms, and git hook scripts are in `.ai/MODE_REFERENCE.md`. This document is auto-generated from `skill.md` via the ProjectOrchestrator Adapter Generator. Manual edits will be overwritten.
