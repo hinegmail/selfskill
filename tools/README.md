@@ -35,7 +35,7 @@ python tools/adapter_generator.py --help
 ### 基本用法
 
 ```bash
-# 生成所有9个适配器
+# 生成所有8个自动适配器（cursorrules 遗留格式为手动维护，不参与自动生成）
 python tools/adapter_generator.py --version 1.0.2 --validate
 
 # 生成特定平台的适配器
@@ -97,7 +97,7 @@ from tools.template_engine import TemplateEngine
 engine = TemplateEngine("tools/templates/adapter/")
 
 # 加载模板
-template = engine.load("platforms/kiro.md.j2")
+template = engine.load("platforms/kiro.j2")
 
 # 准备上下文数据
 context = {
@@ -193,16 +193,16 @@ content = utils.read_file("skill.md")
 utils.write_file("output.md", content)
 
 # 读取YAML配置
-config = utils.read_yaml("generator.yml")
+config = utils.load_yaml_file("generator.yml")
 
 # 写入YAML
-utils.write_yaml("config.yml", {"version": "1.0.2"})
+utils.save_yaml_file("config.yml", {"version": "1.0.2"})
 
 # 目录操作
-utils.ensure_dir("output_dir/")
+utils.ensure_directory("output_dir/")
 
 # 递归搜索文件
-md_files = utils.find_files("adapters/", "*.md")
+md_files = utils.list_files("adapters/", extension=".md")
 ```
 
 ## CLI 命令参考
@@ -400,7 +400,7 @@ A：使用 `--dry-run` 模式预览输出，检查上下文数据
 ## 性能指标
 
 - **解析时间**：< 1秒 (skill.md)
-- **渲染时间**：< 5秒 (所有9个适配器)
+- **渲染时间**：< 5秒 (所有8个自动适配器)
 - **验证时间**：< 3秒 (所有验证器)
 - **总耗时**：< 10秒 (端到端)
 

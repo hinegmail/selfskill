@@ -22,6 +22,7 @@ class SkillParser:
         self.file_path = file_path
         self.content = None
         self.metadata = {}
+        self._lines: List[str] = []
         self._load_content()
     
     def _load_content(self) -> None:
@@ -29,6 +30,7 @@ class SkillParser:
         try:
             with open(self.file_path, 'r', encoding='utf-8') as f:
                 self.content = f.read()
+            self._lines = self.content.split('\n')
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Skill file not found: {self.file_path}") from e
     
@@ -60,7 +62,7 @@ class SkillParser:
         """
         # Find section header - match both "## N. Name" and "## Name" patterns
         pattern = rf'^##\s+(?:\d+\.\s+)?{re.escape(section_name)}\s*$'
-        lines = self.content.split('\n')
+        lines = self._lines
         
         section_start = None
         for i, line in enumerate(lines):
@@ -91,7 +93,7 @@ class SkillParser:
         
         for mode_num in range(7):
             pattern = rf'^###\s+Mode\s+{mode_num}:'
-            lines = self.content.split('\n')
+            lines = self._lines
             
             mode_start = None
             for i, line in enumerate(lines):
@@ -129,7 +131,7 @@ class SkillParser:
         
         # Find the trigger keywords section
         pattern = r'##\s+7\.\s+Trigger\s+Keywords'
-        lines = self.content.split('\n')
+        lines = self._lines
         
         table_start = None
         for i, line in enumerate(lines):
@@ -190,7 +192,7 @@ class SkillParser:
         
         # Find the forbidden behaviors section
         pattern = r'##\s+8\.\s+Forbidden\s+Behaviors'
-        lines = self.content.split('\n')
+        lines = self._lines
         
         section_start = None
         for i, line in enumerate(lines):
@@ -255,7 +257,7 @@ class SkillParser:
             Dict[str, str]: Ordered dict mapping heading text (without '## ')
                             to the full section content including the heading.
         """
-        lines = self.content.split('\n')
+        lines = self._lines
         sections: Dict[str, str] = {}
         boundaries: List[tuple] = []  # (start_line, heading_text)
 

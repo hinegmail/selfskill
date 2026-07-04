@@ -5,16 +5,21 @@ Main orchestration tool for generating adapters from skill definitions.
 import json
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 import yaml
 import click
 
-from skill_parser import SkillParser
-from template_engine import TemplateEngine
-from validators import AdapterValidator
+try:
+    from .skill_parser import SkillParser
+    from .template_engine import TemplateEngine
+    from .validators import AdapterValidator
+except ImportError:
+    from skill_parser import SkillParser
+    from template_engine import TemplateEngine
+    from validators import AdapterValidator
 
 
 @dataclass
@@ -95,6 +100,7 @@ class AdapterGenerator:
         platforms: Optional[List[str]] = None,
         dry_run: bool = False,
         validate: bool = True,
+        force_version: Optional[str] = None,
     ) -> GenerationResult:
         """
         Generate adapters for specified platforms.
@@ -104,7 +110,8 @@ class AdapterGenerator:
                 If None, generates all platforms.
             dry_run (bool): If True, don't write files.
             validate (bool): If True, validate input before generation.
-            
+            force_version (str, optional): Override the version parsed from skill.md.
+                
         Returns:
             GenerationResult: Result of generation.
         """
@@ -116,7 +123,7 @@ class AdapterGenerator:
             # Parse skill file
             try:
                 skill_data = self.skill_parser.parse()
-                version = skill_data['version']
+                version = force_version if force_version else skill_data['version']
             except Exception as e:
                 return GenerationResult(
                     version="unknown",
@@ -154,6 +161,7 @@ class AdapterGenerator:
                     duration_seconds=time.time() - start_time,
                     success=False,
                     errors=errors,
+                    validation_warnings=[],
                 )
             
             # Generate each adapter
@@ -161,6 +169,7 @@ class AdapterGenerator:
                 'version': version,
                 'skill_data': skill_data,
                 'config': self.config,
+                'generation_timestamp': self._get_timestamp(),
             }
             
             for platform in target_platforms:
@@ -291,7 +300,7 @@ class AdapterGenerator:
         if not version_file.exists():
             return
 
-        today = datetime.utcnow().strftime('%Y-%m-%d')
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
         content = version_file.read_text(encoding='utf-8')
 
         # Update version table rows: replace any v\d+\.\d+[\.\d]* cell values
@@ -331,8 +340,7 @@ class AdapterGenerator:
     @staticmethod
     def _get_timestamp() -> str:
         """Get current timestamp in ISO format."""
-        from datetime import datetime
-        return datetime.utcnow().isoformat() + 'Z'
+        return datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
 
 @click.command()
@@ -403,6 +411,7 @@ def main(input, templates, output, platforms, config, version, dry_run, validate
             platforms=target_platforms,
             dry_run=dry_run,
             validate=validate,
+            force_version=version,
         )
         
         # Output results

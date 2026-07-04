@@ -146,7 +146,7 @@ echo ""
 echo "🔌 安装 IDE 适配器"
 
 if [[ "$IDE_LIST" = "all" ]]; then
-    IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity")
+    IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
 else
     IFS=',' read -ra IDES <<< "$IDE_LIST"
 fi

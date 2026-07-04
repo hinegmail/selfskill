@@ -131,7 +131,7 @@ Write-Host ""
 Write-Host "[AI] Installing IDE adapters" -ForegroundColor Cyan
 
 if ($IDE -eq "all") {
-    $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity")
+    $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
 }
 else {
     $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }

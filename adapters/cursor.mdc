@@ -916,8 +916,8 @@ You must not:
 18. Hide unresolved conflicts between documents and code.
 19. Write duplicate logic or duplicate utility functions. (Always search the codebase for existing helper functions/classes before writing new ones).
 20. Leave dead code, unused imports, or temporary debug logs (like console.log, print) in the final implementation.
-22. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
-23. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
+21. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
+22. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
 
 ---
 
@@ -1103,8 +1103,8 @@ You must not:
 18. Hide unresolved conflicts between documents and code.
 19. Write duplicate logic or duplicate utility functions. (Always search the codebase for existing helper functions/classes before writing new ones).
 20. Leave dead code, unused imports, or temporary debug logs (like console.log, print) in the final implementation.
-22. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
-23. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
+21. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
+22. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
 
 ---
 
@@ -1198,7 +1198,7 @@ By combining "local file persistence for cognition" with "new conversation for c
 
 **Version**: 1.0
 
-**Generated**: 
+**Generated**: 2026-07-04T08:30:03.292154Z
 
 **Status**: Active
 

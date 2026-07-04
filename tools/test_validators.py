@@ -71,8 +71,9 @@ class TestVersionValidator:
         validator = VersionValidator()
         content = "# ProjectOrchestrator Skill v1.0"
         is_valid, errors = validator.validate(content, "test.md")
-        # Should still find v1.0 pattern, but it's not standard semver
-        # This test depends on implementation
+        # v1.0 has 2 parts which is accepted (2 or 3 parts are valid)
+        assert is_valid is True
+        assert len(errors) == 0
 
 
 class TestFileReferenceValidator:
@@ -208,34 +209,24 @@ See requirements.md for details.
     
     def test_validate_directory(self):
         """Test directory validation."""
-        tmpdir = tempfile.mkdtemp()
-        
-        # Create some adapter files
-        for name in ['KIRO_AGENT.md', 'CLAUDE.md']:
-            file_path = Path(tmpdir) / name
-            file_path.write_text(f"# {name} v1.0.2\n\nSee requirements.md.")
-        
-        validator = AdapterValidator()
-        results = validator.validate_directory(tmpdir)
-        
-        assert len(results) == 2
-        
-        # Cleanup
-        import shutil
-        shutil.rmtree(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create some adapter files
+            for name in ['KIRO_AGENT.md', 'CLAUDE.md']:
+                file_path = Path(tmpdir) / name
+                file_path.write_text(f"# {name} v1.0.2\n\nSee requirements.md.")
+            
+            validator = AdapterValidator()
+            results = validator.validate_directory(tmpdir)
+            
+            assert len(results) == 2
     
     def test_validate_empty_directory(self):
         """Test validation of empty directory."""
-        tmpdir = tempfile.mkdtemp()
-        
-        validator = AdapterValidator()
-        results = validator.validate_directory(tmpdir)
-        
-        assert len(results) == 0
-        
-        # Cleanup
-        import shutil
-        shutil.rmtree(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            validator = AdapterValidator()
+            results = validator.validate_directory(tmpdir)
+            
+            assert len(results) == 0
 
 
 if __name__ == '__main__':

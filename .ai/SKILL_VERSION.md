@@ -4,13 +4,13 @@
 
 | 组件 | 版本 | 状态 | 最后更新 |
 |------|------|------|---------|
-| **skill.md** | v1.0 | ✅ 稳定 | 2026-07-02 |
-| **适配器** | v1.0 | ✅ 同步 | 2026-07-02 |
-| **模板** | v1.0 | ✅ 同步 | 2026-07-02 |
+| **skill.md** | v1.0 | ✅ 稳定 | 2026-07-04 |
+| **适配器** | v1.0 | ✅ 同步 | 2026-07-04 |
+| **模板** | v1.0 | ✅ 同步 | 2026-07-04 |
 
 ---
 
-## 发布说明 (v1.0.2)
+## 发布说明 (v1.0)
 
 ### 新增功能
 - **STEERING.md 优化**：新增工作空间规则文件，支持针对不同项目的个性化 AI 行为配置
@@ -37,22 +37,22 @@
 在发布新版本前，请逐一完成以下检查项。每一项都是**可执行且清晰明确**的。
 
 ### 1. 版本号一致性检查
-- [ ] **skill.md** 的第一行包含版本 `v1.0.2`（查看：`grep -n "v1.0.2" skill.md | head -1`）
-- [ ] **KIRO_AGENT.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/KIRO_AGENT.md | wc -l`，应 ≥ 1）
-- [ ] **ANTIGRAVITY.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/ANTIGRAVITY.md | wc -l`，应 ≥ 1）
-- [ ] **cursor.mdc** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/cursor.mdc | wc -l`，应 ≥ 1）
-- [ ] **clinerules.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/clinerules.md | wc -l`，应 ≥ 1）
-- [ ] **CLAUDE.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/CLAUDE.md | wc -l`，应 ≥ 1）
-- [ ] **windsurfrules.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/windsurfrules.md | wc -l`，应 ≥ 1）
-- [ ] **gemini_styleguide.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/gemini_styleguide.md | wc -l`，应 ≥ 1）
-- [ ] **AGENTS.md** 包含 `v1.0.2`（查看：`grep "v1.0.2" adapters/AGENTS.md | wc -l`，应 ≥ 1）
+- [ ] **skill.md** 的第一行包含版本 `v1.0`（查看：`grep -n "v1.0" skill.md | head -1`）
+- [ ] **KIRO_AGENT.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/KIRO_AGENT.md | wc -l`，应 ≥ 1）
+- [ ] **ANTIGRAVITY.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/ANTIGRAVITY.md | wc -l`，应 ≥ 1）
+- [ ] **cursor.mdc** 包含 `v1.0`（查看：`grep "v1.0" adapters/cursor.mdc | wc -l`，应 ≥ 1）
+- [ ] **clinerules.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/clinerules.md | wc -l`，应 ≥ 1）
+- [ ] **CLAUDE.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/CLAUDE.md | wc -l`，应 ≥ 1）
+- [ ] **windsurfrules.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/windsurfrules.md | wc -l`，应 ≥ 1）
+- [ ] **gemini_styleguide.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/gemini_styleguide.md | wc -l`，应 ≥ 1）
+- [ ] **AGENTS.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/AGENTS.md | wc -l`，应 ≥ 1）
 
 **快速检查命令**：
 ```bash
 echo "=== 版本号检查 ===" && \
 for file in skill.md adapters/*.md adapters/*.mdc adapters/cursorrules; do \
   if [ -f "$file" ]; then \
-    count=$(grep -c "v1.0.2" "$file" 2>/dev/null || echo 0); \
+    count=$(grep -c "v1.0" "$file" 2>/dev/null || echo 0); \
     echo "$file: $count 次"; \
   fi; \
 done
@@ -153,7 +153,7 @@ done
 ```
 
 ### 7. GitHub Actions 工作流验证
-- [ ] `.github/workflows/adapter-sync.yml` 存在（如有 CI/CD）
+- [ ] `.github/workflows/validate-adapter-versions.yml` 存在（如有 CI/CD）
 - [ ] 工作流中的版本号检查规则已配置
 - [ ] 工作流中的文件名引用检查已配置
 - [ ] PR 上的所有检查已通过 ✅
@@ -215,7 +215,7 @@ git log --oneline | head -3  # 应显示最近的提交
 ### 12. 最终完整性检查
 - [ ] 运行完整的冒烟测试（如已配置）：
   ```bash
-  python tools/adapter-generator.py --validate
+  python tools/adapter_generator.py --validate
   ```
   应返回：`✅ 所有检查通过`
 - [ ] 本地项目构建/测试无错误（如适用）
@@ -275,16 +275,16 @@ git log --oneline | head -3  # 应显示最近的提交
 
 ## 版本升级指南
 
-### 从 v1.0.1 升级到 v1.0.2
+### 从 v1.0.1 升级到 v1.0
 
 **自动升级**（推荐）：
 ```bash
-python tools/adapter-generator.py --version 1.0.2 --apply
+python tools/adapter_generator.py --version 1.0 --apply
 ```
 
 **手动升级**：
-1. 更新 `skill.md` 中的版本号为 `v1.0.2`
-2. 运行 `python tools/adapter-generator.py --version 1.0.2`
+1. 更新 `skill.md` 中的版本号为 `v1.0`
+2. 运行 `python tools/adapter_generator.py --version 1.0`
 3. 验证所有 9 个适配器文件已更新
 4. 提交更改并创建标签
 
@@ -302,5 +302,5 @@ python tools/adapter-generator.py --version 1.0.2 --apply
 ---
 
 **文件维护**：自动生成版本 + 手动审查  
-**最后更新**：2026-07-02  
+**最后更新**：2026-07-04  
 **下一次计划更新**：v1.0.3（待定）

@@ -44,9 +44,17 @@ class MarkdownValidator(BaseValidator):
         if not header_lines:
             errors.append("No headers found in markdown file")
         
-        # Check for matching brackets
-        if content.count('[') != content.count(']'):
-            errors.append("Unmatched square brackets in markdown")
+        # Check for matching brackets outside code blocks only
+        in_code_block = False
+        bracket_depth = 0
+        for line in content.split('\n'):
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+                continue
+            if not in_code_block:
+                bracket_depth += line.count('[') - line.count(']')
+        if bracket_depth != 0:
+            errors.append("Unmatched square brackets in markdown (outside code blocks)")
         
         # Check for matching braces in code blocks
         code_block_count = content.count('```')
@@ -201,14 +209,17 @@ class LanguageValidator(BaseValidator):
                         check_comments = False
                 continue
             
-            # Skip markdown tables
-            if '|' in line:
-                in_table = True
-            elif in_table and not stripped:
+            # Skip markdown tables (only outside code blocks)
+            if not in_code_block:
+                if stripped.startswith('|'):
+                    in_table = True
+                elif in_table and not stripped:
+                    in_table = False
+                
+                if in_table:
+                    continue
+            else:
                 in_table = False
-            
-            if in_table:
-                continue
             
             # Skip markdown headers outside code blocks
             if not in_code_block and stripped.startswith('#'):
@@ -237,6 +248,7 @@ class AdapterValidator:
             FileReferenceValidator(),
             LanguageValidator(),
         ]
+        self.mdc_validator = MDCValidator()
     
     def validate_file(self, file_path: str) -> Tuple[bool, Dict[str, List[str]]]:
         """
@@ -267,6 +279,13 @@ class AdapterValidator:
             if not is_valid:
                 all_valid = False
                 all_errors[validator_name] = errors
+        
+        # Run MDC validator for .mdc files
+        if file_path.endswith('.mdc'):
+            is_valid, errors = self.mdc_validator.validate(content, file_path)
+            if not is_valid:
+                all_valid = False
+                all_errors['MDCValidator'] = errors
         
         return all_valid, all_errors
     
