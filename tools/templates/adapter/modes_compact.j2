@@ -52,10 +52,13 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 
 ### Mode 5: Phase Closeout
 **Trigger**: Validation passes; or user says "测试通过 / closeout / phase complete".
-**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + **milestone status update** + timestamp), NEXT.md (set next active task; if none, write **exactly** `no active task` — no other idle-state text allowed).
+**Must update (BLOCKING)**:
+- TASKS.md — mark completed task `[x]`
+- STATUS.md — update ALL sections: TL;DR + metadata fields (进度/阶段/任务/测试状态) + `## 📈 里程碑执行状态` (read TASKS.md, count `[x]` per milestone, update with actual name+count+status, remove placeholders) + 历史审计日志 + last_audit_timestamp
+- NEXT.md — set next active task; if none, write **exactly** `no active task` (no other idle-state text)
 **Post-Closeout Verification**: After updates, read back:
 1. NEXT.md — must contain valid uncompleted task ID from TASKS.md `[ ]`, OR exact text `no active task` (only if all tasks done). **REJECT** "就绪中"/"ready"/"idle"/"等待"/empty/placeholder — re-execute update if found.
-2. STATUS.md TL;DR — mentions completed task + milestone status updated.
+2. STATUS.md — TL;DR mentions completed task ✓ + `## 📈 里程碑执行状态` NOT template placeholder (no `{待提取}`/`Milestone 1`/`0 / 0`) ✓ + 项目整体进度 count correct ✓
 3. TASKS.md — completed task marked `[x]`.
 Re-execute any failed update before outputting EVOLUTION_LOG.
 **Conditionally update**: TEST_LOG.md, DECISIONS.md, LESSONS.md (mandatory knowledge capture), EVOLUTION_PROPOSALS.md.

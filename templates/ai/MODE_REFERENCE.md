@@ -511,7 +511,20 @@ Phase Closeout
 
 **Must update the following files (BLOCKING - required before next task)**:
 1. `.ai/TASKS.md` — mark completed task as `[x]`
-2. `.ai/STATUS.md` — **Update the `## TL;DR` section** with a one-sentence status summary. Append phase summary (reverse chronological): completed features, key files, technical decisions, known issues. **Update milestone/phase execution status** (e.g., "Milestone 9: 3/4 tasks completed" → "4/4 tasks completed"). Update `last_audit_timestamp`.
+2. `.ai/STATUS.md` — Update **all** of the following sections:
+   - **`## TL;DR`**: one-sentence status summary
+   - **Metadata fields**: `更新时间`, `项目整体进度` (count `[x]` tasks in TASKS.md / total), `当前开发阶段`, `当前活跃任务`, `当前测试状态`, `last_audit_timestamp`
+   - **`## 📈 里程碑执行状态`**: This section **must be updated** using the following procedure:
+     1. Read `.ai/TASKS.md` and identify all milestones/phases and their tasks
+     2. For each milestone, count tasks marked `[x]` (completed) vs total tasks
+     3. Update each milestone line with actual name, count, and status:
+        - `* **[Milestone X: 名称]** (未开始) — 0/N tasks` ← no tasks started
+        - `* **[Milestone X: 名称]** (进行中) — M/N tasks` ← some but not all done
+        - `* **[Milestone X: 名称]** (✅ 已完成) — N/N tasks` ← all done
+     4. **Remove all placeholder text** (e.g., `{待提取}`, `Milestone 1`, `(未开始)`) and replace with actual project data
+     5. If this is the first closeout and the section still has template placeholders, **populate it from scratch** using TASKS.md milestone/phase structure
+   - **`## 📂 历史审计日志`**: Append phase summary (reverse chronological): completed features, key files, technical decisions, known issues
+   - **`## 🛑 风险、阻塞`**: Update if any new blockers or design deviations occurred
 3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state **exactly** `no active task` (this is the **only** valid idle-state expression — do NOT use "就绪中", "ready", "idle", "等待" or any other free-form text)
 
 **Micro Mode shortcut**: In Micro Mode, update only `NEXT.md`, `STATUS.md` (TL;DR + timestamp), `LESSONS.md`. Skip all other document updates.
@@ -596,7 +609,12 @@ After writing all BLOCKING and conditional updates, the AI **must** perform a se
    - A **valid next task** (Task ID + name that exists in TASKS.md as `[ ]`), OR
    - The **exact text** `no active task` (only if ALL tasks in TASKS.md are `[x]`)
    - **REJECT** any other content: "就绪中", "ready", "idle", "等待", empty, placeholder, or any free-form text without a valid Task ID. If NEXT.md contains any such invalid content, **re-execute the NEXT.md update immediately** — either set the next uncompleted task from TASKS.md, or write exactly `no active task`.
-2. **Read back** `.ai/STATUS.md` TL;DR — verify it mentions the task just completed. **Also verify milestone/phase execution status is updated** (e.g., task count incremented).
+2. **Read back** `.ai/STATUS.md` — verify ALL of the following:
+   - TL;DR mentions the task just completed
+   - `## 📈 里程碑执行状态` section is **NOT** still template placeholder (must not contain `{待提取}`, `(未开始)` with `Milestone 1`, or `0 / 0`)
+   - Milestone section reflects updated task counts (the completed task's milestone shows incremented count)
+   - `项目整体进度` field shows correct completed/total count
+   - If any sub-check fails, re-execute the STATUS.md update
 3. **Read back** `.ai/TASKS.md` — verify the completed task is marked `[x]`.
 4. **If any verification fails**: Re-execute the failed update immediately. Do NOT output EVOLUTION_LOG until all three checks pass.
 5. **If all verifications pass**: Output the EVOLUTION_LOG block below.
@@ -605,7 +623,7 @@ After writing all BLOCKING and conditional updates, the AI **must** perform a se
 ```
 ### ✅ Post-Closeout Verification
 - NEXT.md: Active = Task {next_ID} ✓ (valid uncompleted task in TASKS.md) [或 "no active task" ✓ if all tasks done]
-- STATUS.md TL;DR: mentions Task {completed_ID} ✓ + milestone status updated ✓
+- STATUS.md: TL;DR ✓ + 📈 里程碑执行状态 populated (no template placeholders) ✓ + 项目整体进度 count ✓
 - TASKS.md: Task {completed_ID} marked [x] ✓
 All verifications passed. Closeout is complete.
 ```
