@@ -36,13 +36,13 @@ python tools/adapter_generator.py --help
 
 ```bash
 # 生成所有8个自动适配器（cursorrules 遗留格式为手动维护，不参与自动生成）
-python tools/adapter_generator.py --version 1.0.2 --validate
+python tools/adapter_generator.py --version 1.0 --validate
 
 # 生成特定平台的适配器
-python tools/adapter_generator.py --platforms kiro,cursor --version 1.0.2
+python tools/adapter_generator.py --platforms kiro,cursor --version 1.0
 
 # 干运行模式（预览不保存）
-python tools/adapter_generator.py --dry-run --version 1.0.2
+python tools/adapter_generator.py --dry-run --version 1.0
 ```
 
 ### 验证现有适配器
@@ -51,8 +51,8 @@ python tools/adapter_generator.py --dry-run --version 1.0.2
 # 验证所有适配器的质量
 python tools/adapter_generator.py --validate
 
-# 详细的验证输出
-python tools/adapter_generator.py --validate --verbose
+# 跳过验证快速生成
+python tools/adapter_generator.py --no-validate
 ```
 
 ## 模块详解
@@ -101,7 +101,7 @@ template = engine.load("platforms/kiro.j2")
 
 # 准备上下文数据
 context = {
-    "version": "1.0.2",
+    "version": "1.0",
     "principles": [...],
     "modes": [...],
     "keywords": [...]
@@ -123,9 +123,9 @@ from tools.adapter_generator import AdapterGenerator
 
 # 创建生成器实例
 generator = AdapterGenerator(
-    input_file="skill.md",
+    skill_file="skill.md",
+    template_dir="tools/templates/adapter",
     output_dir="adapters/",
-    version="1.0.2"
 )
 
 # 生成所有适配器
@@ -196,7 +196,7 @@ utils.write_file("output.md", content)
 config = utils.load_yaml_file("generator.yml")
 
 # 写入YAML
-utils.save_yaml_file("config.yml", {"version": "1.0.2"})
+utils.save_yaml_file({"version": "1.0"}, "config.yml")
 
 # 目录操作
 utils.ensure_directory("output_dir/")
@@ -217,36 +217,32 @@ python tools/adapter_generator.py [OPTIONS]
 
 | 选项             | 类型   | 默认值    | 说明                                    |
 | ---------------- | ------ | --------- | --------------------------------------- |
-| `--version`    | string | 1.0.2     | 目标版本号                              |
-| `--input-file` | path   | skill.md  | 输入的skill.md文件路径                  |
-| `--output-dir` | path   | adapters/ | 输出适配器文件的目录                    |
+| `--input`      | path   | skill.md  | 输入的skill.md文件路径                  |
+| `--templates`  | path   | tools/templates/adapter | 模板目录路径              |
+| `--output`     | path   | adapters/ | 输出适配器文件的目录                    |
 | `--platforms`  | string | all       | 生成的平台（逗号分隔，或"all"表示全部） |
 | `--config`     | path   | -         | 配置文件路径（YAML格式）                |
-| `--validate`   | flag   | false     | 仅验证，不生成                          |
+| `--version`    | string | -         | 覆盖版本号（默认从skill.md解析）        |
+| `--validate`   | flag   | true      | 生成前验证输入（用--no-validate关闭）   |
 | `--dry-run`    | flag   | false     | 干运行模式（预览但不保存）              |
-| `--verbose`    | flag   | false     | 详细输出                                |
-| `--stats`      | flag   | false     | 显示性能统计信息                        |
 
 ### 示例
 
 ```bash
-# 生成所有适配器到v1.0.3
-python tools/adapter_generator.py --version 1.0.3 --validate
+# 生成所有适配器到v1.0
+python tools/adapter_generator.py --version 1.0 --validate
 
 # 生成特定平台
-python tools/adapter_generator.py --platforms kiro,cursor,claude --version 1.0.3
+python tools/adapter_generator.py --platforms kiro,cursor,claude --version 1.0
 
 # 干运行模式（预览）
-python tools/adapter_generator.py --dry-run --version 1.0.3
+python tools/adapter_generator.py --dry-run --version 1.0
 
-# 仅验证
-python tools/adapter_generator.py --validate
+# 跳过验证快速生成
+python tools/adapter_generator.py --no-validate
 
 # 使用配置文件
 python tools/adapter_generator.py --config generator.yml
-
-# 详细输出和性能统计
-python tools/adapter_generator.py --verbose --stats --version 1.0.3
 ```
 
 ## 测试
@@ -289,7 +285,7 @@ tests/
 # 适配器生成器配置文件
 
 # 版本号
-version: "1.0.2"
+version: "1.0"
 
 # 输入文件
 input_file: "skill.md"

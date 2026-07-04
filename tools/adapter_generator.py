@@ -386,10 +386,9 @@ class AdapterGenerator:
     help='Preview generation without writing files'
 )
 @click.option(
-    '--validate',
-    is_flag=True,
+    '--validate/--no-validate',
     default=True,
-    help='Validate input before generation'
+    help='Validate input before generation (default: on)'
 )
 def main(input, templates, output, platforms, config, version, dry_run, validate):
     """Generate adapters from skill definition."""
@@ -425,6 +424,11 @@ def main(input, templates, output, platforms, config, version, dry_run, validate
                 click.echo(f"\n⚠ Adapter validation warnings ({len(result.validation_warnings)}):")
                 for w in result.validation_warnings:
                     click.echo(f"    {w}")
+            # Remind user about cursorrules (manual maintenance, not auto-generated)
+            cursorrules_file = Path(output) / "cursorrules"
+            if cursorrules_file.exists():
+                click.echo(f"\nℹ️ Note: 'cursorrules' (Cursor legacy format) is manually maintained and was NOT auto-generated.")
+                click.echo(f"   If skill.md changed, manually review and update: {cursorrules_file}")
         else:
             click.echo("✗ Generation failed")
             for error in result.errors:

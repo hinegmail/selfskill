@@ -36,6 +36,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 | `.ai/requirements.md` | Product requirements: user value, business rules, acceptance goals |
 | `.ai/DESIGN.md` | Technical design: architecture, modules, APIs, data models, constraints |
 | `.ai/TASKS.md` | Complete task list: phases, task IDs, dependencies, acceptance criteria, status |
+| `.ai/STEERING.md` | Project navigation hub: mission, architecture overview, milestones, document chapter index (auto-generated on init, mandatory read every session) |
 
 ### AI-maintained runtime files (updated during development)
 
@@ -51,7 +52,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 ### Lite Mode (small projects / solo developers)
 
-Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`
+Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`, `STEERING.md`
 
 Omit: `RULES.md`, `TEST_LOG.md`, `DECISIONS.md`, `LESSONS.md`, `EVOLUTION_PROPOSALS.md`
 
@@ -104,131 +105,6 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 **Output**:
 ```
-
-## 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
-
-**Purpose**: Define the complete set of user expressions and patterns that automatically trigger Mode 3 entry.
-
-**Key Principle**: User does NOT need to memorize special commands. Any natural affirmative response will work.
-
-### Affirmative Triggers (肯定信号 - 任何一个都自动进入Mode 3)
-
-**Direct Execution Commands**:
-- "执行" / "执行这个" / "执行任务" / "执行规划"
-- "开始" / "开始实现" / "开始编码" / "开始编写"
-- "确认" / "批准" / "同意" / "认可"
-- "可以" / "可以开始" / "没问题" / "没有问题"
-- "好的" / "好" / "嗯" / "明白了"
-- "OK" / "okay" / "好吧" / "走起"
-- "继续" / "继续开发" / "我们继续"
-
-**Affirmative Responses to "准备就绪" Prompt**:
-- "是的" / "对" / "对的" / "对的吗" (positive confirmation)
-- "很好" / "看起来不错" / "不错"
-- 任何不含"不"、"改"、"重"的简短回复都视为肯定
-
-**Emoji/Shorthand**:
-- "👍" / ":+1:" / "✓" / "✅"
-- "🚀" (rocket = let's go)
-
-### Technical Question → Auto-Transition Pattern
-
-**When user asks implementation-related questions**:
-- "这里是不是应该用X技术?" 
-- "需要考虑性能吗?"
-- "用什么库?"
-- "怎么处理Y场景?"
-- 任何以 "?" 结尾且与实现相关的问题
-
-**Behavior**: 
-AI answers the question, then **automatically enters Mode 3** to proceed with implementation.
-
-### Rejection/Modification Triggers (拒绝信号 - 回到Mode 2重新规划)
-
-**Explicit Rejection**:
-- "重新规划" / "改一下" / "改改" / "重来"
-- "我不同意" / "有问题" / "不对" / "不行"
-- "这样不行" / "不好" / "有问题"
-
-**Modification Requests**:
-- "改改XX部分"
-- "XX改成Y"
-- "不用这个库"
-
-**When rejection detected**: AI stays in Mode 2 and asks "哪里有问题？请告诉我。"
-
-### Auto-Detection Algorithm (自动检测算法)
-
-```
-if user_message in affirmative_triggers_list:
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, affirmative_patterns):
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, technical_question_patterns):
-    AI_answers_question()
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, rejection_triggers):
-    REMAIN_IN_MODE_2()
-    ASK_CLARIFICATION("哪里需要调整？")
-    
-else:
-    REQUEST_DIRECTION("您希望我: (1)执行规划, (2)调整规划, 还是(3)讨论细节?")
-```
-
----
-
-### Mode 3: Task Implementation（任务实现）
-
-**Trigger**: User provides affirmative signal matching Mode 2→3 Automatic Transition Triggers (see §3.1 above), OR user begins asking implementation-related technical questions.
-
-**Precondition**: Mode 2 output generated. NEXT.md gate valid.
-
-**Auto-Entry Logic**:
-- AI scans user's response for trigger words/patterns from the Transition Triggers list
-- If match found: **AUTOMATICALLY ENTER MODE 3** (no explicit permission needed)
-- If rejection words detected: remain in Mode 2, ask for clarification instead
-- If ambiguous: request explicit direction
-
-**Iron Rules**:
-1. Only implement the active task in `.ai/NEXT.md`.
-2. Do not execute future tasks.
-3. Do not expand requirements beyond `.ai/requirements.md`.
-4. Do not refactor unrelated modules.
-5. Do not rewrite tested modules unless the current task requires it.
-6. Do not change public interfaces unless the current task requires it or user approves.
-7. Do not introduce new dependencies unless the current task requires it or user approves.
-8. If documents and code conflict, **stop and report**.
-9. If the task description is ambiguous, **stop and ask for clarification**.
-
-**Output** (after implementation):
-```
-
-
-### Mode 0: Initialization
-
-**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "启动项目 / 初始化项目 / setup / initialize / init".
-
-**Actions**:
-1. Read `.ai/requirements.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
-2. If `.ai/STEERING.md` is missing but the above original documents exist:
-   - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
-   - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
-   - Propose the complete contents for `.ai/STEERING.md` to avoid developer manual labor.
-3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
-   - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
-   - Ask the user 3 key design questions in the chat:
-     - ① **项目名称**与核心商业价值定位是什么？
-     - ② 核心**技术栈**与工程框架是什么？
-     - ③ **核心功能职责与模块**如何规划？
-   - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
-4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
-5. **Do not implement any code.** Wait for user confirmation.
-
-**Output**:
-```
 ## 🚀 Initialization
 
 ### Existing Files
@@ -240,8 +116,6 @@ else:
 ### Recommended Next Step
 Confirm the proposed files (or answer the wizard questions), then enter Context Audit mode.
 ```
-
----
 
 ---
 
@@ -309,8 +183,6 @@ Task Planning
 ```
 
 **If `.ai/STATUS.md`, `.ai/NEXT.md`, or `.ai/STEERING.md` is missing, or contains default placeholder templates**: Enter Initialization mode instead.
-
----
 
 ---
 
@@ -388,7 +260,7 @@ Task Planning
 
 ---
 
-## 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
+### 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
 
 **Purpose**: Define the complete set of user expressions and patterns that automatically trigger Mode 3 entry.
 
@@ -463,8 +335,6 @@ else:
 
 ---
 
----
-
 ### Mode 3: Task Implementation（任务实现）
 
 **Trigger**: User provides affirmative signal matching Mode 2→3 Automatic Transition Triggers (see §3.1 above), OR user begins asking implementation-related technical questions.
@@ -536,8 +406,6 @@ Validation
 ```
 
 **Do not automatically start the next task.**
-
----
 
 ---
 
@@ -656,8 +524,6 @@ Phase Closeout
 
 ---
 
----
-
 ### Mode 5: Phase Closeout（阶段收口）
 
 **Trigger**: Validation passes; or user says "测试通过 / 阶段完成 / 收口 / closeout / tests passed / phase complete".
@@ -756,8 +622,6 @@ Phase Closeout
 
 ---
 
----
-
 ### Mode 6: Skill Evolution Proposal（技能进化提案）
 
 **Trigger**: Repeated process issues, rule defects, or optimization opportunities observed; or user says "优化规则 / 更新约定 / propose / 进化 / optimize rules / evolve".
@@ -815,188 +679,6 @@ Phase Closeout
 ```
 
 ---
-
-## 5. NEXT.md Hard Gate
-
-Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** if any of the following is true:
-
-- `.ai/NEXT.md` does not exist
-- `.ai/NEXT.md` is empty
-- `.ai/NEXT.md` contains more than one active task
-- `.ai/NEXT.md` references a task not found in `.ai/TASKS.md`
-- The referenced task is already marked `[x]` (completed)
-- The referenced task has no acceptance criteria
-- The referenced task conflicts with `.ai/STATUS.md`
-- The active task is too broad to complete safely in one focused pass
-
-**Response when gate fails**: Stop immediately. Propose a corrected `.ai/NEXT.md`. Do not write code.
-
----
-
-## 6. Controlled Self-Evolution Rules
-
-### Automatically updatable (no approval needed)
-
-| File | When |
-|------|------|
-| `.ai/STATUS.md` | After each task completion |
-| `.ai/TASKS.md` | Mark task status (`[x]`, `[~]`, `[!]`) after validation |
-| `.ai/TEST_LOG.md` | During validation and repair |
-| `.ai/LESSONS.md` | Actively capture during each task: technical findings, API behaviors, configuration quirks, implementation details, and any insights valuable for future reference |
-| `.ai/DECISIONS.md` | For factual decision records |
-| `.ai/NEXT.md` | During Phase Closeout |
-
-### Requires user approval (proposal-based)
-
-| File | Why |
-|------|-----|
-| `.ai/requirements.md` | Product intent must not drift |
-| `.ai/DESIGN.md` | Architecture changes need review |
-| `.ai/TASKS.md` structure | Task reorganization affects roadmap |
-| `.ai/RULES.md` | Permanent rules must be deliberate |
-| This Skill | Meta-rules must be stable |
-
-**Rule of thumb**: Project facts → auto-record. Project rules → require review. Architecture changes → require approval. Skill evolution → require approval.
-
-### 🧬 Token Economy & Context Chunking (按需读取优化)
-To save API costs and prevent compliance decay in long conversations:
-- **Phase Audit Sync**: AI **must** read `.ai/STEERING.md` at every conversation startup — this file is never skipped. Read `.ai/requirements.md` and `.ai/DESIGN.md` only when timestamp comparison (Mode 1, §4.1) determines they have been modified.
-- **Chapter-Anchor Navigation (锚点分块读取)**: When a large file (`.ai/requirements.md`, `.ai/DESIGN.md`) must be read, **never load it in full**. First locate the target chapter by searching for its heading anchor (from `STEERING.md §4 index`), then read only from that heading to the next same-level heading. This applies to any file requiring focused section retrieval.
-- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them**. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in the active context.
-
-### 🧠 Cognitive Distillation of Lessons (认知蒸馏规则)
-At the end of every major milestone or phase:
-- The AI **must** evaluate the accumulated lessons in `.ai/LESSONS.md`.
-- It must perform **Cognitive Distillation** to distill the top 3-5 most critical, recurring, project-specific traps or rules.
-- It must submit a proposal to `.ai/EVOLUTION_PROPOSALS.md` to merge these distilled rules directly into `.ai/RULES.md` (under "踩坑教训" or "开发规则"). Once approved by the user, these rules are consolidated and `.ai/LESSONS.md` is reset, keeping the context clean and preventing memory bloat.
-
----
-
-## 7. Trigger Keywords (中英双语)
-
-| Intent | 中文触发词 | English Triggers |
-|--------|-----------|-----------------|
-| Context Audit | "继续项目"、"继续开发"、"继续"、"同步状态" | "continue project", "continue", "sync" |
-| Task Planning | "开始阶段 X"、"执行 Task Y"、"规划" | "plan", "start task", "start phase" |
-| Implementation | "确认"、"批准"、"开始实现" | "approved", "implement", "go ahead" |
-| Validation | "运行测试"、"验证" | "test", "validate", "run tests" |
-| Phase Closeout | "测试通过"、"阶段完成"、"收口" | "tests passed", "phase complete", "closeout" |
-| Document Update | "更新文档"、"同步文档"、"文档收口" | "update docs", "sync docs", "document closeout" |
-| Evolution | "优化规则"、"更新约定"、"进化" | "optimize rules", "update conventions", "evolve" |
-| Apply Proposal | "应用提案"、"批准并执行" | "apply proposal", "execute proposal" |
-| Initialization | "启动项目"、"初始化项目"、"新建项目"、"创建项目" | "init project", "setup", "initialize" |
-
----
-
-## 8. Forbidden Behaviors
-
-You must not:
-
-1. Continue development based only on chat memory.
-2. Start implementation before reading `.ai/` documents.
-3. Skip Context Audit mode.
-4. Execute more than one task at a time.
-5. Automatically start the next task after completing one.
-6. Invent requirements not found in `.ai/requirements.md`.
-7. Ignore acceptance criteria in `.ai/TASKS.md`.
-8. Ignore the `.ai/NEXT.md` gate.
-9. Rewrite completed and tested modules without explicit need.
-10. Refactor unrelated modules during feature implementation.
-11. Add new features during test repair.
-12. Treat old `DESIGN.md` text as newer than `STATUS.md`.
-13. Silently change architecture.
-14. Silently rewrite `.ai/DESIGN.md` or `.ai/TASKS.md` structure.
-15. Modify this Skill without formal proposal submission and explicit user approval in the chat. (Modifications via Mode 6.5 Apply Proposal are fully permitted once approved).
-16. Convert one-time fixes into permanent rules without review.
-17. Mark tasks complete without validation or approval.
-18. Hide unresolved conflicts between documents and code.
-19. Write duplicate logic or duplicate utility functions. (Always search the codebase for existing helper functions/classes before writing new ones).
-20. Leave dead code, unused imports, or temporary debug logs (like console.log, print) in the final implementation.
-21. Over-engineer code by introducing unused abstraction layers or placeholders for hypothetical future requirements.
-22. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks. (All sub-task completions must be recorded strictly within existing files: checked off in `.ai/TASKS.md` and briefly appended to the chronological log in `.ai/STATUS.md`. Detailed summary documents or walkthroughs may only be proposed at the end of a major phase/milestone).
-
----
-
-## 9. Task Status Markers
-
-Use these markers in `.ai/TASKS.md`:
-
-- `[ ]` — Not started
-- `[~]` — In progress
-- `[x]` — Completed (validation passed)
-- `[!]` — Blocked (document the blocker)
-
----
-
-## 10. EVOLUTION_LOG Format
-
-Every write-back to `.ai/` files must include this log block at the end of the response:
-
-```text
-📂 EVOLUTION_LOG
-[时间] YYYY-MM-DDTHH:MMZ
-[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
-[变更] .ai/{file}: {description}
-[变更] .ai/{file}: {description}
-[建议] {recommended git command or follow-up action}
-```
-
----
-
-## 11. New Conversation Strategy (Anti-Context-Pollution)
-
-After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly recommend the user start a new conversation** to cut off context pollution from old error logs, failed attempts, and temporary fixes.
-
-**Recommended startup prompt for new conversation**:
-
-- For existing project (continue development): **"继续项目"** (or **"continue project"** / **"继续开发"**) to load files and enter Context Audit mode.
-- For new project (initial setup/migration): **"启动项目"** (or **"init project"**) to trigger Mode 0 auto-extraction.
-
-By combining "local file persistence for cognition" with "new conversation for clean context", the AI reloads clean project state from the file system every time.
-
----
-
-## 12. Security & Audit
-
-- AI should only modify repository files after user authorization. Prefer PR-based or user-approved commits.
-- All automated write-backs must include author/reason/timestamp metadata.
-- After phase closeout, recommend Git commit with descriptive message and tag (e.g., `v0.2-phase2`).
-- The AI must not execute destructive operations (database drops, production deployments) without explicit user instruction.
-- **Git Hook State Linter (AI 状态强校验钩子)**:
-  Recommend the user to create a Git pre-commit hook `.git/hooks/pre-commit` to prevent AI state hallucinations (e.g., claiming to update state but failing).
-  
-  Pre-commit Hook Script (`.git/hooks/pre-commit`):
-  ```bash
-  #!/bin/sh
-  # ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook
-
-  # Check NEXT.md and TASKS.md consistency
-  if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
-    ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
-    if [ ! -z "$ACTIVE_TASK" ]; then
-      # If task is marked complete [x] in TASKS.md but is still listed as Active in NEXT.md
-      if grep -q "\[x\] $ACTIVE_TASK" .ai/TASKS.md && grep -q "Active = $ACTIVE_TASK" .ai/NEXT.md; then
-        echo "❌ [ProjectOrchestrator Linter] Integrity Error: $ACTIVE_TASK is marked complete [x] in TASKS.md but is still set as Active in NEXT.md!"
-        echo "Please update NEXT.md to set the next active task before committing."
-        exit 1
-      fi
-    fi
-  fi
-
-  # Check STATUS.md timestamp update
-  if [ -f ".ai/STATUS.md" ]; then
-    LAST_UPDATE=$(grep "上次全局审计时间" .ai/STATUS.md | cut -d':' -f2 | xargs)
-    if [ "$LAST_UPDATE" = "{待AI审计更新}" ] || [ "$LAST_UPDATE" = "{待更新}" ] || [ -z "$LAST_UPDATE" ]; then
-      echo "⚠️ [ProjectOrchestrator Linter] Warning: STATUS.md last_audit_timestamp not updated"
-      echo "Consider running Mode 5: Phase Closeout to update the timestamp."
-    fi
-  fi
-
-  echo "✅ [ProjectOrchestrator Linter] Document integrity check passed"
-  ```
-
----
-
 ---## 5. NEXT.md Hard Gate
 
 Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** if any of the following is true:
@@ -1194,7 +876,7 @@ By combining "local file persistence for cognition" with "new conversation for c
 
 **Version**: 1.0
 
-**Generated**: 2026-07-04T08:30:03.292154Z
+**Generated**: 2026-07-04T09:14:59.997530Z
 
 **Status**: Active
 

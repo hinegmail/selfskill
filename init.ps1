@@ -10,7 +10,7 @@
 
 .PARAMETER IDE
     IDE adapters to install, comma-separated.
-    Options: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, all
+    Options: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
     Default: all
 
 .PARAMETER Lite
@@ -226,7 +226,7 @@ Write-Host "├─ MODE 3: Implementation       (执行编码，您说'执行'�
 Write-Host "├─ MODE 4: Validation & Test    (运行测试，自动)" -ForegroundColor Gray
 Write-Host "├─ MODE 5: Phase Closeout       (更新.ai/文件，自动 ✅)" -ForegroundColor Green
 Write-Host "├─ MODE 6: Skill Evolution      (提案改进，按需)" -ForegroundColor Gray
-Write-Host "└─ MODE 7: Context Refresh      (新对话推荐)" -ForegroundColor Gray
+Write-Host "└─ New Conversation             (收口后推荐新开对话，切断上下文污染)" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "🚀 快速开始 (3步):" -ForegroundColor Cyan
 Write-Host ""

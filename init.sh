@@ -8,7 +8,7 @@
 # 选项:
 #   -p, --path PATH       目标项目路径 (默认: 当前目录)
 #   -i, --ide IDES        IDE列表, 逗号分隔 (默认: all)
-#                          可选: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, all
+#                          可选: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
 #   -l, --lite            轻量模式 (仅创建5个核心文件)
 #   -f, --force           强制覆盖已存在的 .ai/ 模板文件
 #   -s, --source PATH     SelfSkill 源目录 (默认: 脚本所在目录)
@@ -215,13 +215,28 @@ done
 echo ""
 echo "✨ 初始化完成！"
 echo ""
-echo "📌 下一步："
-echo "   1. 编辑 .ai/requirements.md 填写产品需求"
-echo "   2. 编辑 .ai/DESIGN.md 填写技术设计"
-echo "   3. 编辑 .ai/TASKS.md 填写任务清单"
-echo "   4. 编辑 .ai/NEXT.md 设置第一个活跃任务"
-echo "   5. 在 AI IDE 中新开对话，输入："
+echo "ProjectOrchestrator Skill: 7-Mode自动化运作流程"
 echo ""
-echo '   "使用 ProjectOrchestrator。进入 Context Audit 模式，'
-echo '    读取 .ai/ 全部文件并输出审计报告。"'
+echo "├─ MODE 1: Context Audit        (加载项目状态)"
+echo "├─ MODE 2: Task Planning        (规划当前任务，自动)"
+echo "├─ MODE 3: Implementation       (执行编码，您说'执行'→自动启动)"
+echo "├─ MODE 4: Validation & Test    (运行测试，自动)"
+echo "├─ MODE 5: Phase Closeout       (更新.ai/文件，自动 ✅)"
+echo "├─ MODE 6: Skill Evolution      (提案改进，按需)"
+echo "└─ New Conversation             (收口后推荐新开对话，切断上下文污染)"
+echo ""
+echo "🚀 快速开始 (3步):"
+echo ""
+echo "  1️⃣  在您的IDE (Cursor/Cline/Windsurf/Claude/Kiro等) 打开对话"
+echo ""
+echo "  2️⃣  说这条命令:"
+echo ""
+echo '      继续项目'
+echo ""
+echo "  3️⃣  AI会自动执行 Mode 1 → Mode 2 → 等待您说'执行' → 自动进入 Mode 3-5"
+echo ""
+echo "💡 提示:"
+echo "  • 任何肯定回复（'开始','好的','OK'等）都会触发实现"
+echo "  • 无需记住特殊命令，自然表达即可"
+echo "  • 如要调整规划，说'改一下'或'重新规划'"
 echo ""

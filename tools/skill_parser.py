@@ -84,40 +84,47 @@ class SkillParser:
     
     def extract_modes(self) -> Dict[str, str]:
         """
-        Extract all 7 modes definitions (Mode 0-6).
-        
+        Extract all mode definitions (Mode 0-6, including sub-modes like 4.5, 6.5).
+
         Returns:
             Dict[str, str]: Dictionary mapping mode names to their content.
         """
         modes = {}
-        
-        for mode_num in range(7):
-            pattern = rf'^###\s+Mode\s+{mode_num}:'
-            lines = self._lines
-            
-            mode_start = None
-            for i, line in enumerate(lines):
-                if re.match(pattern, line, re.IGNORECASE):
-                    mode_start = i
-                    break
-            
-            if mode_start is None:
+        lines = self._lines
+
+        # Match any mode number, integer or decimal (e.g. Mode 0, Mode 4.5, Mode 6.5)
+        pattern = re.compile(r'^###\s+Mode\s+(\d+(?:\.\d+)?):', re.IGNORECASE)
+
+        # Find all mode heading positions
+        mode_starts: List[tuple] = []  # (line_index, mode_number_str)
+        in_code_block = False
+        for i, line in enumerate(lines):
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
                 continue
-            
-            # Find next mode or end of section
+            if in_code_block:
+                continue
+            match = pattern.match(line)
+            if match:
+                mode_starts.append((i, match.group(1)))
+
+        for idx, (mode_start, mode_num) in enumerate(mode_starts):
+            # Find end: next mode heading or next ## section or EOF
             mode_end = len(lines)
-            for i in range(mode_start + 1, len(lines)):
-                if re.match(r'^###\s+Mode\s+\d+:', lines[i]):
-                    mode_end = i
-                    break
-            
-            # Extract mode name from header
+            if idx + 1 < len(mode_starts):
+                mode_end = mode_starts[idx + 1][0]
+            else:
+                for i in range(mode_start + 1, len(lines)):
+                    if lines[i].startswith('## ') and not lines[i].startswith('### '):
+                        mode_end = i
+                        break
+
             header = lines[mode_start]
-            mode_name_match = re.search(r'Mode\s+\d+:\s*(.+?)(?:\(|$)', header)
+            mode_name_match = re.search(r'Mode\s+\d+(?:\.\d+)?:\s*(.+?)(?:\(|$)', header)
             mode_name = mode_name_match.group(1).strip() if mode_name_match else f"Mode {mode_num}"
-            
+
             modes[mode_name] = '\n'.join(lines[mode_start:mode_end]).strip()
-        
+
         return modes
     
     def extract_keywords(self) -> Dict[str, List[str]]:
@@ -249,9 +256,8 @@ class SkillParser:
         headings in order. Each section spans from its heading line to the
         line before the next ## heading (or end of file).
 
-        Sections whose headings start with an emoji or are output-block
-        headings embedded inside Mode content (e.g. '## 🚀 Initialization')
-        are intentionally included — callers can filter by key prefix if needed.
+        Headings inside fenced code blocks (```) are ignored to prevent
+        splitting sections at output-template markers like '## 🚀 Initialization'.
 
         Returns:
             Dict[str, str]: Ordered dict mapping heading text (without '## ')
@@ -261,8 +267,12 @@ class SkillParser:
         sections: Dict[str, str] = {}
         boundaries: List[tuple] = []  # (start_line, heading_text)
 
+        in_code_block = False
         for i, line in enumerate(lines):
-            if line.startswith('## ') and not line.startswith('### '):
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+                continue
+            if not in_code_block and line.startswith('## ') and not line.startswith('### '):
                 heading = line[3:].strip()
                 boundaries.append((i, heading))
 

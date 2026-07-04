@@ -1,9 +1,9 @@
 """
 ProjectOrchestrator Adapter Generation Tools
-Version: 1.0.2
+Version: 1.0
 """
 
-__version__ = "1.0.2"
+__version__ = "1.0"
 
 try:
     from .skill_parser import SkillParser

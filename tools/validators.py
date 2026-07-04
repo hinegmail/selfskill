@@ -151,11 +151,6 @@ class FileReferenceValidator(BaseValidator):
             count = content.count('PRD.md')
             errors.append(f"Found {count} reference(s) to 'PRD.md' (should be 'requirements.md')")
         
-        # Check that requirements.md is referenced
-        if '.md' in content or '.txt' in content:
-            if 'requirements.md' not in content and 'requirements' not in content.lower():
-                errors.append("No reference to 'requirements.md' found (expected for file references)")
-        
         return len(errors) == 0, errors
 
 

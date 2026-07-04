@@ -32,6 +32,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 | `.ai/requirements.md` | Product requirements: user value, business rules, acceptance goals |
 | `.ai/DESIGN.md` | Technical design: architecture, modules, APIs, data models, constraints |
 | `.ai/TASKS.md` | Complete task list: phases, task IDs, dependencies, acceptance criteria, status |
+| `.ai/STEERING.md` | Project navigation hub: mission, architecture overview, milestones, document chapter index (auto-generated on init, mandatory read every session) |
 
 ### AI-maintained runtime files (updated during development)
 
@@ -47,7 +48,7 @@ Your entire memory and decision-making must be anchored to the `.ai/` directory.
 
 ### Lite Mode (small projects / solo developers)
 
-Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`
+Use only: `requirements.md`, `DESIGN.md`, `TASKS.md`, `STATUS.md`, `NEXT.md`, `STEERING.md`
 
 Omit: `RULES.md`, `TEST_LOG.md`, `DECISIONS.md`, `LESSONS.md`, `EVOLUTION_PROPOSALS.md`
 
@@ -253,7 +254,7 @@ Task Planning
 
 ---
 
-## 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
+### 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
 
 **Purpose**: Define the complete set of user expressions and patterns that automatically trigger Mode 3 entry.
 
