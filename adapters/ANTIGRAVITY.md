@@ -111,9 +111,10 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 1. Read STATUS.md **TL;DR section first**. If TL;DR says "no changes since last session", skip full STATUS.md read.
 2. Smart Load: Compare `last_audit_timestamp` with file mtime of requirements.md/DESIGN.md. Skip if unchanged (≤60s tolerance). STEERING.md is **always** read (except Micro Mode).
 3. Read RULES.md if exists (hot-reload evolved rules).
-4. **Closeout Integrity Check**: Cross-validate TASKS.md ↔ STATUS.md ↔ NEXT.md. If NEXT.md active task is already `[x]` in TASKS.md, or STATUS.md missing latest completed task, or NEXT.md empty but tasks remain → enter Recovery Protocol (complete missing Mode 5 updates before proceeding).
-5. Validate NEXT.md gate (see §5).
-6. **Micro Mode Auto-Upgrade**: If in Micro Mode and task has ≥3 criteria or >5 files, recommend upgrading to Lite Mode.
+4. **Closeout Integrity Check**: Cross-validate TASKS.md ↔ STATUS.md ↔ NEXT.md. If NEXT.md active task is already `[x]` in TASKS.md, or STATUS.md missing latest completed task, or NEXT.md is idle (empty/placeholder/"no active task"/non-task text like "就绪中") but tasks remain → enter Recovery Protocol (complete missing Mode 5 updates before proceeding).
+5. **Idle-State Task Selection**: If NEXT.md is idle AND TASKS.md has uncompleted tasks → select next task, write to NEXT.md (BLOCKING before Mode 2). Do NOT plan or produce any output until NEXT.md has a valid active task.
+6. Validate NEXT.md gate (see §5).
+7. **Micro Mode Auto-Upgrade**: If in Micro Mode and task has ≥3 criteria or >5 files, recommend upgrading to Lite Mode.
 **Micro Mode**: Read only NEXT.md + STATUS.md TL;DR. Skip STEERING.md, skip timestamp check.
 
 ### Mode 2: Task Planning + Three Confirmations
@@ -146,7 +147,7 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 
 ### Mode 5: Phase Closeout
 **Trigger**: Validation passes; or user says "测试通过 / closeout / phase complete".
-**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + timestamp), NEXT.md (set next active task).
+**Must update (BLOCKING)**: TASKS.md (mark [x]), STATUS.md (TL;DR + phase summary + timestamp), NEXT.md (set next active task; if none, write **exactly** `no active task` — no other idle-state text allowed).
 **Post-Closeout Verification**: After updates, read back NEXT.md (active ≠ completed task), STATUS.md TL;DR (mentions completed task), TASKS.md (task marked [x]). Re-execute any failed update before outputting EVOLUTION_LOG.
 **Conditionally update**: TEST_LOG.md, DECISIONS.md, LESSONS.md (mandatory knowledge capture), EVOLUTION_PROPOSALS.md.
 **LESSONS.md Cap**: If >20 entries, trigger Cognitive Distillation — distill top 3-5 rules into RULES.md proposal, then reset LESSONS.md.
@@ -277,7 +278,7 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 **Version**: 1.0
 
-**Generated**: 2026-07-04T16:37:40.899150Z
+**Generated**: 2026-07-04T17:06:34.253408Z
 
 **Status**: Active
 

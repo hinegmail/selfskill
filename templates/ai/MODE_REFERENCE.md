@@ -81,7 +81,7 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
    - Cross-validate consistency between TASKS.md, STATUS.md, and NEXT.md to detect an incomplete Mode 5 from the previous session:
      - **Check A (NEXT.md vs TASKS.md)**: Read the active task ID in NEXT.md. Search for that task in TASKS.md. If the task is already marked `[x]` (completed), this means the previous session's Mode 5 updated TASKS.md but failed to update NEXT.md.
      - **Check B (TASKS.md vs STATUS.md)**: Find the most recently completed task (latest `[x]`) in TASKS.md. Check if STATUS.md's phase summary or TL;DR mentions that task. If not, the previous session's Mode 5 updated TASKS.md but failed to update STATUS.md.
-     - **Check C (NEXT.md emptiness)**: If NEXT.md is empty, contains placeholder text, or says "no active task" but TASKS.md has uncompleted tasks (`[ ]`), the previous session's Mode 5 failed to set the next active task.
+     - **Check C (NEXT.md idle-state detection)**: NEXT.md is in an idle state if it is empty, contains placeholder text, says "no active task", OR **has content but does not contain a valid task ID** (e.g., says "就绪中", "ready", "idle", "等待", or any other free-form non-task text). If NEXT.md is in idle state but TASKS.md has uncompleted tasks (`[ ]`), the previous session's Mode 5 failed to set the next active task.
    - **If any check fails**: Output a prominent warning and enter **Recovery Protocol**:
      > ⚠️ [Closeout Integrity Alert] Previous session's Mode 5 (Phase Closeout) was not fully completed. Detected issue: {describe which check failed}.
      > 
@@ -92,15 +92,23 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
      > 
      > After recovery, I will re-run the NEXT.md gate validation.
    - **Micro Mode**: Skip Check B (no TASKS.md). Only perform Check A (if NEXT.md task is done, set next task) and Check C.
-6. Validate the NEXT.md gate (see §5).
-7. **Micro Mode Auto-Upgrade Detection (微型模式自动升级检测)**:
+6. **Idle-State Task Selection (空闲态任务选定)**:
+   - If Check C determined that NEXT.md is in idle state (including: says "no active task", has non-task content, or is empty) AND TASKS.md has uncompleted tasks (`[ ]`):
+     - Select the **first uncompleted task** from TASKS.md (respecting task dependencies and phase order).
+     - **Write it into NEXT.md** as the new active task (with Task ID, name, and acceptance criteria).
+     - This update is **BLOCKING** — must be completed before proceeding to step 7.
+     - Do NOT enter Mode 2 or produce any planning output until NEXT.md contains a valid active task.
+   - If NEXT.md is in idle state AND all tasks in TASKS.md are completed: Proceed to audit report output. NEXT.md stays as "no active task".
+   - **Micro Mode**: If NEXT.md is idle and no TASKS.md exists, ask the user what the next task should be and write it into NEXT.md.
+7. Validate the NEXT.md gate (see §5).
+8. **Micro Mode Auto-Upgrade Detection (微型模式自动升级检测)**:
    - If running in Micro Mode (only `NEXT.md` + `STATUS.md` + `LESSONS.md` exist), evaluate the active task's complexity:
      - **Upgrade signal**: The task description in NEXT.md contains **≥ 3 acceptance criteria** OR references **> 5 files** OR involves multi-step phases (e.g., "first do X, then do Y").
      - **Action when upgrade signal triggers**: Output a prominent recommendation:
        > ⚠️ [Mode Upgrade Suggestion] This task has grown beyond Micro Mode scope (N criteria, M files). Consider upgrading to Lite Mode by running: `init.ps1 -Lite -Force` (Windows) or `./init.sh --lite --force` (macOS/Linux). This will add planning files (requirements.md, DESIGN.md, TASKS.md, STEERING.md) without overwriting existing ones.
      - Do **not** force the upgrade — proceed with Micro Mode if the user confirms, but warn that planning files will be unavailable.
-8. Output the audit report.
-9. **Do not modify any code files.**
+9. Output the audit report.
+10. **Do not modify any code files.**
 
 **Output**:
 ```
@@ -504,7 +512,7 @@ Phase Closeout
 **Must update the following files (BLOCKING - required before next task)**:
 1. `.ai/TASKS.md` — mark completed task as `[x]`
 2. `.ai/STATUS.md` — **Update the `## TL;DR` section** with a one-sentence status summary. Append phase summary (reverse chronological): completed features, key files, technical decisions, known issues. Update `last_audit_timestamp`.
-3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state "no active task"
+3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state **exactly** `no active task` (this is the **only** valid idle-state expression — do NOT use "就绪中", "ready", "idle", "等待" or any other free-form text)
 
 **Micro Mode shortcut**: In Micro Mode, update only `NEXT.md`, `STATUS.md` (TL;DR + timestamp), `LESSONS.md`. Skip all other document updates.
 
