@@ -77,15 +77,30 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
 4. **Adaptive Rule Reload (扩展规则热加载)**:
    - Check if `.ai/RULES.md` exists. If it exists and contains custom guidelines or evolved conventions:
      - **Must read** `.ai/RULES.md` and merge its rules/conventions into the active context instructions. This ensures that even in non-compiled environments, the AI dynamically adapts to evolved instructions.
-5. Validate the NEXT.md gate (see §5).
-6. **Micro Mode Auto-Upgrade Detection (微型模式自动升级检测)**:
+5. **Closeout Integrity Check (收口完整性校验)**:
+   - Cross-validate consistency between TASKS.md, STATUS.md, and NEXT.md to detect an incomplete Mode 5 from the previous session:
+     - **Check A (NEXT.md vs TASKS.md)**: Read the active task ID in NEXT.md. Search for that task in TASKS.md. If the task is already marked `[x]` (completed), this means the previous session's Mode 5 updated TASKS.md but failed to update NEXT.md.
+     - **Check B (TASKS.md vs STATUS.md)**: Find the most recently completed task (latest `[x]`) in TASKS.md. Check if STATUS.md's phase summary or TL;DR mentions that task. If not, the previous session's Mode 5 updated TASKS.md but failed to update STATUS.md.
+     - **Check C (NEXT.md emptiness)**: If NEXT.md is empty, contains placeholder text, or says "no active task" but TASKS.md has uncompleted tasks (`[ ]`), the previous session's Mode 5 failed to set the next active task.
+   - **If any check fails**: Output a prominent warning and enter **Recovery Protocol**:
+     > ⚠️ [Closeout Integrity Alert] Previous session's Mode 5 (Phase Closeout) was not fully completed. Detected issue: {describe which check failed}.
+     > 
+     > **Recovery Protocol**: I will now complete the missing Mode 5 updates before proceeding:
+     > 1. Update STATUS.md with the completed task's phase summary + TL;DR + timestamp.
+     > 2. Regenerate NEXT.md with the next uncompleted task from TASKS.md.
+     > 3. Output EVOLUTION_LOG for the recovery.
+     > 
+     > After recovery, I will re-run the NEXT.md gate validation.
+   - **Micro Mode**: Skip Check B (no TASKS.md). Only perform Check A (if NEXT.md task is done, set next task) and Check C.
+6. Validate the NEXT.md gate (see §5).
+7. **Micro Mode Auto-Upgrade Detection (微型模式自动升级检测)**:
    - If running in Micro Mode (only `NEXT.md` + `STATUS.md` + `LESSONS.md` exist), evaluate the active task's complexity:
      - **Upgrade signal**: The task description in NEXT.md contains **≥ 3 acceptance criteria** OR references **> 5 files** OR involves multi-step phases (e.g., "first do X, then do Y").
      - **Action when upgrade signal triggers**: Output a prominent recommendation:
        > ⚠️ [Mode Upgrade Suggestion] This task has grown beyond Micro Mode scope (N criteria, M files). Consider upgrading to Lite Mode by running: `init.ps1 -Lite -Force` (Windows) or `./init.sh --lite --force` (macOS/Linux). This will add planning files (requirements.md, DESIGN.md, TASKS.md, STEERING.md) without overwriting existing ones.
      - Do **not** force the upgrade — proceed with Micro Mode if the user confirms, but warn that planning files will be unavailable.
-7. Output the audit report.
-8. **Do not modify any code files.**
+8. Output the audit report.
+9. **Do not modify any code files.**
 
 **Output**:
 ```
@@ -565,6 +580,23 @@ Phase Closeout
 
 ### 🔄 下一会话推荐启动提示词
 > 继续项目
+```
+
+**Post-Closeout Verification (收口后验证)**:
+After writing all BLOCKING and conditional updates, the AI **must** perform a self-check before outputting the final EVOLUTION_LOG:
+1. **Read back** `.ai/NEXT.md` — verify the active task is NOT the task just completed (i.e., NEXT.md must point to a different task or state "no active task").
+2. **Read back** `.ai/STATUS.md` TL;DR — verify it mentions the task just completed.
+3. **Read back** `.ai/TASKS.md` — verify the completed task is marked `[x]`.
+4. **If any verification fails**: Re-execute the failed update immediately. Do NOT output EVOLUTION_LOG until all three checks pass.
+5. **If all verifications pass**: Output the EVOLUTION_LOG block below.
+
+**Output the verification result**:
+```
+### ✅ Post-Closeout Verification
+- NEXT.md: Active = Task {next_ID} ✓ (not the completed task)
+- STATUS.md TL;DR: mentions Task {completed_ID} ✓
+- TASKS.md: Task {completed_ID} marked [x] ✓
+All verifications passed. Closeout is complete.
 ```
 
 **After closeout**: Recommend user to start a new conversation for a clean context.

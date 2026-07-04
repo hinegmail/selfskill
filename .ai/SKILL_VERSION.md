@@ -242,6 +242,7 @@ git log --oneline | head -3  # 应显示最近的提交
 - **P2 Token 经济策略**：STATUS.md 新增 TL;DR 头部、LESSONS.md 20 条封顶+认知蒸馏、MODE_REFERENCE.md 按需加载
 - init 脚本新增 `-Micro` / `--micro` 参数
 - 生成器自动输出 MODE_REFERENCE.md 到 templates/ai/
+- **收口完整性防护**：Mode 1 新增收口完整性校验（Check A/B/C），检测上次会话 Mode 5 是否未完成并触发 Recovery Protocol；Mode 5 新增收口后验证（Post-Closeout Verification），read-back 校验三个文件一致性后才输出 EVOLUTION_LOG
 
 **发布检查清单**：✅ 全部通过（36 项测试）  
 **贡献者**：ProjectOrchestrator 团队  
