@@ -93,36 +93,55 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 ### Mode 0: Initialization
 
-**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` is missing; or user says "启动项目 / 初始化项目 / setup / initialize / init".
+**Trigger**: Any of the following:
+- `.ai/STATUS.md` or `.ai/NEXT.md` is **missing**
+- `.ai/STATUS.md` or `.ai/STEERING.md` contains **template placeholders** (detect by scanning for: `{待`, `{待AI`, `{待填写`, `{待更新`, `{待提取`, `Milestone 1]` with `(未开始)`, `0 / 0 任务`, `项目名称` as literal text)
+- User says "启动项目 / 初始化项目 / setup / initialize / init"
 
 **Actions**:
 1. Read `.ai/requirements.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
-2. If `.ai/STEERING.md` is missing but the above original documents exist:
-   - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
-   - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
-   - Proactively write the generated complete contents into `.ai/STEERING.md` using file tools to avoid developer manual labor.
-3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
+2. **Placeholder Detection Scan**: For each `.ai/` runtime file (STATUS.md, STEERING.md, NEXT.md, TASKS.md), scan its content for template placeholder patterns. Classify each file as:
+   - **✅ Populated** — contains real project data, no placeholders
+   - **⚠️ Template** — still contains placeholder text (e.g., `{待...}`, `项目名称`, `Milestone 1]` with no real name, `0 / 0`)
+   - **❌ Missing** — file does not exist
+3. If `requirements.md`, `DESIGN.md`, `TASKS.md` exist and contain real project data (not placeholders):
+   - **Auto-extract and populate** all ⚠️/❌ runtime files:
+     - **STEERING.md**: Extract project name, core value, tech stack from `requirements.md`. Extract architecture modules from `DESIGN.md`. Extract milestones from `TASKS.md`. Build the INDEX chapter mapping. Write complete content.
+     - **STATUS.md**: Extract project name. Count tasks in TASKS.md → set `项目整体进度`. Extract current phase/milestone from TASKS.md → set `当前开发阶段`. Set `当前活跃任务` from the first `[ ]` task. Populate `## 📈 里程碑执行状态` with all milestones from TASKS.md and their task counts. Set `last_audit_timestamp` to current UTC. Write TL;DR summary.
+     - **NEXT.md**: Find the first `[ ]` task in TASKS.md. Write it as Active Task with its acceptance criteria. Ensure file paths reference the current project, not template source paths.
+     - **TASKS.md** (if still template): Launch Interactive Setup Wizard (see step 5).
+   - Write all populated files using file tools.
+4. If `requirements.md`/`DESIGN.md`/`TASKS.md` are also placeholders or missing:
    - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
    - Ask the user 3 key design questions in the chat:
      - ① **项目名称**与核心商业价值定位是什么？
      - ② 核心**技术栈**与工程框架是什么？
      - ③ **核心功能职责与模块**如何规划？
-   - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
-4. Automatically generate and write the initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task) using file tools.
+   - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, then execute step 3 to populate STEERING.md, STATUS.md, NEXT.md.
 5. **Do not implement any code.** Wait for user confirmation.
 
 **Output**:
 ```
 ## 🚀 Initialization
 
-### Existing Files
-（list found files）
+### Placeholder Detection Scan
+| File | Status | Action |
+|------|--------|--------|
+| requirements.md | ✅ Populated / ⚠️ Template / ❌ Missing | (action taken) |
+| DESIGN.md | ... | ... |
+| TASKS.md | ... | ... |
+| STEERING.md | ... | ... |
+| STATUS.md | ... | ... |
+| NEXT.md | ... | ... |
 
-### Missing Files
-（list missing files with proposed initial content or wizard questions）
+### Auto-Extracted Content
+（summary of what was extracted and written）
+
+### Files Requiring User Input
+（if wizard was launched, list questions）
 
 ### Recommended Next Step
-Confirm the proposed files (or answer the wizard questions), then enter Context Audit mode.
+Confirm the auto-extracted content (or answer the wizard questions), then enter Context Audit mode.
 ```
 
 ---
@@ -149,8 +168,9 @@ Confirm the proposed files (or answer the wizard questions), then enter Context 
      - If the difference exceeds 60 seconds, mtime is unreadable, or `last_audit_timestamp` is missing/empty/placeholder:
        - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
    - **STEERING.md reading is mandatory in all cases** — it is never skipped regardless of timestamp result.
-3. If `.ai/STEERING.md` or `.ai/STATUS.md` contain default placeholder templates (or are missing), but original files (`requirements.md`, `DESIGN.md`, `TASKS.md`) exist:
-   - Proactively redirect to **Mode 0: Initialization** to execute auto-extraction.
+3. **Placeholder Detection (占位符检测)**: If `.ai/STEERING.md` or `.ai/STATUS.md` or `.ai/NEXT.md` contain template placeholder text (scan for: `{待`, `{待AI`, `{待填写`, `{待更新}`, `{待提取}`, `Milestone 1]` with `(未开始)` and no real name, `0 / 0`, `项目名称` as literal text, or `就绪中`):
+   - **Do NOT proceed with normal audit.** Output a warning and redirect to **Mode 0: Initialization** to execute auto-extraction.
+   - > ⚠️ [Template Placeholder Detected] The following files still contain template placeholders: {list files}. Redirecting to Mode 0 for auto-extraction and population.
 4. **Adaptive Rule Reload (扩展规则热加载)**:
    - Check if `.ai/RULES.md` exists. If it exists and contains custom guidelines or evolved conventions:
      - **Must read** `.ai/RULES.md` and merge its rules/conventions into the active context instructions. This ensures that even in non-compiled environments, the AI dynamically adapts to evolved instructions.

@@ -246,6 +246,7 @@ git log --oneline | head -3  # 应显示最近的提交
 - **空闲态漏洞修复**：Mode 1 Check C 扩大检测范围（覆盖「就绪中」等自由文本）；新增步骤 6 空闲态任务选定（Idle-State Task Selection），NEXT.md 空闲且 TASKS.md 有未完成任务时强制选定写入后才允许进入 Mode 2；Mode 5 规定 NEXT.md 空闲态唯一合法写法为 `no active task`；§5 Hard Gate 新增「有内容但无有效任务 ID」拦截规则
 - **收口验证强化**：Mode 5 Post-Closeout Verification 增加 NEXT.md 空闲态文本 REJECT 检测（拒绝「就绪中」等并强制重写）；STATUS.md BLOCKING 更新增加里程碑执行状态更新要求；init 脚本修复 MODE_REFERENCE.md 始终强制覆盖
 - **里程碑更新规程**：Mode 5 STATUS.md 更新从模糊指令改为精确五步规程（指定 `## 📈 里程碑执行状态` 章节名+从 TASKS.md 统计 `[x]` 计数+三种状态格式+移除占位符+首次填充规则）；Post-Closeout Verification 增加里程碑章节模板占位符检测；STATUS.md 模板里程碑章节增加格式说明和示例
+- **占位符检测与自动填充**：Mode 0 触发条件扩大（检测模板占位符而不仅是文件缺失）；新增 Placeholder Detection Scan 扫描步骤（✅ Populated / ⚠️ Template / ❌ Missing 分类）；自动从 requirements.md/DESIGN.md/TASKS.md 提取并填充 STEERING.md/STATUS.md/NEXT.md；Mode 1 新增步骤 3 占位符检测，检测到则强制重定向到 Mode 0；修复 NEXT.md 模板路径指向 SelfSkill 而非当前项目的问题
 
 **发布检查清单**：✅ 全部通过（36 项测试）  
 **贡献者**：ProjectOrchestrator 团队  

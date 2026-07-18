@@ -105,8 +105,12 @@ If a conflict affects implementation decisions, **stop and ask for user confirma
 Follow modes sequentially unless user explicitly requests a specific mode. Do not skip modes.
 
 ### Mode 0: Initialization
-**Trigger**: `.ai/STATUS.md` or `.ai/NEXT.md` missing; or user says "启动项目 / init / setup".
-**Actions**: Read existing `.ai/` docs → auto-extract and write STEERING.md if missing → write initial runtime files. **No code.** Wait for confirmation.
+**Trigger**: STATUS.md/NEXT.md missing **OR** contains template placeholders (`{待`, `0 / 0`, `项目名称`, `Milestone 1]` with no real name); or user says "启动项目 / init / setup".
+**Actions**: 
+1. Read requirements.md/DESIGN.md/TASKS.md (if exist).
+2. **Placeholder Detection Scan** — scan each `.ai/` runtime file for placeholder patterns, classify as ✅ Populated / ⚠️ Template / ❌ Missing.
+3. If source docs have real data → **auto-extract and write** STEERING.md (project name, modules, milestones, INDEX), STATUS.md (TL;DR, progress count, milestone section, timestamp), NEXT.md (first `[ ]` task). Fix file paths to reference current project.
+4. If source docs also placeholders → launch Interactive Setup Wizard (3 questions).
 **Micro Mode**: Skip STEERING.md extraction. Just create NEXT.md + STATUS.md with first task.
 
 ### Mode 1: Context Audit
@@ -114,11 +118,12 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 **Actions**:
 1. Read STATUS.md **TL;DR section first**. If TL;DR says "no changes since last session", skip full STATUS.md read.
 2. Smart Load: Compare `last_audit_timestamp` with file mtime of requirements.md/DESIGN.md. Skip if unchanged (≤60s tolerance). STEERING.md is **always** read (except Micro Mode).
-3. Read RULES.md if exists (hot-reload evolved rules).
-4. **Closeout Integrity Check**: Cross-validate TASKS.md ↔ STATUS.md ↔ NEXT.md. If NEXT.md active task is already `[x]` in TASKS.md, or STATUS.md missing latest completed task, or NEXT.md is idle (empty/placeholder/"no active task"/non-task text like "就绪中") but tasks remain → enter Recovery Protocol (complete missing Mode 5 updates before proceeding).
-5. **Idle-State Task Selection**: If NEXT.md is idle AND TASKS.md has uncompleted tasks → select next task, write to NEXT.md (BLOCKING before Mode 2). Do NOT plan or produce any output until NEXT.md has a valid active task.
-6. Validate NEXT.md gate (see §5).
-7. **Micro Mode Auto-Upgrade**: If in Micro Mode and task has ≥3 criteria or >5 files, recommend upgrading to Lite Mode.
+3. **Placeholder Detection**: If STEERING.md/STATUS.md/NEXT.md contain template placeholders (`{待`, `0 / 0`, `项目名称`, `Milestone 1]`, `就绪中`) → **redirect to Mode 0** for auto-extraction. Do NOT proceed with audit.
+4. Read RULES.md if exists (hot-reload evolved rules).
+5. **Closeout Integrity Check**: Cross-validate TASKS.md ↔ STATUS.md ↔ NEXT.md. If NEXT.md active task is already `[x]` in TASKS.md, or STATUS.md missing latest completed task, or NEXT.md is idle (empty/placeholder/"no active task"/non-task text like "就绪中") but tasks remain → enter Recovery Protocol (complete missing Mode 5 updates before proceeding).
+6. **Idle-State Task Selection**: If NEXT.md is idle AND TASKS.md has uncompleted tasks → select next task, write to NEXT.md (BLOCKING before Mode 2). Do NOT plan or produce any output until NEXT.md has a valid active task.
+7. Validate NEXT.md gate (see §5).
+8. **Micro Mode Auto-Upgrade**: If in Micro Mode and task has ≥3 criteria or >5 files, recommend upgrading to Lite Mode.
 **Micro Mode**: Read only NEXT.md + STATUS.md TL;DR. Skip STEERING.md, skip timestamp check.
 
 ### Mode 2: Task Planning + Three Confirmations
@@ -289,7 +294,7 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 **Version**: 1.0
 
-**Generated**: 2026-07-18T08:57:16.176649Z
+**Generated**: 2026-07-18T09:47:15.300286Z
 
 **Status**: Active
 
