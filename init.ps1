@@ -250,6 +250,48 @@ foreach ($ideItem in $ideList) {
 }
 
 # ============================================================
+# Post-init: Detect unpopulated template files
+# ============================================================
+
+# Check if source documents have real content (not just templates)
+$reqFile = Join-Path $AiDir "requirements.md"
+$designFile = Join-Path $AiDir "DESIGN.md"
+$tasksFile = Join-Path $AiDir "TASKS.md"
+$statusFile = Join-Path $AiDir "STATUS.md"
+$steeringFile = Join-Path $AiDir "STEERING.md"
+
+$hasRealRequirements = (Test-Path $reqFile) -and -not ((Get-Content $reqFile -Raw -ErrorAction SilentlyContinue) -match '\{待|项目名称\}|\[预计总周期')
+$hasRealTasks = (Test-Path $tasksFile) -and -not ((Get-Content $tasksFile -Raw -ErrorAction SilentlyContinue) -match '项目名称 - 任务开发清单|预计总周期')
+$statusIsTemplate = (Test-Path $statusFile) -and ((Get-Content $statusFile -Raw -ErrorAction SilentlyContinue) -match '\{待|0 / 0 任务')
+$steeringIsTemplate = (Test-Path $steeringFile) -and ((Get-Content $steeringFile -Raw -ErrorAction SilentlyContinue) -match '\{待填写\}|\{项目名称\}|\{待提取\}')
+
+if (($hasRealRequirements -or $hasRealTasks) -and ($statusIsTemplate -or $steeringIsTemplate)) {
+    Write-Host ""
+    Write-Host "⚠️ [Template Placeholder Detected]" -ForegroundColor Yellow
+    Write-Host "  Source documents (requirements.md/TASKS.md) have real content," -ForegroundColor Yellow
+    Write-Host "  but STATUS.md and/or STEERING.md are still template placeholders." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "📋 Copy the following command and send it to your AI assistant:" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  ┌─────────────────────────────────────────────────────────────────────┐" -ForegroundColor Cyan
+    Write-Host "  │ 执行 Mode 0 初始化：检测到 STATUS.md 和 STEERING.md 仍是模板占位符。 │" -ForegroundColor White
+    Write-Host "  │ 请从 requirements.md 和 TASKS.md 提取真实内容，填充以下文件：        │" -ForegroundColor White
+    Write-Host "  │ 1. STEERING.md — 提取项目名称、核心价值、技术栈、架构模块、里程碑    │" -ForegroundColor White
+    Write-Host "  │ 2. STATUS.md — 填充 TL;DR、项目进度、里程碑执行状态、当前活跃任务     │" -ForegroundColor White
+    Write-Host "  │ 3. NEXT.md — 从 TASKS.md 找第一个未完成任务 [ ]，修正文件路径        │" -ForegroundColor White
+    Write-Host "  │ 完成后输出初始化报告。                                               │" -ForegroundColor White
+    Write-Host "  └─────────────────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
+    Write-Host ""
+}
+elseif ($statusIsTemplate -or $steeringIsTemplate) {
+    Write-Host ""
+    Write-Host "⚠️ STATUS.md/STEERING.md contain template placeholders." -ForegroundColor Yellow
+    Write-Host "  Source documents also appear to be templates." -ForegroundColor Yellow
+    Write-Host "  In your IDE, say: 启动项目  (to launch the Interactive Setup Wizard)" -ForegroundColor Yellow
+    Write-Host ""
+}
+
+# ============================================================
 # Done
 # ============================================================
 

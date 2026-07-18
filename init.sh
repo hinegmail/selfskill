@@ -244,6 +244,55 @@ for ide in "${IDES[@]}"; do
 done
 
 # ============================================================
+# Post-init: Detect unpopulated template files
+# ============================================================
+
+REQ_FILE="$AI_DIR/requirements.md"
+TASKS_FILE="$AI_DIR/TASKS.md"
+STATUS_FILE="$AI_DIR/STATUS.md"
+STEERING_FILE="$AI_DIR/STEERING.md"
+
+has_real_req=false
+has_real_tasks=false
+status_is_template=false
+steering_is_template=false
+
+if [[ -f "$REQ_FILE" ]] && ! grep -qE '\{待|项目名称\}|\[预计总周期' "$REQ_FILE" 2>/dev/null; then
+    has_real_req=true
+fi
+if [[ -f "$TASKS_FILE" ]] && ! grep -qE '项目名称 - 任务开发清单|预计总周期' "$TASKS_FILE" 2>/dev/null; then
+    has_real_tasks=true
+fi
+if [[ -f "$STATUS_FILE" ]] && grep -qE '\{待|0 / 0 任务' "$STATUS_FILE" 2>/dev/null; then
+    status_is_template=true
+fi
+if [[ -f "$STEERING_FILE" ]] && grep -qE '\{待填写\}|\{项目名称\}|\{待提取\}' "$STEERING_FILE" 2>/dev/null; then
+    steering_is_template=true
+fi
+
+if { [[ "$has_real_req" = true || "$has_real_tasks" = true ]] && { [[ "$status_is_template" = true ]] || [[ "$steering_is_template" = true ]]; }; then
+    echo ""
+    echo "⚠️ [Template Placeholder Detected]"
+    echo "  Source documents have real content, but STATUS.md/STEERING.md are templates."
+    echo ""
+    echo "📋 Copy this command to your AI assistant:"
+    echo ""
+    echo "  执行 Mode 0 初始化：检测到 STATUS.md 和 STEERING.md 仍是模板占位符。"
+    echo "  请从 requirements.md 和 TASKS.md 提取真实内容，填充以下文件："
+    echo "  1. STEERING.md — 提取项目名称、核心价值、技术栈、架构模块、里程碑"
+    echo "  2. STATUS.md — 填充 TL;DR、项目进度、里程碑执行状态、当前活跃任务"
+    echo "  3. NEXT.md — 从 TASKS.md 找第一个未完成任务 [ ]，修正文件路径"
+    echo "  完成后输出初始化报告。"
+    echo ""
+elif [[ "$status_is_template" = true || "$steering_is_template" = true ]]; then
+    echo ""
+    echo "⚠️ STATUS.md/STEERING.md contain template placeholders."
+    echo "  Source docs also appear to be templates."
+    echo "  In your IDE, say: 启动项目  (to launch the Interactive Setup Wizard)"
+    echo ""
+fi
+
+# ============================================================
 # 完成
 # ============================================================
 

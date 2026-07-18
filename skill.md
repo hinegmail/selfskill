@@ -91,6 +91,17 @@ If a conflict affects implementation decisions, **stop and ask for user confirma
 
 You must follow these modes sequentially unless the user explicitly requests a specific mode. Do not skip modes. Do not jump from implementation to the next task.
 
+### ⚠️ Pre-Flight Check (预检 — 在所有模式之前执行，不可跳过)
+
+**Before entering any mode (including Mode 0 or Mode 1), you MUST perform this check FIRST:**
+
+1. Read `.ai/STATUS.md` and `.ai/STEERING.md` (first 10 lines each is enough).
+2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `Milestone 1]` with no real name.
+3. **If ANY placeholder is found** → Immediately enter **Mode 0: Initialization** (auto-extraction). Do NOT proceed to Mode 1 or any other mode. Do NOT output an audit report. Do NOT ask "what would you like to do?" — just execute Mode 0 auto-extraction directly.
+4. **If NO placeholders found** → Continue to the normal mode flow below.
+
+> This check is **mandatory and non-negotiable**. It must run every time a conversation starts, before anything else. If you skip this check, all downstream modes will operate on empty/template data and produce incorrect results.
+
 ### Mode 0: Initialization
 
 **Trigger**: Any of the following:

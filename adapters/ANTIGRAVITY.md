@@ -100,6 +100,12 @@ If a conflict affects implementation decisions, **stop and ask for user confirma
 
 Follow modes sequentially unless user explicitly requests a specific mode. Do not skip modes.
 
+### ⚠️ Pre-Flight Check (MUST run before any mode, non-negotiable)
+1. Read `.ai/STATUS.md` + `.ai/STEERING.md` (first 10 lines each).
+2. Scan for placeholders: `{待`, `0 / 0 任务`, `项目名称` literal, `{待填写}`, `{待提取}`, `Milestone 1]` no real name.
+3. **If ANY placeholder found** → enter **Mode 0 auto-extraction immediately**. Do NOT proceed to Mode 1. Do NOT output audit report. Do NOT ask what to do — just execute Mode 0.
+4. **If NO placeholders** → continue normal mode flow.
+
 ### Mode 0: Initialization
 **Trigger**: STATUS.md/NEXT.md missing **OR** contains template placeholders (`{待`, `0 / 0`, `项目名称`, `Milestone 1]` with no real name); or user says "启动项目 / init / setup".
 **Actions**: 
@@ -290,7 +296,7 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 **Version**: 1.0
 
-**Generated**: 2026-07-18T09:47:15.300286Z
+**Generated**: 2026-07-18T11:39:30.542793Z
 
 **Status**: Active
 
