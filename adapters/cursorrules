@@ -36,7 +36,7 @@ Runtime files (AI-maintained): STATUS.md, NEXT.md, RULES.md, TEST_LOG.md, DECISI
 
 ## 4. Seven-Mode Execution Engine
 
-Mode 0: Initialization — Propose missing runtime files. No code.
+Mode 0: Initialization — Write missing runtime files. No code.
 Mode 1: Context Audit — Read .ai/, validate NEXT.md gate, output audit report. No code.
 Mode 2: Task Planning — Plan for NEXT.md active task. Three Confirmations: ① Objective ② Tech path + files ③ First deliverable. Wait for confirmation.
 Mode 3: Task Implementation — Only implement active task. No scope expansion. Stop on conflicts.

@@ -100,7 +100,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
 2. If `.ai/STEERING.md` is missing but the above original documents exist:
    - Proactively extract the project's core mission, high-level architecture modules, and milestones from the existing docs.
    - Trace and establish the INDEX Line-Range mapping for major chapters in the original files.
-   - Propose the complete contents for `.ai/STEERING.md` to avoid developer manual labor.
+   - Proactively write the generated complete contents into `.ai/STEERING.md` using file tools to avoid developer manual labor.
 3. If no original documents exist and the `.ai/` directory is completely empty or contains default templates:
    - Proactively launch the **Interactive Setup Wizard (交互式初始化向导)**.
    - Ask the user 3 key design questions in the chat:
@@ -108,7 +108,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
      - ② 核心**技术栈**与工程框架是什么？
      - ③ **核心功能职责与模块**如何规划？
    - Once the user answers, automatically generate the initial skeleton files for `requirements.md`, `DESIGN.md`, and `TASKS.md`, and write them along with `STEERING.md`, `STATUS.md`, and `NEXT.md`.
-4. Propose initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task).
+4. Automatically generate and write the initial content for other missing runtime files (`STATUS.md`, `NEXT.md` with the first active task) using file tools.
 5. **Do not implement any code.** Wait for user confirmation.
 
 **Output**:
