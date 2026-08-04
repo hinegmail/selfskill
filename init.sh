@@ -248,19 +248,30 @@ done
 # ============================================================
 
 REQ_FILE="$AI_DIR/requirements.md"
+DESIGN_FILE="$AI_DIR/DESIGN.md"
 TASKS_FILE="$AI_DIR/TASKS.md"
 STATUS_FILE="$AI_DIR/STATUS.md"
 STEERING_FILE="$AI_DIR/STEERING.md"
 
 has_real_req=false
+has_real_design=false
 has_real_tasks=false
 status_is_template=false
 steering_is_template=false
 
-if [[ -f "$REQ_FILE" ]] && ! grep -qE '\{待|项目名称\}|\[预计总周期' "$REQ_FILE" 2>/dev/null; then
+# Template detection patterns (same logic as init.ps1):
+# - "# 项目名称 -" appears in all three source template H1 headings
+# - "{待" appears in STATUS.md and STEERING.md templates
+# - "预计总周期" appears in TASKS.md template
+# - "[简述" appears in requirements.md and DESIGN.md templates
+# - "[如 " appears in DESIGN.md template
+if [[ -f "$REQ_FILE" ]] && ! grep -qE '\{待|# 项目名称 -|\[简述' "$REQ_FILE" 2>/dev/null; then
     has_real_req=true
 fi
-if [[ -f "$TASKS_FILE" ]] && ! grep -qE '项目名称 - 任务开发清单|预计总周期' "$TASKS_FILE" 2>/dev/null; then
+if [[ -f "$DESIGN_FILE" ]] && ! grep -qE '\{待|# 项目名称 -|\[简述|\[如 ' "$DESIGN_FILE" 2>/dev/null; then
+    has_real_design=true
+fi
+if [[ -f "$TASKS_FILE" ]] && ! grep -qE '# 项目名称 -|预计总周期' "$TASKS_FILE" 2>/dev/null; then
     has_real_tasks=true
 fi
 if [[ -f "$STATUS_FILE" ]] && grep -qE '\{待|0 / 0 任务' "$STATUS_FILE" 2>/dev/null; then
@@ -270,24 +281,44 @@ if [[ -f "$STEERING_FILE" ]] && grep -qE '\{待填写\}|\{项目名称\}|\{待�
     steering_is_template=true
 fi
 
-if { [[ "$has_real_req" = true || "$has_real_tasks" = true ]] && { [[ "$status_is_template" = true ]] || [[ "$steering_is_template" = true ]]; }; then
+# All three source docs must have real content to use auto-extraction.
+all_sources_real=false
+if [[ "$has_real_req" = true && "$has_real_design" = true && "$has_real_tasks" = true ]]; then
+    all_sources_real=true
+fi
+
+if [[ "$all_sources_real" = true ]] && { [[ "$status_is_template" = true ]] || [[ "$steering_is_template" = true ]]; }; then
     echo ""
     echo "⚠️ [Template Placeholder Detected]"
-    echo "  Source documents have real content, but STATUS.md/STEERING.md are templates."
+    echo "  Source documents (requirements.md, DESIGN.md, TASKS.md) have real content,"
+    echo "  but STATUS.md and/or STEERING.md are still template placeholders."
     echo ""
     echo "📋 Copy this command to your AI assistant:"
     echo ""
     echo "  执行 Mode 0 初始化：检测到 STATUS.md 和 STEERING.md 仍是模板占位符。"
-    echo "  请从 requirements.md 和 TASKS.md 提取真实内容，填充以下文件："
+    echo "  请从 requirements.md、DESIGN.md 和 TASKS.md 提取真实内容，填充："
     echo "  1. STEERING.md — 提取项目名称、核心价值、技术栈、架构模块、里程碑"
     echo "  2. STATUS.md — 填充 TL;DR、项目进度、里程碑执行状态、当前活跃任务"
     echo "  3. NEXT.md — 从 TASKS.md 找第一个未完成任务 [ ]，修正文件路径"
     echo "  完成后输出初始化报告。"
     echo ""
+elif [[ "$all_sources_real" = false ]] && { [[ "$status_is_template" = true ]] || [[ "$steering_is_template" = true ]]; }; then
+    echo ""
+    echo "⚠️ [Template Placeholder Detected]"
+    echo "  Source documents (requirements.md, DESIGN.md, TASKS.md) are still templates."
+    echo "  Runtime files (STATUS.md, STEERING.md) are also templates."
+    echo ""
+    echo "📋 Copy this command to your AI assistant:"
+    echo ""
+    echo "  启动项目"
+    echo ""
+    echo "  (触发 Mode 0 交互式初始化向导，AI 将询问 3 个问题后"
+    echo "   自动生成 requirements.md、DESIGN.md、TASKS.md，"
+    echo "   再填充 STEERING.md、STATUS.md、NEXT.md)"
+    echo ""
 elif [[ "$status_is_template" = true || "$steering_is_template" = true ]]; then
     echo ""
     echo "⚠️ STATUS.md/STEERING.md contain template placeholders."
-    echo "  Source docs also appear to be templates."
     echo "  In your IDE, say: 启动项目  (to launch the Interactive Setup Wizard)"
     echo ""
 fi
