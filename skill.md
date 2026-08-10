@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.0
+# ProjectOrchestrator Skill v1.1
 
 ## 0. Role Definition
 
@@ -96,7 +96,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
 **Before entering any mode (including Mode 0 or Mode 1), you MUST perform this check FIRST:**
 
 1. Read `.ai/STATUS.md` and `.ai/STEERING.md` (first 10 lines each is enough).
-2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `Milestone 1]` with no real name.
+2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across STATUS.md, STEERING.md, NEXT.md, **and RULES.md**.
 3. **If ANY placeholder is found** → Immediately enter **Mode 0: Initialization** (auto-extraction). Do NOT proceed to Mode 1 or any other mode. Do NOT output an audit report. Do NOT ask "what would you like to do?" — just execute Mode 0 auto-extraction directly.
 4. **If NO placeholders found** → Continue to the normal mode flow below.
 
@@ -120,6 +120,12 @@ You must follow these modes sequentially unless the user explicitly requests a s
      - **STEERING.md**: Extract project name, core value, tech stack from `requirements.md`. Extract architecture modules from `DESIGN.md`. Extract milestones from `TASKS.md`. Build the INDEX chapter mapping. Write complete content.
      - **STATUS.md**: Extract project name. Count tasks in TASKS.md → set `项目整体进度`. Extract current phase/milestone from TASKS.md → set `当前开发阶段`. Set `当前活跃任务` from the first `[ ]` task. Populate `## 📈 里程碑执行状态` with all milestones from TASKS.md and their task counts. Set `last_audit_timestamp` to current UTC. Write TL;DR summary.
      - **NEXT.md**: Find the first `[ ]` task in TASKS.md. Write it as Active Task with its acceptance criteria. Ensure file paths reference the current project, not template source paths.
+     - **RULES.md**: Fill template placeholders using data extracted from `DESIGN.md` and `TASKS.md`:
+       - `{auth_middleware_name}`: Extract from DESIGN.md auth/login section. If no formal middleware exists, write `无（基于 user_id 隔离）`.
+       - `{语言 1}`: Extract primary language from DESIGN.md tech stack (e.g., `Python`).
+       - `{风格指南，如 PEP 8 / ESLint + Prettier}`: Extract from TASKS.md coding standards section (e.g., `PEP 8 + mypy 类型检查`).
+       - `{spaces / tabs}`: Infer from language convention (Python → `4 spaces`, Go → `tabs`, JS/TS → `2 spaces`).
+       - `{e.g., 120}`: Set to `120` (universal default) or extract from project conventions if specified.
      - **TASKS.md** (if still template): Launch Interactive Setup Wizard (see step 5).
    - Write all populated files using file tools.
 4. If `requirements.md`/`DESIGN.md`/`TASKS.md` are also placeholders or missing:
@@ -634,13 +640,13 @@ Phase Closeout
    - **`## 📂 历史审计日志`**: Append phase summary (reverse chronological): completed features, key files, technical decisions, known issues
    - **`## 🛑 风险、阻塞`**: Update if any new blockers or design deviations occurred
 3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state **exactly** `no active task` (this is the **only** valid idle-state expression — do NOT use "就绪中", "ready", "idle", "等待" or any other free-form text)
+4. `.ai/TEST_LOG.md` — Append structured test record (test command, result, failures, root causes, fixes, retest, final conclusion). **Mandatory when tests were executed in Mode 4.** Only skip entirely if no tests were run at all (must state explicit reason for skipping).
 
 **Micro Mode shortcut**: In Micro Mode, update only `NEXT.md`, `STATUS.md` (TL;DR + timestamp), `LESSONS.md`. Skip all other document updates.
 
 **LESSONS.md Cap Check**: If `.ai/LESSONS.md` contains more than 20 entries, trigger Cognitive Distillation (see §6). Propose merging top 3-5 recurring lessons into `RULES.md`, then archive old entries.
 
 **Conditionally update the following files (OPTIONAL - but recommended)**:
-4. `.ai/TEST_LOG.md` — append final test conclusion (only if test records exist)
 5. `.ai/DECISIONS.md` — if design deviations or important decisions were made
 6. `.ai/LESSONS.md` — **Mandatory knowledge capture**: Record any technical findings, pitfalls, or notes from this task
    - **Each entry must include a `### 模块/关键词` field** listing the relevant module names and technical keywords (comma-separated), enabling precise grep retrieval in future Mode 2 sessions.
@@ -670,7 +676,7 @@ Phase Closeout
 | TASKS.md | ✅ 已更新 | Task {ID} 标记为 [x] |
 | STATUS.md | ✅ 已更新 | 追加阶段总结，更新时间戳 |
 | NEXT.md | ✅ 已更新 | Active = Task {next_ID} |
-| TEST_LOG.md | ✅ 已更新 / ⏭️ 跳过 | 追加测试结论 / 无测试记录 |
+| TEST_LOG.md | ✅ 已更新 | 追加结构化测试记录（命令/结果/失败项/根因/修复/复测） |
 | DECISIONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录关键决策 / 无新决策 |
 | LESSONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录新教训 / 无新教训 |
 

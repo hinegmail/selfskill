@@ -162,6 +162,65 @@ else {
 }
 
 # ============================================================
+# Auto-fill RULES.md placeholders from design.md
+# ============================================================
+
+$rulesPath = Join-Path $AiDir "RULES.md"
+if ((Test-Path $rulesPath) -and -not $Micro) {
+    $rulesContent = Get-Content $rulesPath -Raw -Encoding UTF8
+
+    # Check if placeholders exist
+    $hasPlaceholders = $rulesContent -match '\{auth_middleware_name\}' -or $rulesContent -match '\{语言 1\}' -or $rulesContent -match '\{spaces / tabs\}'
+    if ($hasPlaceholders) {
+        # Read design.md for tech stack inference
+        $designPath = Join-Path $AiDir "design.md"
+        $designContent = ""
+        if (Test-Path $designPath) {
+            $designContent = Get-Content $designPath -Raw -Encoding UTF8
+        }
+        # Also check DESIGN.md (uppercase)
+        if ([string]::IsNullOrEmpty($designContent)) {
+            $designPathUpper = Join-Path $AiDir "DESIGN.md"
+            if (Test-Path $designPathUpper) {
+                $designContent = Get-Content $designPathUpper -Raw -Encoding UTF8
+            }
+        }
+
+        # Heuristic: detect primary language from design content
+        $lang = "Python"; $style = "PEP 8 + mypy 类型检查"; $indent = "4 spaces"
+        if ($designContent -match "TypeScript|React|Vue|Angular") {
+            $lang = "TypeScript"; $style = "ESLint + Prettier"; $indent = "2 spaces"
+        } elseif ($designContent -match "(?m)\bGo\b|Golang") {
+            $lang = "Go"; $style = "gofmt + go vet"; $indent = "tabs"
+        } elseif ($designContent -match "Rust") {
+            $lang = "Rust"; $style = "rustfmt + clippy"; $indent = "4 spaces"
+        } elseif ($designContent -match "Java|Spring") {
+            $lang = "Java"; $style = "Google Java Style + Checkstyle"; $indent = "4 spaces"
+        }
+
+        # Heuristic: detect auth middleware from design content
+        $authMiddleware = "无（基于 user_id 隔离）"
+        if ($designContent -match "JWT|json.web.token") {
+            $authMiddleware = "JWT"
+        } elseif ($designContent -match "OAuth") {
+            $authMiddleware = "OAuth 2.0"
+        } elseif ($designContent -match "Session|session.based") {
+            $authMiddleware = "Session"
+        }
+
+        # Perform replacements
+        $rulesContent = $rulesContent -replace '\{auth_middleware_name\}', $authMiddleware
+        $rulesContent = $rulesContent -replace '\{语言 1\}', $lang
+        $rulesContent = $rulesContent -replace '\{风格指南，如 PEP 8 / ESLint \+ Prettier\}', $style
+        $rulesContent = $rulesContent -replace '\{spaces / tabs\}', $indent
+        $rulesContent = $rulesContent -replace '\{e\.g\., 120\}', '120'
+
+        Set-Content $rulesPath -Value $rulesContent -Encoding UTF8 -NoNewline
+        Write-Host "  [+] RULES.md placeholders auto-filled (lang=$lang, auth=$authMiddleware)" -ForegroundColor Green
+    }
+}
+
+# ============================================================
 # Install IDE adapters
 # ============================================================
 

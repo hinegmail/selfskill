@@ -174,6 +174,57 @@ else
 fi
 
 # ============================================================
+# Auto-fill RULES.md placeholders from design.md
+# ============================================================
+
+RULES_PATH="$AI_DIR/RULES.md"
+if [[ -f "$RULES_PATH" && "$MICRO_MODE" = false ]]; then
+    # Check if placeholders exist
+    if grep -qE '\{auth_middleware_name\}|\{语言 1\}|\{spaces / tabs\}' "$RULES_PATH"; then
+        # Read design.md for tech stack inference (try lowercase then uppercase)
+        DESIGN_CONTENT=""
+        if [[ -f "$AI_DIR/design.md" ]]; then
+            DESIGN_CONTENT=$(cat "$AI_DIR/design.md")
+        elif [[ -f "$AI_DIR/DESIGN.md" ]]; then
+            DESIGN_CONTENT=$(cat "$AI_DIR/DESIGN.md")
+        fi
+
+        # Heuristic: detect primary language from design content
+        LANG_NAME="Python"; STYLE="PEP 8 + mypy 类型检查"; INDENT="4 spaces"
+        if echo "$DESIGN_CONTENT" | grep -qE "TypeScript|React|Vue|Angular"; then
+            LANG_NAME="TypeScript"; STYLE="ESLint + Prettier"; INDENT="2 spaces"
+        elif echo "$DESIGN_CONTENT" | grep -qE "Go\b|Golang"; then
+            LANG_NAME="Go"; STYLE="gofmt + go vet"; INDENT="tabs"
+        elif echo "$DESIGN_CONTENT" | grep -q "Rust"; then
+            LANG_NAME="Rust"; STYLE="rustfmt + clippy"; INDENT="4 spaces"
+        elif echo "$DESIGN_CONTENT" | grep -qE "Java|Spring"; then
+            LANG_NAME="Java"; STYLE="Google Java Style + Checkstyle"; INDENT="4 spaces"
+        fi
+
+        # Heuristic: detect auth middleware from design content
+        AUTH_MW="无（基于 user_id 隔离）"
+        if echo "$DESIGN_CONTENT" | grep -qE "JWT|json.web.token"; then
+            AUTH_MW="JWT"
+        elif echo "$DESIGN_CONTENT" | grep -q "OAuth"; then
+            AUTH_MW="OAuth 2.0"
+        elif echo "$DESIGN_CONTENT" | grep -qE "Session|session.based"; then
+            AUTH_MW="Session"
+        fi
+
+        # Perform replacements (use temp file for macOS compatibility)
+        sed \
+            -e "s/{auth_middleware_name}/$(printf '%s' "$AUTH_MW" | sed 's/[&/\]/\\&/g')/g" \
+            -e "s/{语言 1}/$(printf '%s' "$LANG_NAME" | sed 's/[&/\]/\\&/g')/g" \
+            -e "s/{风格指南，如 PEP 8 \/ ESLint + Prettier}/$(printf '%s' "$STYLE" | sed 's/[&/\]/\\&/g')/g" \
+            -e "s/{spaces \/ tabs}/$(printf '%s' "$INDENT" | sed 's/[&/\]/\\&/g')/g" \
+            -e "s/{e.g., 120}/120/g" \
+            "$RULES_PATH" > "$RULES_PATH.tmp" && mv "$RULES_PATH.tmp" "$RULES_PATH"
+
+        echo "  ✅ RULES.md placeholders auto-filled (lang=$LANG_NAME, auth=$AUTH_MW)"
+    fi
+fi
+
+# ============================================================
 # 安装 IDE 适配器
 # ============================================================
 

@@ -1,4 +1,4 @@
-<!-- Claude Code adapter | Install: CLAUDE.md (project root) | Auto-loaded at conversation start --># ProjectOrchestrator Skill v1.0
+<!-- Claude Code adapter | Install: CLAUDE.md (project root) | Auto-loaded at conversation start --># ProjectOrchestrator Skill v1.1
 
 ## 0. Role Definition
 
@@ -294,9 +294,9 @@ After each Phase Closeout, `.ai/` files contain the latest cognition. **Strongly
 
 ## Document Information
 
-**Version**: 1.0
+**Version**: 1.1
 
-**Generated**: 2026-07-18T11:39:30.542793Z
+**Generated**: 2026-08-10T09:49:35.522958Z
 
 **Status**: Active
 
