@@ -25,6 +25,28 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 
 ## 🚀 Quick Start
 
+### Option A: Use as an On-Demand Skill (Recommended)
+
+ProjectOrchestrator is configured as a standard skill at `.agents/skills/project-orchestrator/SKILL.md`. AI IDEs with skill discovery support (Codex, Cursor, etc.) will automatically detect and activate it.
+
+**Skill structure:**
+
+```
+.agents/skills/project-orchestrator/
+├── SKILL.md                  # Core skill (YAML frontmatter + compact instructions)
+└── references/               # On-demand loaded references
+    ├── mode-reference.md     # Full mode output templates (Mode 0-6.5)
+    └── forbidden-behaviors.md # Forbidden behaviors + Git Hook scripts
+```
+
+Simply open a conversation and type a trigger keyword like **"继续项目"** / **"continue"** — the skill activates automatically based on the YAML `description` field.
+
+See [docs/seflskill使用指南.md](docs/seflskill使用指南.md) for detailed usage.
+
+---
+
+### Option B: Initialize a Target Project
+
 ### 1. Initialize Your Project
 
 **Windows (PowerShell)**:
@@ -103,9 +125,15 @@ Open a new conversation in your preferred AI IDE and type the startup command:
 
 ## 📁 Project Structure
 
-```test
-SelfSkill/
+```
+ProjectOrchestrator/
 ├── skill.md                  # Core Skill instructions (Single Source of Truth)
+├── .agents/skills/            # Standard skill directory (on-demand activation)
+│   └── project-orchestrator/
+│       ├── SKILL.md           # Skill with YAML frontmatter (auto-discoverable)
+│       └── references/        # On-demand loaded references
+│           ├── mode-reference.md      # Full mode output templates
+│           └── forbidden-behaviors.md # Forbidden behaviors + Git Hook
 ├── README.md                 # This file (English)
 ├── README_CN.md              # Chinese description (简体中文)
 ├── init.ps1                  # PowerShell initialization script (Windows)
@@ -141,6 +169,7 @@ SelfSkill/
 
 | IDE / Agent                  | Adapter File             | Installation Location                      |
 | ---------------------------- | ------------------------ | ------------------------------------------ |
+| **Skill-compatible IDEs**    | `.agents/skills/`        | `.agents/skills/project-orchestrator/SKILL.md` |
 | **Cursor** (MDC)       | `cursor.mdc`           | `.cursor/rules/project-orchestrator.mdc` |
 | **Cursor** (Legacy)    | `cursorrules`          | `.cursorrules` (Root)                    |
 | **Cline / RooCode**    | `clinerules.md`        | `.clinerules/project-orchestrator.md`    |
