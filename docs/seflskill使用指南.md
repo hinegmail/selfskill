@@ -33,10 +33,15 @@ ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-or
 技能激活后，AI 会按照 SKILL.md 中定义的七模式执行引擎工作：
 
 ```
-预检 → Mode 0 (初始化) → Mode 1 (审计) → Mode 2 (规划) 
-→ Mode 3 (实现) → Mode 4 (验证) → Mode 4.5 (文档同步) 
-→ Mode 5 (收口) → Mode 6 (进化提案) → Mode 6.5 (应用提案)
+预检 → Mode 0 (初始化) → Mode 1 (审计) → Mode 2 (单卡开工契约) 
+→ Mode 3 (实现+Hard Stop) → Mode 4 (分级验证+防自验) → Mode 4.5 (文档同步) 
+→ Mode 5 (铁三角门禁收口) → Mode 6 (进化提案) → Mode 6.5 (应用提案)
 ```
+
+**v2.0 核心门禁说明**：
+- **Mode 2 单卡开工契约**：替代旧版“三项确认协议”，以结构化契约卡片一次性锁定目标、影响范围和分级验收断言，经用户批准后冻结
+- **Mode 3 物理硬停机**：编码完成后强制停机，输出变更文件和建议测试命令，等待用户确认后才进入验证
+- **Mode 5 铁三角门禁**：收口需三项物理凭证同时满足——代码变更存在 + 测试 Exit Code 0 + Git Commit Hash
 
 首次进入某模式时，AI 会自动读取 `references/mode-reference.md` 中对应的输出模板章节。
 
@@ -89,10 +94,10 @@ ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-or
 ```mermaid
 graph TD
     A["💬 唤醒: 输入 '继续项目'"] --> B["🔍 Mode 1: 智能审计 (校验 NEXT 闸门 & 复杂度升级检测)"]
-    B --> C["📋 Mode 2: 输入 '规划' (强制加载模版, 提出 '三项确认协议')"]
-    C --> D["⚡ Mode 3: 输入 '执行' (AI 专注编码, 严禁私自扩充需求)"]
-    D --> E["🧪 Mode 4: 运行测试并分析 (记录 TEST_LOG, 触发 3次重试保护)"]
-    E --> F["📝 Mode 5: 自动收口更新文档 (更新 STATUS, NEXT, 写入 EVOLUTION_LOG)"]
+    B --> C["📋 Mode 2: 输入 '规划' (强制加载模版, 生成单卡开工契约)"]
+    C --> D["⚡ Mode 3: 输入 '执行' (AI 专注编码, 完成后物理硬停机)"]
+    D --> E["🧪 Mode 4: 运行分级验证 (Tier 1/2/3 + 防同谋自验检查)"]
+    E --> F["📝 Mode 5: 铁三角门禁收口 (Git Commit + Exit Code 0 + 审计台账)"]
     F --> G["🔄 推荐开启新对话 (断开 Context 记忆污染)"]
 ```
 
@@ -101,11 +106,11 @@ graph TD
 1. **启动/继续同步**："`继续项目`" / "`continue`"
    * AI 读取 `STATUS.md` 和 `NEXT.md`，执行闸门审核和时间戳审计，输出审计报告。
 2. **生成计划**："`规划`" / "`plan`"
-   * AI 检索历史踩坑教训，给出三项确认协议：① 目标理解、② 技术路径及改动文件、③ 首个交付物。
+   * AI 检索历史踩坑教训，生成**单卡开工契约**：① 交付目标、② 影响范围（检查/修改文件）、③ JIT 分级验收断言（Tier 1 静态检查 + Tier 2 自动化测试 + Tier 3 冒烟验证）、④ 首个最小交付物、⑤ 回滚预案。经用户批准后契约冻结写入 NEXT.md。
 3. **确认执行**："`执行`" / "`confirm`" / "`OK`"
    * AI 正式进入代码编写和工具调用。
 4. **测试收口**："`测试通过`" / "`closeout`"
-   * AI 自动更新 `STATUS.md`、`NEXT.md` 和 `TASKS.md`，以 `📂 EVOLUTION_LOG` 格式记录，标志任务闭环。
+   * AI 通过**铁三角门禁**验证（代码变更 + Exit Code 0 + Git Commit Hash），自动更新 `STATUS.md`（含物理审计台账）、`NEXT.md` 和 `TASKS.md`（绑定 commit hash），以 `📂 EVOLUTION_LOG` 格式记录（含 `[证据]` 字段），标志任务闭环。
 
 ---
 

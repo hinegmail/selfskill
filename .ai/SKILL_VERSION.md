@@ -10,6 +10,34 @@
 
 ---
 
+## 发布说明 (v2.0)
+
+### 新增功能
+- **One-Card Gate（单卡开工契约）**：Mode 2 从多轮"三项确认"对话升级为结构化、不可变的单卡契约。契约经用户批准后冻结写入 NEXT.md，包含交付目标、影响范围、JIT 分级验收断言、首个最小交付物和回滚预案
+- **Hard Stop（物理硬停机）**：Mode 3 编码完成后强制物理停机，输出变更文件和建议测试命令后进入 AWAITING_VERIFICATION 状态，禁止自动推进到 Mode 4.5 或 Mode 5
+- **Iron Triangle Gate（铁三角门禁）**：Mode 5 收口门禁要求三项物理凭证同时满足——① 物理变更存在（git status 确认）② 真实测试绿灯（Exit Code 0）③ Git Commit 就绪（真实 commit hash），杜绝空气交付
+- **JIT Tiered Verification（即时分级验收）**：Mode 2 契约中生成 Tier 1（Lint/类型检查）、Tier 2（原生测试套件）、Tier 3（冒烟验证）三级验收断言，Mode 4 按此执行
+- **Anti-Collusion Guard（防同谋自验作弊）**：Mode 4 新增断言不可变性检查和 Exit Code 物理验证，禁止篡改测试文件或断言来伪造通过
+- **物理审计台账（Audit Trail）**：STATUS.md 新增物理 SSOT 审计台账表，记录每个已完成任务的 Task ID、Git Commit Hash、测试命令和结项时间戳
+- **V2FeatureValidator 校验器**：tools/validators.py 新增 v2.0 核心关键词校验器，检查适配器是否包含 Hard Stop、One-Card Gate、Iron Triangle、Anti-Collusion 四组关键词
+
+### 改进项
+- EVOLUTION_LOG 格式升级：新增 `[证据]` 字段（Git Commit Hash + Exit Code），与 Mode 5 物理结项模板保持一致
+- RULES.md 术语同步：将"三项确认协议"替换为"单卡开工契约协议"，验收断言描述升级为 JIT 分级断言
+- MODE_REFERENCE.md 术语同步：将"Three Confirmations"替换为"One-Card Contract"
+- 禁止行为清单扩充至 24 条（新增 Hard Stop 跳过禁止、Anti-Collusion 篡改禁止、无物理凭证结项禁止）
+
+### 修复项
+- 修复术语漂移问题：全项目范围将 v1.0 的 "Three Confirmations" / "三项确认" 统一替换为 v2.0 的 "One-Card Contract" / "单卡开工契约"
+- 修复 EVOLUTION_LOG 两处格式不一致问题（§10 定义 vs Mode 5 模板）
+- 修复 Git pre-commit Hook 缺少 v2.0 物理凭证校验的问题（新增 commit hash 和审计台账检查）
+
+### 兼容性
+- ✅ 向后兼容 v1.0 项目（NEXT.md 旧格式仍可读取，Mode 1 自动检测并升级）
+- ✅ 支持所有主流 IDE（Cursor、Cline、Windsurf、Claude Code、Gemini、Antigravity、Kiro）
+
+---
+
 ## 发布说明 (v1.0)
 
 ### 新增功能
@@ -324,4 +352,4 @@ python tools/adapter_generator.py --version 1.0 --apply
 
 **文件维护**：自动生成版本 + 手动审查  
 **最后更新**：2026-08-18  
-**下一次计划更新**：v1.0.3（待定）
+**下一次计划更新**：v2.1（待定）

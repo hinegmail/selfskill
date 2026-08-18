@@ -744,6 +744,7 @@ Every write-back to `.ai/` files must include this log block at the end of the r
 📂 EVOLUTION_LOG
 [时间] YYYY-MM-DDTHH:MMZ
 [触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
+[证据] Git Commit: {commit_hash} | Exit Code: 0
 [变更] .ai/{file}: {description}
 [变更] .ai/{file}: {description}
 [建议] {recommended git command or follow-up action}
@@ -776,9 +777,12 @@ By combining "local file persistence for cognition" with "new conversation for c
   Pre-commit Hook Script (`.git/hooks/pre-commit`):
   ```bash
   #!/bin/sh
-  # ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook
+  # ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook (v2.0)
+  # Checks: NEXT/TASKS consistency, STATUS timestamp, Audit Trail commit hash, [x] task commit binding
 
-  # Check NEXT.md and TASKS.md consistency
+  HAS_ERROR=0
+
+  # === 1. NEXT.md and TASKS.md consistency ===
   if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
     ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
     if [ ! -z "$ACTIVE_TASK" ]; then
@@ -786,12 +790,12 @@ By combining "local file persistence for cognition" with "new conversation for c
       if grep -q "\[x\] $ACTIVE_TASK" .ai/TASKS.md && grep -q "Active = $ACTIVE_TASK" .ai/NEXT.md; then
         echo "❌ [ProjectOrchestrator Linter] Integrity Error: $ACTIVE_TASK is marked complete [x] in TASKS.md but is still set as Active in NEXT.md!"
         echo "Please update NEXT.md to set the next active task before committing."
-        exit 1
+        HAS_ERROR=1
       fi
     fi
   fi
 
-  # Check STATUS.md timestamp update
+  # === 2. STATUS.md timestamp update ===
   if [ -f ".ai/STATUS.md" ]; then
     LAST_UPDATE=$(grep "上次全局审计时间" .ai/STATUS.md | cut -d':' -f2 | xargs)
     if [ "$LAST_UPDATE" = "{待AI审计更新}" ] || [ "$LAST_UPDATE" = "{待更新}" ] || [ -z "$LAST_UPDATE" ]; then
@@ -800,5 +804,48 @@ By combining "local file persistence for cognition" with "new conversation for c
     fi
   fi
 
-  echo "✅ [ProjectOrchestrator Linter] Document integrity check passed"
+  # === 3. v2.0: STATUS.md Audit Trail must contain Git Commit Hash ===
+  if [ -f ".ai/STATUS.md" ] && [ -f ".ai/TASKS.md" ]; then
+    # Find tasks marked [x] in TASKS.md
+    COMPLETED_TASKS=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/TASKS.md | while read task; do
+      if grep -q "\[x\] $task" .ai/TASKS.md; then echo "$task"; fi
+    done)
+    if [ ! -z "$COMPLETED_TASKS" ]; then
+      # Check that STATUS.md Audit Trail section exists and contains commit hash patterns
+      if ! grep -q "物理审计台账\|Audit Trail" .ai/STATUS.md; then
+        echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md is missing the Audit Trail (物理审计台账) section."
+        echo "Completed tasks exist but no audit trail found. Run Mode 5: Phase Closeout to generate it."
+        HAS_ERROR=1
+      else
+        # Verify that at least one commit hash pattern exists in the Audit Trail
+        if ! grep -qE "[0-9a-f]{7,40}" .ai/STATUS.md; then
+          echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md Audit Trail has no Git Commit Hash entries."
+          echo "Each completed task must have a physical commit hash recorded. Run Mode 5: Phase Closeout."
+          HAS_ERROR=1
+        fi
+      fi
+    fi
+  fi
+
+  # === 4. v2.0: [x] tasks in TASKS.md must be bound to a commit hash ===
+  if [ -f ".ai/TASKS.md" ]; then
+    # Extract lines with [x] and check for commit hash pattern (7+ hex chars)
+    while IFS= read -r line; do
+      if echo "$line" | grep -q "\[x\]"; then
+        if ! echo "$line" | grep -qE "[0-9a-f]{7,40}"; then
+          TASK_ID=$(echo "$line" | grep -oE "Task [0-9]+\.[0-9]+" || echo "unknown")
+          echo "⚠️ [ProjectOrchestrator Linter] v2.0 Warning: $TASK_ID is marked [x] but has no Git Commit Hash binding."
+          echo "Run Mode 5: Phase Closeout to bind the commit hash."
+        fi
+      fi
+    done < .ai/TASKS.md
+  fi
+
+  # === Final result ===
+  if [ "$HAS_ERROR" -eq 1 ]; then
+    echo "❌ [ProjectOrchestrator Linter] Document integrity check FAILED (see errors above)"
+    exit 1
+  fi
+
+  echo "✅ [ProjectOrchestrator Linter] Document integrity check passed (v2.0)"
   ```

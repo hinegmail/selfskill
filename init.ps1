@@ -391,13 +391,13 @@ elseif ($statusIsTemplate -or $steeringIsTemplate) {
 Write-Host ""
 Write-Host "[OK] Initialization complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "ProjectOrchestrator Skill: 7-Mode自动化运作流程" -ForegroundColor Cyan
+Write-Host "ProjectOrchestrator Skill v2.0: 7-Mode自动化运作流程" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "├─ MODE 1: Context Audit        (加载项目状态)" -ForegroundColor Gray
-Write-Host "├─ MODE 2: Task Planning        (规划当前任务，自动)" -ForegroundColor Gray
-Write-Host "├─ MODE 3: Implementation       (执行编码，您说'执行'→自动启动)" -ForegroundColor Yellow
-Write-Host "├─ MODE 4: Validation & Test    (运行测试，自动)" -ForegroundColor Gray
-Write-Host "├─ MODE 5: Phase Closeout       (更新.ai/文件，自动 ✅)" -ForegroundColor Green
+Write-Host "├─ MODE 2: One-Card Gate         (单卡开工契约，批准后冻结)" -ForegroundColor Gray
+Write-Host "├─ MODE 3: Implementation       (执行编码 → Hard Stop 物理停机)" -ForegroundColor Yellow
+Write-Host "├─ MODE 4: Tiered Validation    (分级验证 + 防同谋自验检查)" -ForegroundColor Gray
+Write-Host "├─ MODE 5: Iron Triangle Gate   (铁三角门禁: 代码变更+Exit Code 0+Git Commit)" -ForegroundColor Green
 Write-Host "├─ MODE 6: Skill Evolution      (提案改进，按需)" -ForegroundColor Gray
 Write-Host "└─ New Conversation             (收口后推荐新开对话，切断上下文污染)" -ForegroundColor DarkGray
 Write-Host ""
@@ -409,10 +409,11 @@ Write-Host "  2️⃣  说这条命令:" -ForegroundColor White
 Write-Host ""
 Write-Host '      继续项目' -ForegroundColor Yellow
 Write-Host ""
-Write-Host "  3️⃣  AI会自动执行 Mode 1 → Mode 2 → 等待您说'执行' → 自动进入 Mode 3-5" -ForegroundColor White
+Write-Host "  3️⃣  AI会自动执行 Mode 1 → Mode 2 (单卡契约) → 等待您说'执行' → Mode 3 (编码+硬停机) → Mode 4-5" -ForegroundColor White
 Write-Host ""
 Write-Host "💡 提示:" -ForegroundColor Green
-Write-Host "  • 任何肯定回复（'开始','好的','OK'等）都会触发实现" -ForegroundColor DarkGray
-Write-Host "  • 无需记住特殊命令，自然表达即可" -ForegroundColor DarkGray
+Write-Host "  • Mode 2 生成单卡开工契约，批准后验收断言冻结，不可篡改" -ForegroundColor DarkGray
+Write-Host "  • Mode 3 编码完成后物理硬停机，必须人工确认才进入验证" -ForegroundColor DarkGray
+Write-Host "  • Mode 5 铁三角门禁: 需 Git Commit + Exit Code 0 才能收口" -ForegroundColor DarkGray
 Write-Host "  • 如要调整规划，说'改一下'或'重新规划'" -ForegroundColor DarkGray
 Write-Host ""

@@ -6,7 +6,7 @@
 >
 > **Fallback**: If this file does not exist, the compact rules in the IDE adapter are sufficient for basic operation. Output will be simpler but functional.
 >
-> **Mandatory read trigger**: Mode 2 (Task Planning) **requires** reading this file's §Mode 2 section before producing the Three Confirmations output. See skill.md §4 Mode 2 Action 0.
+> **Mandatory read trigger**: Mode 2 (Task Planning) **requires** reading this file's §Mode 2 section before producing the One-Card Contract output. See skill.md §4 Mode 2 Action 0.
 
 ---
 

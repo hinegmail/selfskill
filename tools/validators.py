@@ -232,9 +232,57 @@ class LanguageValidator(BaseValidator):
         return len(errors) == 0, errors
 
 
+class V2FeatureValidator(BaseValidator):
+    """Validates that v2.0 core concepts are present in adapter/skill files."""
+
+    # v2.0 core concept groups — each group must have at least one keyword match
+    V2_KEYWORD_GROUPS = {
+        'HardStop': ['Hard Stop', 'AWAITING_VERIFICATION', '物理停机', '物理硬停机'],
+        'OneCardGate': ['One-Card', 'Contract Card', 'frozen', '单卡', '开工契约', 'Contract Freezing'],
+        'IronTriangle': ['Iron Triangle', '铁三角', 'Git Commit', 'commit hash', '物理门禁'],
+        'AntiCollusion': ['Anti-Collusion', '防自验作弊', '防同谋', 'Exit Code', 'Assertion Immutability'],
+    }
+
+    def validate(self, content: str, file_path: str) -> Tuple[bool, List[str]]:
+        """
+        Validate that v2.0 core concept keywords are present.
+
+        Checks for four v2.0 concept groups:
+        - HardStop: Hard Stop / AWAITING_VERIFICATION
+        - OneCardGate: One-Card / Contract / frozen
+        - IronTriangle: Iron Triangle / Git Commit
+        - AntiCollusion: Anti-Collusion / Exit Code
+
+        Args:
+            content (str): Content to validate.
+            file_path (str): Path to the file.
+
+        Returns:
+            Tuple[bool, List[str]]: (is_valid, error_messages)
+        """
+        errors = []
+        content_lower = content.lower()
+
+        for group_name, keywords in self.V2_KEYWORD_GROUPS.items():
+            found = False
+            for kw in keywords:
+                # Case-insensitive search for English keywords,
+                # case-sensitive for Chinese (lowercase has no effect on CJK)
+                if kw.lower() in content_lower:
+                    found = True
+                    break
+            if not found:
+                errors.append(
+                    f"Missing v2.0 concept '{group_name}': "
+                    f"none of {keywords} found in file"
+                )
+
+        return len(errors) == 0, errors
+
+
 class AdapterValidator:
     """Main validator for adapter files."""
-    
+
     def __init__(self):
         """Initialize validator with all sub-validators."""
         self.validators = [
@@ -242,6 +290,7 @@ class AdapterValidator:
             VersionValidator(),
             FileReferenceValidator(),
             LanguageValidator(),
+            V2FeatureValidator(),
         ]
         self.mdc_validator = MDCValidator()
     

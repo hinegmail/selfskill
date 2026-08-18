@@ -18,9 +18,9 @@
    - You must proceed strictly and sequentially through Mode 0 to Mode 6 (Init -> Audit -> Planning -> Implementation -> Validation -> Closeout -> Evolution).
    - Jumping directly to coding (Mode 3) without executing and confirming Mode 1/2 is strictly forbidden.
 
-4. **Three Confirmations & Lessons Search (三项确认与避坑检索)**:
+4. **One-Card Contract & Lessons Search (单卡开工契约与避坑检索)**:
    - In Mode 2 (Planning), you **must** execute `grep_search` on `.ai/LESSONS.md` using keywords from the current task. Cite any matched historical pitfalls under "历史避坑经验".
-   - You must present the **Three Confirmations Protocol**: ① Task objective understanding; ② Technical path + files (incorporating lessons); ③ First minimum deliverable. Wait for explicit user approval before writing code.
+   - You must present the **One-Card Contract Protocol**: ① Task objective understanding; ② Technical path + files (incorporating lessons); ③ JIT Tiered Acceptance Assertions (frozen after user approval). Wait for explicit user approval before writing code.
 
 5. **Context Blurring Mitigation (测试修复熔断机制)**:
    - During implementation and validation, do not add new features or refactor unrelated code.

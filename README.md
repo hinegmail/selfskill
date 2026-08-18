@@ -15,7 +15,7 @@ Transform AI from a "blind code-writing tool" into a highly disciplined, self-le
 | 🧠**Dual-Track Cognition**     | Runs two cognitive tracks simultaneously: the Execution Track (coding) and the Evolution Track (self-reflection & knowledge persistence). |
 | 🚦**`NEXT.md` Hard Gate**    | Restricts coding to a single active task, preventing AI from expanding scope or jumping between tasks.                                    |
 | 🔄**Seven-Mode Engine**        | Strict lifecycle flow: Init ➔ Context Audit ➔ Task Planning ➔ Implementation ➔ Validation ➔ Closeout ➔ Evolution.                   |
-| 📋**Three Confirmations**      | Mandatory pre-coding validation: Objective alignment + Technical path/file plan + Minimum deliverable.                                    |
+| 📋**One-Card Contract**      | Mandatory pre-coding structured contract: Objective + Impact scope + JIT Tiered Acceptance Assertions (frozen after approval).                                    |
 | 🧬**Proposal-Based Evolution** | AI automatically accumulates lessons, and rule/convention changes require explicit user approval (applied via Mode 6.5). |
 | 📂**`.ai/` Source of Truth** | All project context is persisted in files, allowing perfect session state recovery upon starting a new chat.                              |
 | 🔌**Multi-IDE Adapter Suite**  | Out-of-the-box support for Cursor, Cline, Windsurf, Claude Code, Gemini Code Assist, and Agentic workflows.                               |
@@ -104,7 +104,7 @@ See [docs/seflskill使用指南.md](docs/seflskill使用指南.md) for detailed 
 
 ### 2. Configure the `.ai/` Brain Files
 
-After initialization, edit the following files to match your project specifications:
+After initialization, edit the following files to match your project specifications. The v2.0 engine enforces physical evidence gates (Git Commit Hash + Exit Code 0) at Phase Closeout.
 
 ```
 .ai/
@@ -190,7 +190,7 @@ ProjectOrchestrator/
 │                                                             │
 │  Mode 0         Mode 1          Mode 2         Mode 3      │
 │  Initialize ──➔ Context Audit ➔ Task Plan  ──➔ Implement   │
-│  (init)         (audit)         (plan+3conf)   (code)      │
+│  (init)         (audit)         (One-Card)     (code+Hard Stop) │
 │                                                             │
 │                Mode 4          Mode 5         Mode 6       │
 │           ──➔  Validate   ──➔  Closeout   ──➔  Evolve      │
@@ -228,13 +228,17 @@ ProjectOrchestrator/
 | **Recommended For**                | Team environments, large projects | Solo developers, small MVPs |
 | **Seven-Mode Lifecycle**           | ✅ Enabled                        | ✅ Enabled                  |
 | **NEXT.md Hard Gate**              | ✅ Enabled                        | ✅ Enabled                  |
+| **One-Card Contract (v2.0)**       | ✅ Enabled                        | ✅ Enabled                  |
+| **Hard Stop (v2.0)**              | ✅ Enabled                        | ✅ Enabled                  |
+| **Iron Triangle Gate (v2.0)**     | ✅ Enabled                        | ✅ Enabled                  |
+| **Anti-Collusion Guard (v2.0)**   | ✅ Enabled                        | ✅ Enabled                  |
 | **EVOLUTION_LOG Output**           | ✅ Enabled                        | ✅ Enabled                  |
 | **Anti-Bloat & DRY constraints**   | ✅ Enabled                        | ✅ Enabled                  |
 | **Context Compactor & Safeguards** | ✅ Enabled                        | ✅ Enabled                  |
 | **RULES / TEST_LOG / DECISIONS**   | ✅ Enabled                        | ❌ Omitted                  |
 | **LESSONS / PROPOSALS**            | ✅ Enabled                        | ❌ Omitted                  |
 
-*Note: Lite Mode preserves the core workflow discipline and anti-drift rules, omitting only the long-term knowledge accumulation files.*
+*Note: v2.0 physical evidence gates (One-Card Contract, Hard Stop, Iron Triangle, Anti-Collusion) are enforced in all modes. Lite Mode preserves the core workflow discipline, omitting only long-term knowledge accumulation files.*
 
 ---
 

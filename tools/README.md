@@ -7,7 +7,7 @@ Python工具包，用于自动生成和维护ProjectOrchestrator Skill适配器�
 - **SkillParser** - 从 `skill.md` 提取结构化内容
 - **TemplateEngine** - 使用Jinja2渲染适配器模板
 - **AdapterGenerator** - CLI工具，自动生成所有IDE适配器 + MODE_REFERENCE.md
-- **Validators** - 多层验证系统（Markdown、版本、引用、语言等）
+- **Validators** - 多层验证系统（Markdown、版本、引用、语言、v2.0 核心概念等）
 - **Utils** - 文件I/O、YAML处理、目录管理工具函数
 
 ## 适配器架构（Compact 模式）
@@ -65,13 +65,13 @@ python tools/adapter_generator.py --help
 
 ```bash
 # 生成所有8个自动适配器 + MODE_REFERENCE.md（cursorrules 遗留格式为手动维护，不参与自动生成）
-python tools/adapter_generator.py --version 1.0 --validate
+python tools/adapter_generator.py --version 2.0 --validate
 
 # 生成特定平台的适配器
-python tools/adapter_generator.py --platforms kiro,cursor --version 1.0
+python tools/adapter_generator.py --platforms kiro,cursor --version 2.0
 
 # 干运行模式（预览不保存）
-python tools/adapter_generator.py --dry-run --version 1.0
+python tools/adapter_generator.py --dry-run --version 2.0
 ```
 
 ### 验证现有适配器
@@ -181,7 +181,8 @@ from tools.validators import (
     MarkdownValidator,
     VersionValidator,
     FileReferenceValidator,
-    LanguageValidator
+    LanguageValidator,
+    V2FeatureValidator
 )
 
 # Markdown验证
@@ -200,8 +201,17 @@ has_prd_refs = ref_validator.check_prd_references("adapters/")
 lang_validator = LanguageValidator()
 has_chinese_code = lang_validator.check_chinese_code("adapters/")
 
-if not (is_valid_md and not version_issues and not has_prd_refs and not has_chinese_code):
+# v2.0 核心概念验证
+v2_validator = V2FeatureValidator()
+# 检查适配器是否包含 v2.0 四组关键词：HardStop / OneCardGate / IronTriangle / AntiCollusion
+with open("adapters/CLAUDE.md", "r", encoding="utf-8") as f:
+    content = f.read()
+v2_ok, v2_errors = v2_validator.validate(content, "adapters/CLAUDE.md")
+
+if not (is_valid_md and not version_issues and not has_prd_refs and not has_chinese_code and v2_ok):
     print("❌ 验证失败")
+    if not v2_ok:
+        print(f"  v2.0 缺失: {v2_errors}")
 else:
     print("✅ 所有验证通过")
 ```
@@ -258,14 +268,14 @@ python tools/adapter_generator.py [OPTIONS]
 ### 示例
 
 ```bash
-# 生成所有适配器到v1.0
-python tools/adapter_generator.py --version 1.0 --validate
+# 生成所有适配器到v2.0
+python tools/adapter_generator.py --version 2.0 --validate
 
 # 生成特定平台
-python tools/adapter_generator.py --platforms kiro,cursor,claude --version 1.0
+python tools/adapter_generator.py --platforms kiro,cursor,claude --version 2.0
 
 # 干运行模式（预览）
-python tools/adapter_generator.py --dry-run --version 1.0
+python tools/adapter_generator.py --dry-run --version 2.0
 
 # 跳过验证快速生成
 python tools/adapter_generator.py --no-validate
@@ -314,7 +324,7 @@ tests/
 # 适配器生成器配置文件
 
 # 版本号
-version: "1.0"
+version: "2.0"
 
 # 输入文件
 input_file: "skill.md"
@@ -449,6 +459,6 @@ MIT License
 
 ---
 
-**文档版本**：1.0
-**最后更新**：2024-12
+**文档版本**：2.0
+**最后更新**：2026-08-18
 **维护者**：ProjectOrchestrator 团队
