@@ -1,610 +1,293 @@
-# 📋 ProjectOrchestrator Skill 系统设计缺陷暴露与架构优化提案
+# 📋 ProjectOrchestrator Skill 系统设计缺陷暴露与架构优化提案 (v2.0)
 
-## 一、核心缺陷诊断
+> **版本**：v2.0 (敏捷工程与产品体验重构版)  
+> **状态**：已评审待实施 (Approved & Ready for Implementation)  
+> **更新时间**：2026-08-18  
+> **评审角色**：资深产品经理 (PM) / 资深技术项目经理 (TPM)  
+
+---
+
+## 📌 版本修订历史与修正大纲 (Changelog & Revision Outline)
+
+| 版本 | 日期 | 修订人 | 修订类型 | 核心变更摘要 |
+|---|---|---|---|---|
+| **v1.0** | 2026-08-18 | System Architect | 初始诊断 | 识别 6 大核心缺陷，提出基础 6 层防御方案（引入 Hard Stop、3 次顺序确认、全量预写 84 个 Bash 验收脚本、1h 定时器超时等）。 |
+| **v2.0** | 2026-08-18 | Lead PM & TPM | 架构与体验重构 | 1. **去除交互疲劳**：将 Mode 2 繁琐的“3 次对话审问”重构为“单卡结构化开工契约 (One-Card Gate)”。<br>2. **验收体系敏捷化**：废弃“全量预制 84 个 Shell 脚本”的瀑布流重度方案，升级为“JIT (即时) 分级验收 + 原生测试工具链 + 防作弊不可变契约”。<br>3. **状态机精简**：废弃脆弱的轮询定时器，改用事件驱动的安全挂起状态（Suspended State）。<br>4. **强化物理 SSOT 闭环**：确立“Git Commit Hash + 测试 Exit Code + 文件变更”铁三角完成凭证。<br>5. **落地路径优化**：重排 P0/P1/P2 敏捷实施路径，降低冷启动摩擦。 |
+
+---
+
+## 一、 核心缺陷诊断 (Defect Diagnosis)
 
 ### 1.1 缺陷地图
 
-| 缺陷 | 表现 | 根因 | 影响范围 |
-|---|---|---|---|
-| **缺陷 A：Mode 转换自动化过度** | Mode 3 完成后自动进入 Mode 5，跳过验证 | Mode 4 为可选而非强制；Mode 4.5 自动触发 Mode 5 | 所有任务都会被虚假标记为完成 |
-| **缺陷 B：三方确认流程被破坏** | Mode 2 三个确认点，但用户只说"执行"就跳过 | Mode 2→3 的触发条件过于宽松（7 个任意关键词） | 规划与实现之间缺乏充分沟通 |
-| **缺陷 C：单任务执行门禁失效** | NEXT.md 中一次性列出 84 个任务都标记为完成 | 没有"任务 DAG 依赖验证"；没有"单任务隔离检查" | 并发标记、任务间污染 |
-| **缺陷 D：验收标准没有可执行性** | tasks.md 定义了"完成标准"，但 Skill 从未真正检查 | 完成标准是文本描述，而非可编程的断言/测试 | 虚报完成率，无法追溯 |
-| **缺陷 E：STATUS.md 与代码现实脱节** | STATUS.md 说"100% 完成"，但代码只有 48% | 没有"双向校验"机制：Skill 不会检查 git 提交是否真的包含了宣称的功能 | 文档虚报，信息不对称 |
-| **缺陷 F：Mode 4 (Validation) 缺乏强制力** | Mode 4 是可选的（仅当"user provides test results"时触发） | 没有强制性的测试运行步骤；没有"测试未通过 ⇒ 强制回到 Mode 3"的闭环 | 可以完全跳过测试，直接标记完成 |
+| 缺陷编号 | 缺陷名称 | 核心表现 | 根因分析 | 影响范围 |
+|---|---|---|---|---|
+| **缺陷 A** | **Mode 转换自动化过度** | Mode 3 完成后自动进 Mode 4.5/5，跳过实质验证 | Mode 4 被设计为可选分支；Mode 4.5 自动触发 Mode 5；缺少刚性中断点（Hard Stop） | 导致未经验证的任务直接被虚假标记为完成 |
+| **缺陷 B** | **确认流程脆弱且流于形式** | 用户随意回复“执行”或任意关键词即可跳过规划深思 | 触发条件过于宽松且非结构化；缺乏不可变的开工契约卡点 | 规划与实际实现脱节，方向跑偏 |
+| **缺陷 C** | **单任务执行门禁失效** | NEXT.md 中一次性出现多个任务或批量标记完成 | 缺乏“任务 DAG 拓扑验证”；缺乏“单一活跃任务强隔离” | 任务并发污染、上下文混乱、依赖关系被跳过 |
+| **缺陷 D** | **验收标准无执行力（纯文本幻觉）** | tasks.md 定义了完成标准，但 Skill 仅作文本匹配 | 验收标准缺乏可执行的断言（Exit Code / Test Runner），LLM 零成本自我宣告胜利 | 虚报完成率，实际代码未达标或无法运行 |
+| **缺陷 E** | **STATUS.md 与代码现实脱节** | STATUS.md 宣称 100% 完成，实际代码覆盖率极低（如 48%） | 缺少“双向物理校验”：Skill 不检查 Git 提交与文件真实变更 | 文档虚假繁荣，产生严重信息不对称 |
+| **缺陷 F** | **验证闭环缺乏强制力与防作弊** | Mode 4 验证未通过或失败时依然能进 Mode 5；Agent 存在修改测试以迎合代码的可能 | 缺少“失败强制回退 Mode 3”闭环；验收标准未在 Mode 2 阶段冻结 | 空气代码入库，缺陷累积至项目后期暴雷 |
 
-### 1.2 缺陷连锁反应
+### 1.2 缺陷连锁反应模型
 
 ```
-缺陷 A（Mode 自动化过度）
-   ↓
-缺陷 B（三方确认被破坏）
-   ↓
-缺陷 D（验收标准不可执行）
-   ↓
-缺陷 E（STATUS 虚报）
-   ↓
-最终结果：项目虽然"100% 完成"，但实际只有 48% 代码
-   ↓
-无法发现问题，直到人工审计（太晚了）
+[ 缺陷 A: 自动化过度 + 无 Hard Stop ]
+   │
+   ▼
+[ 缺陷 B: 规划确认非结构化、流于形式 ]
+   │
+   ▼
+[ 缺陷 D: 验收标准仅为纯文本，无程序化断言 ]
+   │
+   ▼
+[ 缺陷 F: 缺乏物理测试拦截与防作弊机制 ]
+   │
+   ▼
+[ 缺陷 E: 虚假更新 STATUS.md (空气交付) ]
+   │
+   ▼
+最终结果：项目在文档层面显示 100% 完成，实际只写了一半甚至无法通过编译/测试
 ```
 
 ---
 
-## 二、分层优化方案
-
-### 2.1 L1：Mode 转换逻辑重构（最高优先级）
-
-**现状问题**：
-```
-Mode 3 完成 
-  → 自动进入 Mode 4.5
-    → 自动进入 Mode 5
-       ❌ 没有停止点等待用户验证
-```
-
-**优化方案**：
+## 二、 架构重构优化方案 (v2.0 敏捷与体验升级)
 
 ```
-Mode 3: Task Implementation
-  ↓ 代码完成
-  列出改动文件
-  建议 test 命令
-  ✋ STOP - 等待用户操作
-     ├─ 用户说 "测试通过" / "验证完成" → 进 Mode 5
-     ├─ 用户说 "运行测试" → 进 Mode 4
-     ├─ 用户说 "改一下" → 回 Mode 3
-     └─ 超时 1 小时未反应 → 发送 reminder，但不自动进 Mode 5
+                    ┌──────────────────────────────────────────────┐
+                    │               Mode 1: DAG 预检               │
+                    │   - 依赖拓扑校验                             │
+                    │   - 锁定唯一活跃任务 (Single Active Task)     │
+                    └──────────────────────┬───────────────────────┘
+                                           │
+                                           ▼
+                    ┌──────────────────────────────────────────────┐
+                    │       Mode 2: JIT 结构化契约 (One-Card Gate)  │
+                    │   - 目标 + 涉及文件 + 验收断言 (不可变)       │
+                    │   - 单卡一次性确认 (杜绝 3 轮审问交互疲劳)    │
+                    └──────────────────────┬───────────────────────┘
+                                           │
+                                           ▼
+                    ┌──────────────────────────────────────────────┐
+                    │           Mode 3: 编码实现 (Hard Stop)        │
+                    │   - 仅限修改契约内文件                        │
+                    │   - 完成后硬停止，输出改动与测试建议          │
+                    └──────────────────────┬───────────────────────┘
+                                           │
+                                           ▼
+                    ┌──────────────────────────────────────────────┐
+                    │         Mode 4: 多层级自动化验收 (Gate)        │
+                    │   - 运行项目原生测试 (npm test / pytest 等)  │
+                    │   - 校验 Mode 2 固化的断言 (防自验作弊)        │
+                    └──────────────────────┬───────────────────────┘
+                                           │ (验收 Exit 0 + Git Commit)
+                                           ▼
+                    ┌──────────────────────────────────────────────┐
+                    │          Mode 5: 物理凭证归档 (SSOT)          │
+                    │   - 提取 Commit Hash + 测试日志               │
+                    │   - 标记 [x]，更新 STATUS.md                   │
+                    └──────────────────────────────────────────────┘
 ```
 
-**实现规则**：
-- ✅ **Hard Stop**: Mode 3 完成后必须停止，等待明确的用户意图信号
-- ✅ **Explicit Signal**: 不能用模糊的"继续"，必须是明确的验证关键词：
-  - "测试通过" / "验证成功" / "OK，验收" → Mode 5
-  - "运行测试" / "执行测试" → Mode 4
-  - "改一下" / "有问题" → Mode 3
-- ✅ **No Auto-Advance**: Mode 4.5 不再自动触发 Mode 5，改为用户决定
+### 2.1 L1：Mode 3 物理硬卡点与明确意图驱动 (P0)
+
+* **重构原则**：彻底废弃“Mode 3 完成后自动进 Mode 4.5/5”。
+* **执行机制**：
+  * Mode 3 完成代码编写后，**必须强制停机（Hard Stop）**，输出当前改动清单与建议的验证命令。
+  * 状态置为 `AWAITING_VERIFICATION`，绝不允许自动流转。
+  * 仅响应明确的用户意图信号：
+    * `运行测试` / `执行验证` / `跑测试` $\rightarrow$ 进入 **Mode 4**。
+    * `测试通过` / `验收通过`（并提供验证上下文） $\rightarrow$ 校验前置条件后进入 **Mode 5**。
+    * `需要调整` / `修复报错` $\rightarrow$ 留在 **Mode 3** 继续修改。
 
 ---
 
-### 2.2 L2：三方确认流程硬化（第二优先级）
+### 2.2 L2：单卡结构化开工契约 (One-Card Proposal Gate) (P1)
 
-**现状问题**：
-```
-Mode 2 要求三次确认，但 Mode 2→3 的触发条件是 7 个任意关键词中的任何一个
-➜ 用户说"执行"就直接进 Mode 3，跳过了详细规划
-```
-
-**优化方案**：
-
-```
-Mode 2: Task Planning + Three Confirmations (HARDENED)
-
-必须逐个确认（非 AND 逻辑变为 AND+序列检查）：
-
-① 目标确认
-   Agent: "目标：实现 projects 表 DDL。确认？"
-   User: "确认" / "OK" / "👍" ← 必须明确
-   ✓ Checkpoint 1 通过
-   
-② 文件路径确认
-   Agent: "涉及文件：backend/db/migrations/001_init_projects.sql"
-   User: "确认" ← 必须明确
-   ✓ Checkpoint 2 通过
-   
-③ 第一个交付物确认
-   Agent: "第一交付物：projects 表 DDL 通过 psql 语法检查"
-   User: "确认" ← 必须明确
-   ✓ Checkpoint 3 通过
-
-[三个 Checkpoint 全部通过] → 才能进 Mode 3
-```
-
-**实现规则**：
-- ✅ **Checkpoint Sequence**: 三个确认必须顺序执行，不能跳过
-- ✅ **Explicit Affirmation**: 每个 Checkpoint 需要明确的"是"信号，不接受模糊回答
-- ✅ **Rollback Path**: 任何 Checkpoint 拒绝 → 回到 Mode 2 重新规划（不是回 Mode 1）
-
----
-
-### 2.3 L3：可执行性验收标准（第三优先级）
-
-**现状问题**：
-```
-tasks.md 中定义：
-"完成标准：
-  - [ ] projects 表 DDL 通过 PostgreSQL 15+ 语法检查
-  - [ ] 包含 slug(PK), name, site_url, ... 等全部字段
-  - [ ] 创建主键约束、NOT NULL 约束、DEFAULT 值
-  - [ ] 无错误"
-
-➜ 这些都是文本，Skill 从不检查这些是否真的满足
-```
-
-**优化方案**：
-
-在 tasks.md 中为每个任务添加"可执行验收脚本"字段：
-
-```yaml
-Task: 1a-101
-Title: 设计与实现 projects 表
-...
-Acceptance Criteria:
-  - projects 表 DDL 通过 PostgreSQL 15+ 语法检查
-  - 包含 slug(PK), name, site_url, ... 等全部字段
-
-# ← 新增：可执行验收脚本
-Verification Script: |
-  #!/bin/bash
-  # 1. 检查文件存在
-  test -f backend/db/migrations/001_init_projects.sql || exit 1
+* **重构原则**：废除“目标、文件、交付物”连续 3 轮对话提问（消除交互疲劳），改为在 Mode 2 输出一张 **不可变的结构化开工契约卡片**。
+* **交互示例**：
+  ```markdown
+  ### 📋 任务开工契约 [Task ID: 1a-101]
+  - **任务目标**：设计并实现 `projects` 数据表 DDL 及基础约束
+  - **影响范围**：`backend/db/migrations/001_init_projects.sql`
+  - **验收断言 (Exit Criteria)**：
+    1. SQL 文件通过 PostgreSQL 语法校验
+    2. 包含必填字段：`slug(PK)`, `name`, `site_url`, `market`
+    3. 运行 `pytest tests/db/test_schema.py -k test_projects` 结果为 0 错误
+  - **回滚预案**：如失败则删除 001 迁移文件并重置 DB
   
-  # 2. 检查 SQL 语法
-  psql -d template1 --echo-all -f backend/db/migrations/001_init_projects.sql
-  
-  # 3. 检查表结构
-  psql -U postgres -d geolook -c "\d projects" | grep -q "slug.*primary key"
-  psql -U postgres -d geolook -c "\d projects" | grep -q "name.*not null"
-  
-  # 4. 检查约束
-  psql -U postgres -d geolook -c "\d projects" | wc -l | awk '{if ($1 >= 15) exit 0; else exit 1}'
-  
-  echo "✅ 1a-101 验收通过"
-```
-
-**实现规则**：
-- ✅ **Script Template**: 每个任务必须有一个 bash/python 脚本
-- ✅ **Auto-Execution**: Mode 4 时自动运行验收脚本
-- ✅ **Pass/Fail Gate**: 脚本成功 (exit 0) ⇒ Mode 5；失败 ⇒ 留在 Mode 3
-- ✅ **Log Recording**: 验收脚本输出记录到 TEST_LOG.md
+  👉 请回复 **“确认执行”** 开始编码，或直接提出调整意见。
+  ```
+* **控制规则**：
+  * 用户只需 1 次明确确认即可放行进入 Mode 3。
+  * 契约一旦通过确认，其中的“验收断言”即被冻结，后续阶段 **Agent 无权私自降低或篡改验收标准**。
 
 ---
 
-### 2.4 L4：双向 SSOT 校验（第四优先级）
+### 2.3 L3：JIT 多模态分级验收体系与防作弊机制 (P0)
 
-**现状问题**：
-```
-STATUS.md 说"任务 X 完成"
-但 git 中从未提交相关代码
-➜ 信息不同步
-```
-
-**优化方案**：
-
-添加"Code Presence Check"步骤到 Mode 5：
-
-```
-Mode 5: Phase Closeout (ENHANCED)
-
-Before marking task as complete:
-
-1. 检查代码文件是否存在
-   git ls-files | grep -E "(backend/db/migrations/001|backend/app/...)" 
-   ✓ 文件存在
-   
-2. 检查提交日志
-   git log --oneline --grep="1a-101" | head -1
-   ✓ 提交存在
-   
-3. 检查验收脚本通过
-   bash verification_scripts/1a-101.sh
-   ✓ 脚本通过
-   
-4. 更新 STATUS.md
-   ✓ 标记任务完成
-   ✓ 记录提交 hash
-   ✓ 记录验收时间戳
-
-[如果以上任何一步失败] → 拒绝进入 Mode 5，返回 Mode 3
-```
-
-**实现规则**：
-- ✅ **Code Existence Check**: 提交代码才能标记完成
-- ✅ **Verification Pass Check**: 验收脚本必须通过
-- ✅ **Git Integration**: 记录提交 hash 作为证据
-- ✅ **Audit Trail**: STATUS.md 记录每个任务的 git commit hash
+* **重构原则**：
+  * 摒弃“项目初阶全量预写 84 个 Bash 脚本”的重度瀑布方案。
+  * 采用 **JIT（Just-In-Time 即时生成）+ 原生工具链 + 分级验收**。
+* **分级验收模型 (Tiered Verification)**：
+  1. **Tier 1 (静态语法与类型检查)**：Linter、`tsc --noEmit`、`ruff check`、SQL dry-run。
+  2. **Tier 2 (自动化测试断言)**：调用项目自带的测试套件（如 `pytest`、`npm test`、`cargo test`），通过 Exit Code 是否为 0 判定。
+  3. **Tier 3 (人工冒烟确认)**：对于纯 UI/交互等无法自动断言的任务，提供明确的本地验证步骤，由用户签署通过。
+* **防作弊规则 (Anti-Collusion / Integrity Check)**：
+  * 严禁 Agent 在 Mode 4 阶段通过“把断言删掉”或“伪造 `exit 0`”来强行通过测试。
+  * Mode 4 必须将实际控制台的真实执行日志写入 `.ai/TEST_LOG.md`。
 
 ---
 
-### 2.5 L5：单任务隔离与 DAG 验证（第五优先级）
+### 2.4 L4：双向 SSOT 物理凭证闭环 (P0)
 
-**现状问题**：
-```
-NEXT.md 中同时列出 84 个任务
-➜ Skill 无法判断哪个任务真的可以执行
-
-任务间有依赖关系（1a-102 依赖 1a-101）
-➜ Skill 从未检查依赖
-```
-
-**优化方案**：
-
-添加"Task DAG Validator"到 Mode 1：
-
-```
-Mode 1: Context Audit (ENHANCED)
-
-Before allowing any task execution:
-
-1. Parse NEXT.md
-   current_task = "1a-101"
-   
-2. Validate single task
-   if count(active_tasks) > 1:
-     ERROR: "Multiple active tasks in NEXT.md. Fix before proceeding."
-   
-3. Check task exists in TASKS.md
-   if "1a-101" not in tasks.md:
-     ERROR: "Task 1a-101 not found in tasks.md"
-   
-4. Check task not completed
-   if tasks.md["1a-101"]["status"] == "completed":
-     ERROR: "Task 1a-101 already marked completed"
-   
-5. Check dependencies satisfied
-   dependencies = tasks.md["1a-101"]["depends_on"]
-   for dep in dependencies:
-     if tasks.md[dep]["status"] != "completed":
-       ERROR: f"Cannot start 1a-101: dependency {dep} not completed"
-   
-6. Update STATUS.md
-   STATUS.current_active_task = "1a-101"
-   STATUS.last_audit_timestamp = NOW()
-```
-
-**实现规则**：
-- ✅ **Single Task**: NEXT.md 只能有一个活跃任务
-- ✅ **DAG Check**: 强制检查依赖关系
-- ✅ **No Forward Skip**: 不能跳过依赖任务
-- ✅ **Explicit Completion**: 任务完成必须在 Mode 5 时显式标记
+* **重构原则**：只有代码进入 Git 并且物理存在时，才能在文档中宣布完成。
+* **Mode 5 进入铁三角门禁**：
+  ```
+              ┌─────────────────────────────┐
+              │      Mode 5 任务结项门禁     │
+              └──────────────┬──────────────┘
+                             │ 必须同时满足 3 项物理证据
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+  【1. 文件变更存在】   【2. 验证日志通过】    【3. Git Commit 就绪】
+  git status / ls-files   TEST_LOG.md 记录为     存在真实的 commit hash，
+  确认改动落盘            Exit 0 / ALL PASS     并在 log 中关联 Task ID
+  ```
+* **审计追踪**：Mode 5 在更新 `.ai/STATUS.md` 与 `.ai/TASKS.md` 时，必须附带该任务的 `Git Commit Hash` 与 `验收时间戳`。
 
 ---
 
-### 2.6 L6：超时与提醒机制（第六优先级）
+### 2.5 L5：单任务隔离与 DAG 拓扑门禁 (P1)
 
-**现状问题**：
-```
-Mode 3 完成后等待用户反馈
-但如果用户 24 小时没反馈，Skill 从不提醒
-```
-
-**优化方案**：
-
-添加"Timeout & Reminder"机制：
-
-```
-Mode 3 完成后：
-
-记录 completion_timestamp = NOW()
-mode_3_timeout = 1 hour
-
-每 15 分钟检查一次：
-  if NOW() - completion_timestamp > 15 min:
-    提醒一次（不超过 3 次）
-    "🕒 任务 1a-101 实现完成，等待验证。请说 '测试通过' 或 '运行测试'"
-  
-  if NOW() - completion_timestamp > 1 hour:
-    WARNING：任务已超时未验收
-    "⚠️ 任务 1a-101 已等待 1 小时未验收。强制返回 Mode 1 重新审计。"
-    → 自动进入 Mode 1
-```
-
-**实现规则**：
-- ✅ **Reminder Frequency**: 15 分钟提醒一次，最多 3 次
-- ✅ **Hard Timeout**: 1 小时后自动回到 Mode 1（强制人工审计）
-- ✅ **No Silent Hang**: 永远不会让任务卡在"等待"状态无人问津
+* **重构原则**：杜绝并发执行与依赖跳跃。
+* **Mode 1 预检规则**：
+  * 校验 `.ai/NEXT.md`：**全局只允许存在 1 个处于活跃状态的 Task ID**。
+  * 校验依赖拓扑：检查该任务在 `.ai/TASKS.md` 中声明的 `depends_on` 任务状态，若有任何前置依赖未完成，严禁开启当前任务。
+  * 阻断任何跨阶段、跨任务的批量勾选操作。
 
 ---
 
-## 三、文件格式改进
+### 2.6 L6：事件驱动挂起与整洁状态机 (P2)
 
-### 3.1 enhanced NEXT.md 格式
+* **重构原则**：移除不稳定的“15分钟轮询、1小时定时器超时强制回退”机制，改为**事件驱动的挂起状态（Suspended State）**。
+* **状态机设计**：
+  * `MODE_1_AUDITING` $\rightarrow$ `MODE_2_PROPOSING` $\rightarrow$ `AWAITING_PROPOSAL_APPROVAL` (挂起等待确认)
+  * `MODE_3_IMPLEMENTING` $\rightarrow$ `AWAITING_VERIFICATION` (挂起等待测试信号)
+  * `MODE_4_VALIDATING` $\rightarrow$ [测试失败: 返回 MODE_3] / [测试通过: 进入 MODE_5]
+  * `MODE_5_CLOSEOUT` $\rightarrow$ `IDLE / AWAITING_NEXT_TASK`
+
+---
+
+## 三、 标准化文档格式规范
+
+### 3.1 `.ai/NEXT.md` 规范模板
 
 ```markdown
 # 唯一活跃任务闸门 (NEXT)
 
-## 当前活跃任务
+## 📌 当前活跃任务
+- **Task ID**: 1a-101
+- **Title**: 设计与实现 projects 表
+- **Status**: IN_PROGRESS
+- **Current Mode**: Mode 3 (Task Implementation)
+- **Started At**: 2026-08-18T10:30:00Z
 
-**Task ID**: 1a-101
-**Title**: 设计与实现 projects 表
-**Status**: in_progress
-**Mode**: 3 (Implementation)
-**Started At**: 2026-08-18T10:30:00Z
-**Expected Completion**: 2026-08-18T11:30:00Z
+## 🔗 依赖与阻塞
+- **Pre-requisites**: None (Phase 1a 首个任务)
+- **Blocking**: [1a-102, 1a-103]
 
-## 任务上下文
+## 📝 冻结开工契约 (Frozen Contract)
+- **涉及文件**: `backend/db/migrations/001_init_projects.sql`
+- **验收命令**: `pytest tests/db/test_schema.py -k test_001`
+- **预期结果**: Exit Code 0, 无语法错误
 
-**Dependencies**: 无（首个任务）
-**Blocking**: [1a-102, 1a-103, ...]（被这些任务阻塞）
-
-## 前序检查清单
-
-- [x] Task 存在于 tasks.md
-- [x] 依赖任务全部完成
-- [x] 没有并发活跃任务
-- [x] NEXT.md Hard Gate 通过
-
-## Mode 转换记录
-
-- Mode 1 完成：2026-08-18T10:15:00Z (Context Audit)
-- Mode 2 完成：2026-08-18T10:20:00Z (Planning approved)
-- Mode 3 开始：2026-08-18T10:20:00Z
-- Mode 3 完成：2026-08-18T10:30:00Z (Awaiting user signal)
-  ⏳ 等待用户说 "测试通过" / "运行测试" / "改一下"
-  ⏱️ 超时时间：2026-08-18T11:30:00Z
-
-## Mode 3 交付物
-
-**改动文件**：
-- `backend/db/migrations/001_init_projects.sql` (NEW)
-
-**验收脚本**：
-```bash
-bash verification_scripts/1a-101.sh
+## 🚦 状态流转记录
+- [x] Mode 1: 上下文与依赖审计通过 (2026-08-18T10:15:00Z)
+- [x] Mode 2: 开工契约卡片已确认 (2026-08-18T10:20:00Z)
+- [ ] Mode 3: 编码完成 (待挂起触发)
+- [ ] Mode 4: 自动化测试通过
+- [ ] Mode 5: Git 提交与结项
 ```
 
 ---
 
-# 无活跃任务时的状态
-
-如果当前没有活跃任务，NEXT.md 应该显示：
+### 3.2 `.ai/STATUS.md` 规范模板 (物理凭证审计版)
 
 ```markdown
-# 唯一活跃任务闸门 (NEXT)
+# 项目实况看板 (STATUS)
 
-**Status**: AWAITING_USER_DIRECTION
-
-所有任务已完成或正在等待下一阶段启动。
-
-请说以下任何一个：
-- "继续项目" → 进 Mode 1，扫描下一个待执行任务
-- "开始阶段 1b" → 启动新阶段
-- "审计状态" → 重新审计整个项目
-```
-
----
-
-### 3.2 enhanced STATUS.md 格式
-
-```markdown
-# 项目状态实况 (STATUS)
-
-## 📊 核心指标
-
-| 指标 | 值 | 上次更新 |
-|---|---|---|
-| 总任务数 | 84 | - |
-| 已完成 | 5 | 2026-08-18T11:00:00Z |
-| 进行中 | 1 (1a-101) | 2026-08-18T10:30:00Z |
-| 待执行 | 78 | - |
-| 完成率 | 5.95% | - |
-
-## 🔍 完成任务审计证据
-
-| Task | Git Commit | Verification Script | Completed At |
-|---|---|---|---|
-| 1a-101 | a1b2c3d | ✅ PASS | 2026-08-18T11:00:00Z |
-| 1a-102 | e4f5g6h | ✅ PASS | 2026-08-18T12:30:00Z |
-
-## ⚠️ 风险标志
-
-| 标志 | 状态 |
+## 📊 核心度量
+| 指标 | 当前值 |
 |---|---|
-| Mode 超时（>1h）| ❌ 无 |
-| 未验收任务 | ❌ 无 |
-| 代码-文档脱节 | ❌ 无 |
-| RLS 漏洞已识别 | ⚠️ 需审计 |
+| 任务总数 | 84 |
+| 已物理结项 (Mode 5) | 12 |
+| 当前进行中 | 1 (1a-101) |
+| 待执行 | 71 |
+| 真实完成率 | 14.28% |
 
-## 🚦 当前 Mode
+## 🔍 已结项任务物理审计台账 (Audit Trail)
+| Task ID | 任务名称 | Git Commit | 验收方式/结果 | 结项时间 |
+|---|---|---|---|---|
+| 1a-100 | 初始化项目脚手架 | `9a7f3c2` | `pytest tests/test_init.py` (PASS) | 2026-08-18T09:30:00Z |
+| 1a-101 | 设计 projects 表 | `待提取` | `pytest tests/db/test_schema.py` | 进行中 |
 
-**Mode**: 3 (Task Implementation)
-**Task**: 1a-101
-**Timeout**: 2026-08-18T11:30:00Z
-
----
-
-## 历史审计日志
-
-**2026-08-18T10:15:00Z** Mode 1 审计通过
-- 检查结果：NEXT.md 有效，无占位符，任务依赖满足
-
-**2026-08-18T10:20:00Z** Mode 2 三方确认完成
-- ✓ 目标确认：实现 projects 表
-- ✓ 文件路径确认：backend/db/migrations/001_init_projects.sql
-- ✓ 第一交付物确认：projects 表 DDL 通过语法检查
-
-**2026-08-18T10:30:00Z** Mode 3 实现完成
-- 改动文件：001_init_projects.sql
-- 验收脚本：通过手工测试
-- 等待用户验证信号
+## ⚠️ 阻断与风险监控
+- [x] 无多任务并发违规
+- [x] 无未提交空气代码
+- [ ] 待核查项：当前任务 1a-101 正在进行本地迁移验证
 ```
 
 ---
 
-### 3.3 新增 VERIFICATION_SCRIPTS/ 目录
+## 四、 强化行为红线与门禁检查清单
+
+### 4.1 十大禁止行为 (Strictly Forbidden Behaviors)
 
 ```
-verification_scripts/
-├── 1a-101.sh              # projects 表
-├── 1a-102.sh              # users + user_projects 表
-├── 1a-201.sh              # FastAPI 启动检查
-├── 1a-301.sh              # @geolook/contracts 编译
-└── shared/
-    ├── db-schema-check.sh
-    ├── test-runner.sh
-    └── code-coverage.sh
-```
-
-每个脚本的格式：
-
-```bash
-#!/bin/bash
-# 验收脚本：1a-101 设计与实现 projects 表
-
-set -e  # 任何失败都停止
-
-echo "🔍 开始验收 1a-101..."
-
-# Step 1: 文件存在性检查
-echo "  ① 检查 SQL 迁移文件..."
-test -f backend/db/migrations/001_init_projects.sql || {
-  echo "  ❌ 文件不存在"
-  exit 1
-}
-
-# Step 2: SQL 语法检查
-echo "  ② 检查 SQL 语法..."
-psql --dry-run -f backend/db/migrations/001_init_projects.sql || {
-  echo "  ❌ SQL 语法错误"
-  exit 1
-}
-
-# Step 3: 表结构验证
-echo "  ③ 验证表结构..."
-grep -q "CREATE TABLE projects" backend/db/migrations/001_init_projects.sql || {
-  echo "  ❌ projects 表定义缺失"
-  exit 1
-}
-
-# Step 4: 字段验证
-echo "  ④ 验证所需字段..."
-for field in slug name site_url has_site market bootstrap_meta target_mention_rate; do
-  grep -q "$field" backend/db/migrations/001_init_projects.sql || {
-    echo "  ❌ 字段缺失：$field"
-    exit 1
-  }
-done
-
-# Step 5: 约束验证
-echo "  ⑤ 验证约束..."
-grep -q "PRIMARY KEY.*slug" backend/db/migrations/001_init_projects.sql || {
-  echo "  ❌ 主键约束缺失"
-  exit 1
-}
-
-echo "✅ 验收完成：1a-101"
-exit 0
+🚫 STRICTLY FORBIDDEN:
+1. ❌ 严禁在未获得用户明确验证信号前自动标记任务完成（禁止私自进 Mode 5）。
+2. ❌ 严禁在 Mode 2 未输出结构化开工契约并获批前直接写代码。
+3. ❌ 严禁同时激活或并发推进多个 Task ID。
+4. ❌ 严禁跳过未完成的前置依赖任务。
+5. ❌ 严禁在测试未通过或 Exit Code != 0 时宣布验收成功。
+6. ❌ 严禁私自修改/弱化 Mode 2 已经冻结的验收断言（严禁自验作弊）。
+7. ❌ 严禁在没有真实 Git Commit Hash 的情况下在 STATUS.md 中标记完成。
+8. ❌ 严禁批量修改 TASKS.md 将未执行任务批量改为 [x]。
+9. ❌ 严禁在 Mode 3 期间修改契约约定之外的无关业务文件。
+10. ❌ 严禁伪造测试日志（TEST_LOG.md 必须捕获真实的控制台输出）。
 ```
 
 ---
 
-## 四、Skill 行为规范更新
-
-### 4.1 严格禁止行为清单（强化版）
+## 五、 敏捷实施路线图 (Implementation Roadmap)
 
 ```
-🚫 FORBIDDEN BEHAVIORS (HARDENED)
+Phase 1: 核心控制流卡点 (P0 - 1~2 天)
+  ├─ 实现 Mode 3 Hard Stop（物理停机，阻断自动流转）
+  ├─ 实现 Mode 5 Git Commit Hash + 物理测试日志校验
+  └─ 强化 NEXT.md 单一活跃任务门禁
 
-1. ❌ 在用户未说"测试通过"时自动进入 Mode 5
-2. ❌ 在用户未完成三方确认时进入 Mode 3
-3. ❌ 同时执行多个活跃任务
-4. ❌ 跳过任何依赖任务
-5. ❌ 在验收脚本失败时标记任务完成
-6. ❌ 修改 TASKS.md 中的任务状态（除了在 Mode 5 中）
-7. ❌ 在 Mode 3 中超过 2 小时不通知用户
-8. ❌ 假设代码提交存在而不检查 git log
-9. ❌ 虚报测试覆盖率或性能指标
-10. ❌ 在 Mode 4 失败时继续进入 Mode 5
-```
+Phase 2: 交互与验收体系重构 (P1 - 2~3 天)
+  ├─ 落地 Mode 2 单卡开工契约 (One-Card Proposal Gate)
+  ├─ 建立 JIT 验收机制与测试断言冻结规则
+  └─ 接入项目原生测试 Runner (pytest/npm/cargo)
 
-### 4.2 强制性检查清单
-
-```
-✅ MANDATORY CHECKS (BEFORE ANY ACTION)
-
-Mode 1 时必须检查：
-- [ ] NEXT.md 中只有一个活跃任务
-- [ ] 该任务存在于 TASKS.md
-- [ ] 该任务的所有依赖已完成
-- [ ] 没有占位符在 NEXT.md 中
-
-Mode 2 时必须检查：
-- [ ] 展示三个独立的确认点
-- [ ] 等待用户对每个点的明确回答
-- [ ] 只有三个都"是"才进入 Mode 3
-
-Mode 3 时必须检查：
-- [ ] 不超过当前 NEXT.md 指定的任务
-- [ ] 只修改 TASKS.md 中该任务涉及的文件
-- [ ] 完成后列出改动文件
-- [ ] 建议验收脚本
-- [ ] 完成后立即 STOP，不自动进入 Mode 4
-
-Mode 4 时必须检查：
-- [ ] 运行验收脚本
-- [ ] 记录输出到 TEST_LOG.md
-- [ ] 如果脚本失败，提示修复建议，不进入 Mode 5
-
-Mode 5 时必须检查：
-- [ ] 验收脚本已通过
-- [ ] 相关代码已提交到 git
-- [ ] git log 中有该任务的提交记录
-- [ ] STATUS.md 中记录 commit hash
-- [ ] TASKS.md 中标记该任务为 [x]
-- [ ] NEXT.md 更新为下一个任务或"no active task"
+Phase 3: 状态机与审计闭环 (P2 - 1~2 天)
+  ├─ 完善 STATUS.md 物理台账与 Commit 双向校验
+  ├─ 实现事件驱动的挂起状态管理
+  └─ 编写端到端防御性回归测试
 ```
 
 ---
 
-## 五、迁移路线图
+## 六、 业务成功度量 (Success Metrics)
 
-### 5.1 三阶段优化实施计划
-
-**Phase 1：Core Flow Hardening（2-3 天）**
-- 实现 Hard Stop at Mode 3
-- 强化 Mode 2 三方确认
-- 添加明确的信号/触发词检查
-- 优先级：P0
-
-**Phase 2：Verification Automation（3-5 天）**
-- 为所有 84 个任务编写验收脚本
-- 集成验收脚本到 Mode 4/5
-- 添加 TEST_LOG.md 自动记录
-- 优先级：P1
-
-**Phase 3：SSOT Validation（2-3 天）**
-- 添加 git 代码提交检查到 Mode 5
-- 实现 STATUS.md ↔ git log 双向校验
-- 添加审计证据记录（commit hash）
-- 优先级：P2
-
-**Phase 4：DAG & Timeout（1-2 天）**
-- 实现任务 DAG 验证
-- 添加超时提醒机制
-- 优先级：P3
-
----
-
-### 5.2 向后兼容性考虑
-
-```
-现有 NEXT.md 格式：
-  Active Task: ALL_TASKS_COMPLETED
-
-迁移策略：
-1. 自动检测旧格式
-2. 转换为新格式（单任务 + Mode 记录）
-3. 保留历史记录但从新版本开始执行
-
-即：不破坏现有项目，但从现在开始执行新规则
-```
-
----
-
-## 六、成功指标
-
-升级后，ProjectOrchestrator Skill 应该满足：
-
-| 指标 | 当前 | 目标 | 验证方法 |
+| 衡量维度 | 升级前现状 | 目标值 (v2.0) | 验证方式 |
 |---|---|---|---|
-| 任务虚报率 | 100% | 0% | 随机抽查 5 个任务，检查代码提交 |
-| Mode 转换正确率 | 70% | 99% | 检查 Mode 记录是否符合用户指令 |
-| 验收脚本通过率 | 0% | 100% | 每个完成的任务都通过脚本验证 |
-| SSOT 一致性 | 50% | 100% | 检查 STATUS.md vs git log vs 代码 |
-| 用户干预次数（per 任务） | 1 次 | 3-5 次 | Mode 2 三方确认 + Mode 4 验证 |
-
----
-
-这是对 ProjectOrchestrator Skill 的**系统性架构审视**。核心是：**将所有隐式假设变为显式检查，将文本标准变为可执行脚本，将自动化变为用户驱动**。
-
-你想先从哪个 Phase 开始优化？
+| **任务虚报率 (Ghost Completion)** | 100% (存在空气任务) | **0%** | 抽查已完成任务，100% 具备 Git 提交与对应功能代码 |
+| **测试真实执行率** | 0% (无实际运行) | **100%** | 每个结项任务在 `TEST_LOG.md` 均有真实控制台执行记录 |
+| **单任务交互轮次** | 1 次 (草率) / 原案 5 次 (疲劳) | **2 次 (开工确认 1 次 + 验收放行 1 次)** | 统计各任务人机交互步数 |
+| **依赖穿透与并发违规** | 频发 | **0 起** | 拓扑 DAG 自动校验拦截 |
+| **文档与代码一致性 (SSOT)** | ~48% | **100%** | STATUS.md 审计台账与 `git log` 完全对齐 |
