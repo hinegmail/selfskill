@@ -19,7 +19,6 @@ test_install/
 *local*
 
 # Original docs (archived references)
-docs/
 logs/
 .venv/
 __pycache__/
