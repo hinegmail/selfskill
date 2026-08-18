@@ -25,7 +25,29 @@
 
 ## 🚀 快速上手
 
-### 1\. 初始化项目
+### 方式 A：作为按需调用的技能（推荐）
+
+ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-orchestrator/SKILL.md`。支持技能发现机制的 AI IDE（如 Codex、Cursor 等）会自动识别并按需激活。
+
+**技能结构：**
+
+```
+.agents/skills/project-orchestrator/
+├── SKILL.md                  # 核心技能文件（YAML frontmatter + 精简指令）
+└── references/               # 按需加载的参考文档
+    ├── mode-reference.md     # 完整模式输出模板（Mode 0-6.5）
+    └── forbidden-behaviors.md # 禁止行为清单 + Git Hook 脚本
+```
+
+只需开启对话并输入触发词如 **"继续项目"** / **"continue"**，技能会根据 YAML `description` 字段自动激活。
+
+详见 [使用指南](docs/seflskill使用指南.md)。
+
+---
+
+### 方式 B：初始化目标项目
+
+### 1. 初始化项目
 
 **Windows (PowerShell)**:
 
@@ -110,8 +132,14 @@
 ## 📁 项目结构
 
 ```
-SelfSkill/
+ProjectOrchestrator/
 ├── skill.md                     # 核心 Skill（完整版，唯一事实来源）
+├── .agents/skills/               # 标准技能目录（按需激活）
+│   └── project-orchestrator/
+│       ├── SKILL.md              # 技能文件（YAML frontmatter，自动发现）
+│       └── references/           # 按需加载参考文档
+│           ├── mode-reference.md       # 完整模式输出模板
+│           └── forbidden-behaviors.md  # 禁止行为 + Git Hook
 ├── README.md                    # 本文件
 ├── init.ps1                     # Windows 初始化脚本
 ├── init.sh                      # macOS/Linux 初始化脚本
@@ -123,10 +151,10 @@ SelfSkill/
 │   ├── STATUS.md                # 项目状态模板
 │   ├── NEXT.md                  # 活跃任务闸门模板
 │   ├── RULES.md                 # AI 规则 + 编码约定模板
-│   ├── TEST\_LOG.md              # 测试记录模板
+│   ├── TEST_LOG.md              # 测试记录模板
 │   ├── DECISIONS.md             # 架构决策模板
 │   ├── LESSONS.md               # 经验教训模板
-│   └── EVOLUTION\_PROPOSALS.md   # 进化提案模板
+│   └── EVOLUTION_PROPOSALS.md   # 进化提案模板
 │
 ├── adapters/                    # IDE 适配器
 │   ├── cursor.mdc               # Cursor 新格式 (.cursor/rules/)
@@ -134,8 +162,8 @@ SelfSkill/
 │   ├── clinerules.md            # Cline / RooCode (.clinerules/)
 │   ├── guide.md                 # Gemini Code Assist (.gemini/)
 │   ├── ANTIGRAVITY.md           # Antigravity Agent
-│   ├── KIRO\_AGENT.md           # Kiro AI Agent (命名为 KIRO\_AGENT.md)
-└───── AGENTS.md                # 通用格式 (AGENTS.md)
+│   ├── KIRO_AGENT.md            # Kiro AI Agent
+└───── AGENTS.md                 # 通用格式 (AGENTS.md)
 ```
 
 \---
@@ -144,14 +172,15 @@ SelfSkill/
 
 |IDE|适配器文件|安装位置|
 |-|-|-|
+|**技能兼容 IDE**|`.agents/skills/`|`.agents/skills/project-orchestrator/SKILL.md`|
 |**Cursor** (新版)|`cursor.mdc`|`.cursor/rules/project-orchestrator.mdc`|
 |**Cursor** (传统)|`cursorrules`|`.cursorrules`|
 |**Cline / RooCode**|`clinerules.md`|`.clinerules/project-orchestrator.md`|
 |**Windsurf**|`windsurfrules.md`|`.windsurfrules`|
 |**Claude Code**|`CLAUDE.md`|`CLAUDE.md` (项目根目录)|
-|**Gemini Code Assist**|`gemini\_styleguide.md`|`.gemini/styleguide.md`|
+|**Gemini Code Assist**|`gemini_styleguide.md`|`.gemini/styleguide.md`|
 |**Antigravity** (Google DeepMind Agent)|`ANTIGRAVITY.md`|`ANTIGRAVITY.md` (项目根目录)|
-|**Kiro AI Agent**|`KIRO\_AGENT.md`|`KIRO\_AGENT.md` (项目根目录)|
+|**Kiro AI Agent**|`KIRO_AGENT.md`|`KIRO_AGENT.md` (项目根目录)|
 |**通用**|`AGENTS.md`|`AGENTS.md` (项目根目录)|
 
 \---
