@@ -19,7 +19,7 @@ You must follow these modes sequentially unless the user explicitly requests a s
 **Before entering any mode (including Mode 0 or Mode 1), you MUST perform this check FIRST:**
 
 1. Read `.ai/STATUS.md` and `.ai/STEERING.md` (first 10 lines each is enough).
-2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across STATUS.md, STEERING.md, NEXT.md, **and RULES.md**.
+2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `[Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across STATUS.md, STEERING.md, NEXT.md, **and RULES.md**.
 3. **If ANY placeholder is found** → Immediately enter **Mode 0: Initialization** (auto-extraction). Do NOT proceed to Mode 1 or any other mode. Do NOT output an audit report. Do NOT ask "what would you like to do?" — just execute Mode 0 auto-extraction directly.
 4. **If NO placeholders found** → Continue to the normal mode flow below.
 
@@ -29,14 +29,14 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 **Trigger**: Any of the following:
 - `.ai/STATUS.md` or `.ai/NEXT.md` is **missing**
-- `.ai/STATUS.md` or `.ai/STEERING.md` contains **template placeholders** (detect by scanning for: `{待`, `{待AI`, `{待填写`, `{待更新`, `{待提取`, `Milestone 1]` with `(未开始)`, `0 / 0 任务`, `项目名称` as literal text)
+- `.ai/STATUS.md` or `.ai/STEERING.md` contains **template placeholders** (detect by scanning for: `{待`, `{待AI`, `{待填写`, `{待更新`, `{待提取`, `[Milestone 1]` with `(未开始)`, `0 / 0 任务`, `项目名称` as literal text)
 - User says "启动项目 / 初始化项目 / setup / initialize / init"
 
 **Actions**:
 1. Read `.ai/requirements.md`, `.ai/DESIGN.md`, `.ai/TASKS.md` (if they exist).
 2. **Placeholder Detection Scan**: For each `.ai/` runtime file (STATUS.md, STEERING.md, NEXT.md, TASKS.md), scan its content for template placeholder patterns. Classify each file as:
    - **✅ Populated** — contains real project data, no placeholders
-   - **⚠️ Template** — still contains placeholder text (e.g., `{待...}`, `项目名称`, `Milestone 1]` with no real name, `0 / 0`)
+   - **⚠️ Template** — still contains placeholder text (e.g., `{待...}`, `项目名称`, `[Milestone 1]` with no real name, `0 / 0`)
    - **❌ Missing** — file does not exist
 3. If `requirements.md`, `DESIGN.md`, `TASKS.md` exist and contain real project data (not placeholders):
    - **Auto-extract and populate** all ⚠️/❌ runtime files:
@@ -108,7 +108,7 @@ Confirm the auto-extracted content (or answer the wizard questions), then enter 
      - If the difference exceeds 60 seconds, mtime is unreadable, or `last_audit_timestamp` is missing/empty/placeholder:
        - Perform a full re-audit by reading `requirements.md` and `DESIGN.md`. Prepare to update `last_audit_timestamp` during Mode 5.
    - **STEERING.md reading is mandatory in all cases** — it is never skipped regardless of timestamp result.
-3. **Placeholder Detection (占位符检测)**: If `.ai/STEERING.md` or `.ai/STATUS.md` or `.ai/NEXT.md` contain template placeholder text (scan for: `{待`, `{待AI`, `{待填写`, `{待更新}`, `{待提取}`, `Milestone 1]` with `(未开始)` and no real name, `0 / 0`, `项目名称` as literal text, or `就绪中`):
+3. **Placeholder Detection (占位符检测)**: If `.ai/STEERING.md` or `.ai/STATUS.md` or `.ai/NEXT.md` contain template placeholder text (scan for: `{待`, `{待AI`, `{待填写`, `{待更新}`, `{待提取}`, `[Milestone 1]` with `(未开始)` and no real name, `0 / 0`, `项目名称` as literal text, or `就绪中`):
    - **Do NOT proceed with normal audit.** Output a warning and redirect to **Mode 0: Initialization** to execute auto-extraction.
    - > ⚠️ [Template Placeholder Detected] The following files still contain template placeholders: {list files}. Redirecting to Mode 0 for auto-extraction and population.
 4. **Adaptive Rule Reload (扩展规则热加载)**:
@@ -187,7 +187,7 @@ Task Planning
 
 ---
 
-### Mode 2: Task Planning（任务规划 + 三项确认）
+### Mode 2: Task Planning（任务规划与单卡开工契约 One-Card Gate）
 
 **Trigger**: Context Audit completed and user confirms; or user says "开始阶段 X / 执行 Task Y / plan / start task".
 
@@ -195,479 +195,288 @@ Task Planning
 
 **Actions**:
 0. **Mandatory Mode Reference Load (强制模板加载)**:
-   - If you have **NOT** read `.ai/MODE_REFERENCE.md` in this session, you **MUST** read it before producing any Mode 2 output. The compact adapter only contains triggers; the full output template is in MODE_REFERENCE.md §Mode 2.
-   - Read only the `### Mode 2` section (not the entire file) using chapter-anchor navigation.
-   - If `.ai/MODE_REFERENCE.md` does not exist, fall back to the compact rules in the adapter — output will be simpler but functional.
+   - If you have **NOT** read `.ai/MODE_REFERENCE.md` in this session, you **MUST** read it before producing any Mode 2 output.
+   - Read only the `### Mode 2` section using chapter-anchor navigation.
 1. Plan implementation for the single active task in `.ai/NEXT.md`.
 2. **Mandatory Lessons Query (历史避坑强制检索)**:
-   - The AI **must** use `grep_search` to search `.ai/LESSONS.md` against the `### 模块/关键词` field, using module names and keywords extracted from the current task (e.g., database table names, API names, component names).
-   - Search strategy: run `grep_search` for each key term from the current task against `LESSONS.md`. Prioritize matches in `### 模块/关键词` fields, then fall back to full-text matches.
-   - If any matched lessons are found, they **must** be cited under "历史避坑经验" in the plan, including the LESSON ID and the recommended behavior.
-3. Execute the **Three Confirmations Protocol** (三项确认):
-   - ① My understanding of the task objective (1-2 lines)
-   - ② Technical implementation path + involved files/interfaces (incorporating findings from LESSONS.md)
-   - ③ First minimum deliverable
-4. List acceptance criteria, risks, and non-goals.
+   - The AI **must** use `grep_search` to search `.ai/LESSONS.md` against the `### 模块/关键词` field.
+   - If matched lessons exist, cite them under "历史避坑经验".
+3. **Generate One-Card Proposal Contract (单卡结构化开工契约)**:
+   - ① **Task Objective (交付目标)**: 1-2 lines summarizing core goal.
+   - ② **Impact Scope (影响范围)**: Explicit file list to inspect and modify.
+   - ③ **JIT Tiered Acceptance Assertions (JIT 分级验收断言)**:
+     - Tier 1: Syntax / Typecheck / Dry-run commands.
+     - Tier 2: Specific automated test suite command (e.g. `pytest ...`, `npm test ...`) and expected exit code 0.
+     - Tier 3: Manual smoke check steps (if UI or non-automatable).
+   - ④ **First Minimum Deliverable (首个最小交付物)**.
+   - ⑤ **Rollback Plan (回滚预案)**: How to revert if implementation breaks.
+4. **Contract Freezing (开工契约冻结)**:
+   - Once approved by the user, the acceptance assertions in this contract are **frozen and written to `.ai/NEXT.md`**.
+   - The AI **MUST NOT** alter, weaken, or bypass these assertions in Mode 3 or Mode 4 (Anti-Collusion / 防自验作弊).
 5. **Do not modify any code files.** Wait for user confirmation.
 
-**Micro Mode shortcut**: Skip Three Confirmations. Output a 3-line quick plan: ① Goal ② Files to modify ③ First step. Wait for "执行".
+**Micro Mode shortcut**: Skip full contract card. Output a 3-line quick plan: ① Goal ② Files to modify ③ First step. Wait for explicit approval.
 
 **Output**:
-```
-## 📋 Task Plan
+```markdown
+## 📋 Task Plan (One-Card Gate)
 
-### 任务
-（Task ID + name）
+### 任务卡片
+- **Task ID**: {ID}
+- **Title**: {Task Name}
+- **Phase**: {Phase Name}
 
 ### 历史避坑经验（如有）
 （lessons cited from LESSONS.md）
 
-### 目标理解（三项确认 ①）
-（1-2 lines）
-
-### 技术路径与涉及文件（三项确认 ②）
-- 需检查文件：...
-- 预计修改文件：...
-
-### 首个最小可交付物（三项确认 ③）
-（what will be delivered first）
-
-### 验收标准
-（line-by-line from TASKS.md / NEXT.md）
-
-### 实现步骤
-1. ...
-2. ...
-
-### 需求来源
-（reference requirements.md sections）
-
-### 设计依据
-（reference DESIGN.md sections）
-
-### 风险
-（potential issues）
+### 📋 任务开工契约 (Task Contract Card)
+- **交付目标**: （1-2 lines）
+- **影响范围**:
+  - 需检查文件：...
+  - 预计修改文件：...
+- **JIT 验收断言 (Exit Criteria)**:
+  1. [Tier 1 静态检查]: 命令与预期
+  2. [Tier 2 自动化测试]: 测试命令（预期 Exit Code 0）
+  3. [Tier 3 冒烟验证]: 关键路径行为确认
+- **首个最小可交付物**: （what will be delivered first）
+- **回滚预案**: （git revert / cleanup steps）
 
 ### 本次不会做的事（Non-goals）
 （explicit boundaries）
 
 ---
 
-🚀 **规划完成，准备就绪！**
+🚀 **开工契约已生成，等待确认！**
 
-以上规划已完成检查，技术路径清晰，验收标准明确。
-
-您现在可以：
-① 说 **"执行"** 或 **"开始"** → 我立即进入实现模式开始编码
-② 提出 **疑问或建议** → 我调整规划
-③ 要求 **重新规划** → 我重新分析任务
-
-等待您的下一步指令...
+请回复 **"确认执行"** / **"OK"** 批准开工契约并进入实现模式；或提出 **调整意见** 修改规划。
 ```
 
 ---
 
-### 3.1 Mode 2→Mode 3 Automatic Transition Triggers（自动转换触发器）
+### 3.1 Mode 2→Mode 3 Transition Triggers（开工确认触发器）
 
-**Purpose**: Define the complete set of user expressions and patterns that automatically trigger Mode 3 entry.
+**Affirmative Triggers (批准开工 - 锁定契约并进入 Mode 3)**:
+- "确认" / "确认执行" / "批准" / "同意" / "执行" / "开始" / "开始实现"
+- "OK" / "okay" / "没问题" / "可以开始" / "👍" / "🚀"
 
-**Key Principle**: User does NOT need to memorize special commands. Any natural affirmative response will work.
+**Clarification / Question Pattern**:
+- When user asks a technical or scope question: AI answers the question and stays in Mode 2 with the updated proposal card, waiting for the final affirmative confirmation. AI **MUST NOT** jump into Mode 3 on a question without user's explicit approval.
 
-### Affirmative Triggers (肯定信号 - 任何一个都自动进入Mode 3)
-
-**Direct Execution Commands**:
-- "执行" / "执行这个" / "执行任务" / "执行规划"
-- "开始" / "开始实现" / "开始编码" / "开始编写"
-- "确认" / "批准" / "同意" / "认可"
-- "可以" / "可以开始" / "没问题" / "没有问题"
-- "好的" / "好" / "嗯" / "明白了"
-- "OK" / "okay" / "好吧" / "走起"
-- "继续" / "继续开发" / "我们继续"
-
-**Affirmative Responses to "准备就绪" Prompt**:
-- "是的" / "对" / "对的" / "对的吗" (positive confirmation)
-- "很好" / "看起来不错" / "不错"
-- 任何不含"不"、"改"、"重"的简短回复都视为肯定
-
-**Emoji/Shorthand**:
-- "👍" / ":+1:" / "✓" / "✅"
-- "🚀" (rocket = let's go)
-
-### Technical Question → Auto-Transition Pattern
-
-**When user asks implementation-related questions**:
-- "这里是不是应该用X技术?" 
-- "需要考虑性能吗?"
-- "用什么库?"
-- "怎么处理Y场景?"
-- 任何以 "?" 结尾且与实现相关的问题
-
-**Behavior**: 
-AI answers the question, then **automatically enters Mode 3** to proceed with implementation.
-
-### Rejection/Modification Triggers (拒绝信号 - 回到Mode 2重新规划)
-
-**Explicit Rejection**:
-- "重新规划" / "改一下" / "改改" / "重来"
-- "我不同意" / "有问题" / "不对" / "不行"
-- "这样不行" / "不好" / "有问题"
-
-**Modification Requests**:
-- "改改XX部分"
-- "XX改成Y"
-- "不用这个库"
-
-**When rejection detected**: AI stays in Mode 2 and asks "哪里有问题？请告诉我。"
-
-### Auto-Detection Algorithm (自动检测算法)
-
-```
-if user_message in affirmative_triggers_list:
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, affirmative_patterns):
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, technical_question_patterns):
-    AI_answers_question()
-    ENTER_MODE_3()
-    
-elif contains_any(user_message, rejection_triggers):
-    REMAIN_IN_MODE_2()
-    ASK_CLARIFICATION("哪里需要调整？")
-    
-else:
-    REQUEST_DIRECTION("您希望我: (1)执行规划, (2)调整规划, 还是(3)讨论细节?")
-```
+**Rejection / Modification Triggers**:
+- "改一下" / "调整" / "重新规划" / "不同意" → Remain in Mode 2, adjust proposal.
 
 ---
 
-### Mode 3: Task Implementation（任务实现）
+### Mode 3: Task Implementation（任务实现与 Hard Stop 物理停机）
 
-**Trigger**: User provides affirmative signal matching Mode 2→3 Automatic Transition Triggers (see §3.1 above), OR user begins asking implementation-related technical questions.
+**Trigger**: User provides explicit affirmative signal approving Mode 2 contract card.
 
-**Precondition**: Mode 2 output generated. NEXT.md gate valid.
-
-**Auto-Entry Logic**:
-- AI scans user's response for trigger words/patterns from the Transition Triggers list
-- If match found: **AUTOMATICALLY ENTER MODE 3** (no explicit permission needed)
-- If rejection words detected: remain in Mode 2, ask for clarification instead
-- If ambiguous: request explicit direction
+**Precondition**: Mode 2 contract card approved. NEXT.md gate valid.
 
 **Iron Rules**:
-1. Only implement the active task in `.ai/NEXT.md`.
-2. Do not execute future tasks.
-3. Do not expand requirements beyond `.ai/requirements.md`.
-4. Do not refactor unrelated modules.
-5. Do not rewrite tested modules unless the current task requires it.
-6. Do not change public interfaces unless the current task requires it or user approves.
-7. Do not introduce new dependencies unless the current task requires it or user approves.
-8. If documents and code conflict, **stop and report**.
-9. If the task description is ambiguous, **stop and ask for clarification**.
+1. **Scope Lock**: ONLY modify files specified in the approved Mode 2 contract.
+2. **No Scope Creep**: Do not implement future tasks or unapproved features.
+3. **No Phantom Code**: Every claimed functionality must be written into actual files.
+4. **Hard Stop Principle (物理硬停机)**:
+   - When coding is complete, the AI **MUST IMMEDIATELY STOP TURN**.
+   - It is **STRICTLY FORBIDDEN** to automatically advance to Mode 4.5 or Mode 5.
+   - The AI must output changed files and recommended test commands, and transition to `AWAITING_VERIFICATION` state.
 
 **Output** (after implementation):
-```
-## 🛠️ Task Implementation
+```markdown
+## 🛠️ Task Implementation (Hard Stop)
 
 ### 任务
 （Task ID + name）
 
 ### 当前进度
 ✓ Mode 1: Context Audit 完成
-✓ Mode 2: Task Planning 完成  
-▶️ Mode 3: Task Implementation 进行中
-
-### 执行说明
-- 我现在开始实现Task中的功能需求
-- 实现完成后自动进入Mode 4: Validation & Test
-- 如需中止，您可以随时说"停止"或"暂停"
+✓ Mode 2: Task Planning & Contract Approved
+▶️ Mode 3: Task Implementation 已完成 (Hard Stop)
 
 ---
 
-### 修改的文件
-（file-by-file list）
+### 修改的文件 (Changed Files)
+- `path/to/file1` (NEW / MODIFIED) - 说明
+- `path/to/file2` (MODIFIED) - 说明
 
-### 变更说明
+### 变更摘要
 （what changed and why, per file）
 
-### 验收标准检查
-- [x] Criterion 1 — satisfied
-- [x] Criterion 2 — satisfied
-- [ ] Criterion 3 — needs testing
+### 冻结契约验收检查
+- [ ] Tier 1 静态检查: 待运行
+- [ ] Tier 2 自动化测试: 待运行
+- [ ] Tier 3 冒烟验证: 待确认
 
 ### 建议测试命令
-（commands to run）
-
-### 需要更新的文档（Mode 5 时执行）
-- TASKS.md: 标记本任务为 [x]
-- STATUS.md: 追加阶段总结，更新 last_audit_timestamp
-- NEXT.md: 设置下一活跃任务
-- [DESIGN.md]: 如有设计偏离，需对齐
-- [LESSONS.md]: 如有新教训，需记录
-- [TEST_LOG.md]: 如有测试记录，需追加结论
-
-**请确保测试通过后进入 Mode 5 完成文档更新。**
-
-### 推荐下一模式
-Validation
+```bash
+{test_command_from_contract}
 ```
-
-**Do not automatically start the next task.**
 
 ---
 
-### Mode 4: Validation & Test Repair（验证与测试修复）
+✋ **实现已完成，已进入物理停机状态 (Awaiting Verification)！**
 
-**Trigger**: Implementation completed; or user provides test results / error logs.
+请选择下一步操作：
+1. 回复 **"运行测试"** / **"执行验证"** → 进入 Mode 4 运行自动化验证
+2. 回复 **"测试通过"**（附带测试结果） → 进入 Mode 5 进行物理收口与 Git 提交
+3. 回复 **"需要修改"** → 继续在 Mode 3 调整代码
+```
+
+### Mode 4: Validation & Anti-Collusion Test（分级验证与防作弊测试）
+
+**Trigger**: User says "运行测试" / "执行验证" / "validate" / "run tests"; or user provides test results / error logs.
+
+**Precondition**: Mode 3 implementation completed. Code changes exist.
 
 **Actions**:
-1. Run or recommend the smallest relevant test set.
-2. Record all test activity in `.ai/TEST_LOG.md`.
-3. **Context Health Check (上下文健康度自检)**:
-   Before starting any test-fix loop, evaluate the following signals. If **2 or more** are true, output a health warning and recommend starting a new conversation after the current task closes out:
-
-   | Signal | Check |
-   |--------|-------|
-   | 🔴 Fix iterations | Current test-fix-retest cycle count ≥ `mitigation_threshold` (default: 3) |
-   | 🟠 Conversation turns | Estimated turns in current chat session > 30 |
-   | 🟠 Error log volume | Total error/traceback output processed this session > 200 lines |
-   | 🟡 Memory references | AI is referencing details not in any `.ai/` file (relies on chat memory) |
-   | 🟡 Scope drift | Current work is touching files or tasks beyond what `.ai/NEXT.md` specifies |
-
-   **Output format when 2+ signals trigger**:
-   > ⚠️ **[Context Health Warning]** {N}/5 health signals active: {list triggered signals}.
-   > Recommend completing the current task, running Mode 5 Closeout, then starting a fresh conversation.
-   > Files are up-to-date in `.ai/` — a new conversation will reload clean state automatically.
-
-**Context Blurring Mitigation Protocol (Context Compression Safeguard)**:
-- **Iteration Limit**: The AI must check the custom `mitigation_threshold` configuration in `.ai/RULES.md` (defaulting to 3 if the configuration is missing or empty). If the test-fix-retest loop in the current conversation session exceeds this threshold, the AI **must** halt development.
-- **Action (Root Cause Compaction)**:
-  - The AI **must** consolidate and analyze the root causes of the consecutive failures across these iterations (e.g., compile a brief post-mortem of why previous fixes failed and what is the core mismatch).
-  - Write a **"Root Cause Analysis (根因诊断反思)"** list directly into `.ai/TEST_LOG.md`.
-  - Output a prominent notice requesting the user to start a new clean session:
-    > *⚠️ [Context Alert] Current test-fix cycle has exceeded the limit of {threshold} iterations. To prevent cognitive decay and save tokens, I have compiled a Root Cause Analysis and saved it to `.ai/TEST_LOG.md`. Please start a NEW conversation and say "继续项目" to reload clean memory.*
-- **Log Compactor**: Never paste or process raw terminal output longer than 50 lines in chat. Compress terminal outputs to list only failing test files, test names, error messages, and line numbers.
-
-**If tests fail**:
-- Fix **only** current-task-related failures.
-- Do not add new features.
-- Do not refactor unrelated modules.
-- Do not change task scope.
-- Do not start the next task.
-
-**For each failure, record**:
-- Failing command
-- Error summary
-- Root cause analysis
-- Files changed for fix
-- Retest command
-- Retest result
+1. **Execute Tiered Verification (执行分级验收)**:
+   - **Tier 1 (Static/Lint)**: Run syntax check, typecheck (`tsc`, `mypy`, `ruff`, etc.), or dry-run.
+   - **Tier 2 (Automated Test Suite)**: Execute the project's native test runner (e.g. `pytest`, `npm test`, `cargo test`, `go test`) with exact task test paths.
+   - **Tier 3 (Manual Smoke)**: For non-automatable UI/interactive items, present concise verification steps and obtain user confirmation.
+2. **Anti-Collusion & Integrity Guard (防同谋自验作弊检查)**:
+   - **Assertion Immutability Check**: Verify that test files or assertions have NOT been altered or weakened in Mode 3/4 to fake a test pass.
+   - **Exit Code Verification**: Test passes **ONLY** when the test runner process exits with **Code 0**. Text outputs alone without 0 exit code cannot be treated as pass.
+3. **Capture Real Execution Logs**:
+   - Write actual executed commands, exit codes, and stdout/stderr summary directly into `.ai/TEST_LOG.md`.
+4. **Failure Handling**:
+   - If ANY test fails (exit code != 0):
+     - Record failure in `.ai/TEST_LOG.md` (command, error summary, root cause).
+     - **FORBIDDEN** to enter Mode 5.
+     - Return to **Mode 3** for targeted repair.
+5. **Context Health Check**:
+   - If test-fix loop iteration ≥ `mitigation_threshold` (default: 3), halt development, write post-mortem analysis to `TEST_LOG.md`, and recommend fresh session.
 
 **Output**:
-```
-## ✅ Validation Result
+```markdown
+## ✅ Validation Result (Tiered Verification)
 
 ### 任务
 （Task ID + name）
 
-### 测试命令
-（commands executed）
+### 物理执行记录
+- **测试命令**: `{test_command}`
+- **Exit Code**: `{0 / non-zero}`
+- **耗时 / 资源**: `{time_elapsed}`
 
-### 结果
-（pass / fail summary）
+### 分级验证结果
+| 级别 | 验证项 | 状态 | 物理证据 |
+|---|---|---|---|
+| Tier 1 | 静态 / 类型检查 | ✅ PASS / ❌ FAIL | `exit code 0` |
+| Tier 2 | 自动化测试套件 | ✅ PASS / ❌ FAIL | `{N} passed, 0 failed` |
+| Tier 3 | 冒烟 / 功能核验 | ✅ PASS / ⚠️ 需人工确认 | 用户签署 / 关键日志 |
 
-### 失败项（如有）
-| # | 失败命令 | 错误摘要 | 根因 | 修复文件 | 复测结果 |
-|---|---------|---------|------|---------|---------|
-| 1 | ... | ... | ... | ... | ✅ Pass |
+### 失败项与修复建议（如有）
+（if failed, list failing tests, root cause, and return to Mode 3）
 
-### 最终验证状态
-✅ 全部通过 / ❌ 仍有未解决项
-
-### 推荐下一模式
-Phase Closeout（如全部通过）
+### 最终状态与下一模式
+- 最终结论: ✅ 全部通过 (All Pass) / ❌ 未通过
+- 推荐操作: 回复 **"测试通过"** 或 **"收口"** 进入 Mode 5 进行物理归档与 Git 提交
 ```
-
-**When all tests pass**: Automatically enter Mode 4.5: Document Sync Check. Do not start new development.
 
 ---
 
-### Mode 4.5: Document Sync Check（文档同步检查）
+### Mode 4.5: Document Sync Check（文档同步预检）
 
-**Trigger**: Tests pass in Mode 4; automatic entry.
+**Trigger**: Tests pass in Mode 4; or user requests document sync review.
 
 **Actions**:
-1. **Document Update Requirements Check**:
-   - Check if `.ai/TASKS.md` needs task status marked as `[x]`
-   - Check if `.ai/STATUS.md` needs phase summary appended
-   - Check if `.ai/TEST_LOG.md` needs test conclusion appended
-   - Check if `.ai/DESIGN.md` needs design deviation alignment
-   - Check if `.ai/LESSONS.md` needs new lessons recorded
-2. **Force Mode 5 Entry**: If any document needs updating, automatically enter Mode 5: Phase Closeout.
-3. **Output Sync Report**: Display which documents need updates.
+1. Scan for needed document updates:
+   - `.ai/TASKS.md`: Mark task as `[x]` and record commit hash.
+   - `.ai/STATUS.md`: Append phase summary, audit trail row, and update timestamps.
+   - `.ai/TEST_LOG.md`: Ensure test results are committed.
+   - `.ai/NEXT.md`: Prepare next task.
+2. Present the sync checklist to the user. **Do NOT automatically execute Mode 5** without confirmation.
 
 **Output**:
-```
+```markdown
 ## 📋 Document Sync Check
+- [ ] TASKS.md - 准备标记 Task {ID} 为 [x]
+- [ ] STATUS.md - 准备写入物理审计台账 (Audit Trail)
+- [ ] NEXT.md - 准备推进至下一活跃任务
 
-### Current Task
-（Task ID + name）
-
-### Documents Requiring Update
-- [ ] TASKS.md - 需要标记 Task X 为 [x]
-- [ ] STATUS.md - 需要追加阶段总结
-- [ ] TEST_LOG.md - 需要追加测试结论
-- [ ] DESIGN.md - 无设计偏离（或：需要对齐设计偏离）
-- [ ] LESSONS.md - 无新教训（或：需要记录新教训）
-
-### Recommended Action
-进入 Mode 5: Phase Closeout 完成文档更新
-
-### 推荐下一模式
-Phase Closeout
+👉 请回复 **"收口"** 或 **"确认完成"** 进入 Mode 5 物理归档。
 ```
-
-**If all documents are already up-to-date**: Skip Mode 5 and recommend starting a new conversation.
 
 ---
 
-### Mode 5: Phase Closeout（阶段收口）
+### Mode 5: Phase Closeout（物理 SSOT 结项与审计归档）
 
-**Trigger**: Validation passes; or user says "测试通过 / 阶段完成 / 收口 / closeout / tests passed / phase complete".
+**Trigger**: Validation passed in Mode 4 and user confirms; or user says "测试通过 / 阶段完成 / 收口 / closeout / tests passed".
 
-**Precondition**: Current task or phase has passed validation.
+**Precondition**: **Mode 5 Iron Triangle Gate (铁三角门禁 - 三者必须同时满足)**:
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  Mode 5 铁三角物理门禁 (Iron Triangle)         │
+├──────────────────────────────────────────────────────────────┤
+│ 1. 物理变更存在: git status / git ls-files 确认代码文件落盘      │
+│ 2. 真实测试绿灯: TEST_LOG.md 具备 Exit Code 0 真实执行凭证      │
+│ 3. Git Commit 就绪: 具备真实的 commit hash，杜绝空气交付       │
+└──────────────────────────────────────────────────────────────┘
+```
 
 **Actions & Document Alignments**:
-1. **Design Deviation Alignment (设计偏离智能对齐)**:
-   - Read the corresponding design section of `DESIGN.md` (via line range index in `steering.md`).
-   - Compare the actual code changes against the design. If any architectural deviations exist (e.g., database schema changes, new endpoint interfaces, different variable styles):
-     - The AI **must** generate a minimum design update patch.
-     - Propose this patch in **`EVOLUTION_PROPOSALS.md`** (e.g., `PROPOSAL-DESIGN-UPDATE`) for user approval, instead of rewriting the entire DESIGN.md.
-2. **Audit Timestamp Baseline**:
-   - Update `last_audit_timestamp` in `.ai/STATUS.md` to the current UTC timestamp, establishing a successful baseline for the timestamp-based smart loading in the next session.
-
-**Must update the following files (BLOCKING - required before next task)**:
-1. `.ai/TASKS.md` — mark completed task as `[x]`
-2. `.ai/STATUS.md` — Update **all** of the following sections:
-   - **`## TL;DR`**: one-sentence status summary
-   - **Metadata fields**: `更新时间`, `项目整体进度` (count `[x]` tasks in TASKS.md / total), `当前开发阶段`, `当前活跃任务`, `当前测试状态`, `last_audit_timestamp`
-   - **`## 📈 里程碑执行状态`**: This section **must be updated** using the following procedure:
-     1. Read `.ai/TASKS.md` and identify all milestones/phases and their tasks
-     2. For each milestone, count tasks marked `[x]` (completed) vs total tasks
-     3. Update each milestone line with actual name, count, and status:
-        - `* **[Milestone X: 名称]** (未开始) — 0/N tasks` ← no tasks started
-        - `* **[Milestone X: 名称]** (进行中) — M/N tasks` ← some but not all done
-        - `* **[Milestone X: 名称]** (✅ 已完成) — N/N tasks` ← all done
-     4. **Remove all placeholder text** (e.g., `{待提取}`, `Milestone 1`, `(未开始)`) and replace with actual project data
-     5. If this is the first closeout and the section still has template placeholders, **populate it from scratch** using TASKS.md milestone/phase structure
-   - **`## 📂 历史审计日志`**: Append phase summary (reverse chronological): completed features, key files, technical decisions, known issues
-   - **`## 🛑 风险、阻塞`**: Update if any new blockers or design deviations occurred
-3. `.ai/NEXT.md` — regenerate with exactly one next active task; if none, state **exactly** `no active task` (this is the **only** valid idle-state expression — do NOT use "就绪中", "ready", "idle", "等待" or any other free-form text)
-4. `.ai/TEST_LOG.md` — Append structured test record (test command, result, failures, root causes, fixes, retest, final conclusion). **Mandatory when tests were executed in Mode 4.** Only skip entirely if no tests were run at all (must state explicit reason for skipping).
-
-**Micro Mode shortcut**: In Micro Mode, update only `NEXT.md`, `STATUS.md` (TL;DR + timestamp), `LESSONS.md`. Skip all other document updates.
-
-**LESSONS.md Cap Check**: If `.ai/LESSONS.md` contains more than 20 entries, trigger Cognitive Distillation (see §6). Propose merging top 3-5 recurring lessons into `RULES.md`, then archive old entries.
-
-**Conditionally update the following files (OPTIONAL - but recommended)**:
-5. `.ai/DECISIONS.md` — if design deviations or important decisions were made
-6. `.ai/LESSONS.md` — **Mandatory knowledge capture**: Record any technical findings, pitfalls, or notes from this task
-   - **Each entry must include a `### 模块/关键词` field** listing the relevant module names and technical keywords (comma-separated), enabling precise grep retrieval in future Mode 2 sessions.
-   - Even without errors, record:
-     - New technical details discovered
-     - API usage considerations
-     - Special configuration requirements
-     - Any information that may be valuable for future reference
-   - Only skip if absolutely nothing worth recording exists (must provide reason)
-7. `.ai/EVOLUTION_PROPOSALS.md` — if rule, design, or Skill improvements are recommended (including design sync patch)
+1. **Git Commit & Evidence Extraction**:
+   - Ensure all changes for current task are staged and committed: `git add . && git commit -m "feat({scope}): complete task {ID}"`.
+   - Retrieve current commit hash via `git rev-parse --short HEAD`.
+2. **Update `.ai/TASKS.md` (BLOCKING)**:
+   - Mark completed task as `[x]` and record the `Git Commit Hash` and `Completed Timestamp`.
+3. **Update `.ai/STATUS.md` (BLOCKING)**:
+   - Update `## TL;DR` with verified facts.
+   - Update `## 📊 核心度量` and `## 📈 里程碑执行状态`.
+   - **Append to `## 🔍 已结项任务物理审计台账 (Audit Trail)`**:
+     `| {Task_ID} | {Task_Name} | {Commit_Hash} | {Test_Command} (PASS) | {Timestamp} |`
+   - Update `last_audit_timestamp` to current UTC.
+4. **Update `.ai/NEXT.md` (BLOCKING)**:
+   - Find the **next single uncompleted task (`[ ]`)** from `TASKS.md` whose dependencies are all satisfied.
+   - Write it into `NEXT.md` as the single active task with an empty contract card.
+   - If all tasks are completed, write **strictly** `no active task`.
+5. **Update `.ai/TEST_LOG.md` & `.ai/LESSONS.md`**:
+   - Finalize test conclusions.
+   - Capture lessons learned with module keywords.
 
 **Output**:
-```
-## 🗂️ Phase Closeout
+```markdown
+## 🗂️ Phase Closeout (Physical SSOT Complete)
 
 ### 完成任务
-（Task ID + name）
+- **Task ID**: {ID}
+- **Title**: {Task Name}
+- **Git Commit**: `{commit_hash}`
+- **验证结论**: ✅ 真实测试通过 (Exit Code 0)
 
-### 设计偏离更新（如有）
-- [ ] 偏离检测已记录：(Brief summary or "无设计偏离")
-- [ ] EVOLUTION_PROPOSALS.md 已提交：(Proposal ID)
+### 📊 物理审计台账记录 (Audit Trail)
+| Task ID | 任务名称 | Git Commit | 验收方式 | 结项时间 |
+|---|---|---|---|---|
+| {ID} | {Task Name} | `{commit_hash}` | `{test_cmd}` (PASS) | {ISO-8601} |
 
 ### ✅ 文档更新完成确认
-
-| 文件 | 状态 | 更新内容 |
-|------|------|---------|
-| TASKS.md | ✅ 已更新 | Task {ID} 标记为 [x] |
-| STATUS.md | ✅ 已更新 | 追加阶段总结，更新时间戳 |
-| NEXT.md | ✅ 已更新 | Active = Task {next_ID} |
-| TEST_LOG.md | ✅ 已更新 | 追加结构化测试记录（命令/结果/失败项/根因/修复/复测） |
-| DECISIONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录关键决策 / 无新决策 |
-| LESSONS.md | ✅ 已更新 / ⏭️ 跳过 | 记录新教训 / 无新教训 |
-
-**所有必须文档已更新，可以安全进入下一任务。**
-
-### 已更新文档详情
-- STATUS.md: （what was updated, including audit baseline timestamp）
-- TASKS.md: （what was marked）
-- TEST_LOG.md: （final conclusion, if applicable）
-- NEXT.md: （next active task）
-- [DECISIONS.md]: （if applicable）
-- [LESSONS.md]: （if applicable）
-
-### 修改的代码文件
-（summary list）
-
-### 测试结果
-（final pass/fail summary）
-
-### 关键决策（如有）
-（brief description）
-
-### 经验教训（如有）
-（brief description）
+| 文件 | 状态 | 物理变更证据 |
+|---|---|---|
+| TASKS.md | ✅ 已更新 | 标记 `[x]` 并绑定 commit `{commit_hash}` |
+| STATUS.md | ✅ 已更新 | 物理台账追加、里程碑与时间戳刷新 |
+| NEXT.md | ✅ 已更新 | Active = Task {next_ID} (单一任务) |
+| TEST_LOG.md | ✅ 已更新 | 记录真实测试 Exit Code 0 |
 
 ### 下一 Active Task
-（Task ID + name, or "无活跃任务"）
+- **Next Task ID**: {next_ID} - {next_name}
 
 📂 EVOLUTION_LOG
 [时间] {ISO-8601}
-[触发] Task {ID} 测试通过
-[变更] .ai/TASKS.md: 标记 Task {ID} 为已完成
-[变更] .ai/STATUS.md: 追加阶段总结 + 更新里程碑状态
-[变更] .ai/NEXT.md: Active = Task {next_ID} (或 "no active task")
-[建议] git add .ai/* && git commit -m "ai: closeout task {ID}" && git tag v{version}
+[触发] Task {ID} 物理结项完成
+[证据] Git Commit: {commit_hash} | Exit Code: 0
+[变更] .ai/TASKS.md: 标记 Task {ID} 为 [x]
+[变更] .ai/STATUS.md: 追加物理审计台账 + 更新里程碑
+[变更] .ai/NEXT.md: 切换至 Task {next_ID}
 
-### 🔄 下一会话推荐启动提示词
-> 继续项目
+### 🔄 推荐操作
+推荐开启新对话以获得最干净的上下文，回复 **"继续项目"** 启动下一任务。
 ```
 
-**Post-Closeout Verification (收口后验证)**:
-After writing all BLOCKING and conditional updates, the AI **must** perform a self-check before outputting the final EVOLUTION_LOG:
-1. **Read back** `.ai/NEXT.md` — verify it contains either:
-   - A **valid next task** (Task ID + name that exists in TASKS.md as `[ ]`), OR
-   - The **exact text** `no active task` (only if ALL tasks in TASKS.md are `[x]`)
-   - **REJECT** any other content: "就绪中", "ready", "idle", "等待", empty, placeholder, or any free-form text without a valid Task ID. If NEXT.md contains any such invalid content, **re-execute the NEXT.md update immediately** — either set the next uncompleted task from TASKS.md, or write exactly `no active task`.
-2. **Read back** `.ai/STATUS.md` — verify ALL of the following:
-   - TL;DR mentions the task just completed
-   - `## 📈 里程碑执行状态` section is **NOT** still template placeholder (must not contain `{待提取}`, `(未开始)` with `Milestone 1`, or `0 / 0`)
-   - Milestone section reflects updated task counts (the completed task's milestone shows incremented count)
-   - `项目整体进度` field shows correct completed/total count
-   - If any sub-check fails, re-execute the STATUS.md update
-3. **Read back** `.ai/TASKS.md` — verify the completed task is marked `[x]`.
-4. **If any verification fails**: Re-execute the failed update immediately. Do NOT output EVOLUTION_LOG until all three checks pass.
-5. **If all verifications pass**: Output the EVOLUTION_LOG block below.
-
-**Output the verification result**:
-```
-### ✅ Post-Closeout Verification
-- NEXT.md: Active = Task {next_ID} ✓ (valid uncompleted task in TASKS.md) [或 "no active task" ✓ if all tasks done]
-- STATUS.md: TL;DR ✓ + 📈 里程碑执行状态 populated (no template placeholders) ✓ + 项目整体进度 count ✓
-- TASKS.md: Task {completed_ID} marked [x] ✓
-All verifications passed. Closeout is complete.
-```
-
-**After closeout**: Recommend user to start a new conversation for a clean context.
-
-**Do not automatically start the next task.**
+**Post-Closeout Self-Verification**:
+- Verify that `NEXT.md` contains exactly one valid active task or `no active task`.
+- Verify that `STATUS.md` contains the commit hash in the Audit Trail table.
+- Verify that `TASKS.md` has the task marked `[x]`.
 
 ---
 
