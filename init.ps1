@@ -372,13 +372,30 @@ if ($IDE -eq "auto") {
         if ($installedAdapters -notcontains $key) {
             $cfg = $ideConfigs[$key]
             $dst = Join-Path $TargetPath $cfg.Dst
-            # Only remove if it's a ProjectOrchestrator adapter (contains our signature)
+            # Only remove if it's a ProjectOrchestrator adapter
             if (Test-Path $dst) {
                 $content = Get-Content $dst -Raw -ErrorAction SilentlyContinue
-                if ($content -match "ProjectOrchestrator" -and $content -match "auto-generated") {
+                # Match by content signature OR by filename pattern
+                if ($content -match "ProjectOrchestrator" -or $cfg.Label -match "project-orchestrator") {
                     Remove-Item $dst -Force
                     Write-Host "  [-] $($cfg.Label) (removed — not selected)" -ForegroundColor DarkGray
                 }
+            }
+        }
+    }
+    # Clean up empty IDE config directories left behind (e.g. .cursor/rules/, .clinerules/, .gemini/)
+    $ideDirsToCheck = @(
+        ".cursor\rules",
+        ".clinerules",
+        ".gemini"
+    )
+    foreach ($dir in $ideDirsToCheck) {
+        $dirPath = Join-Path $TargetPath $dir
+        if (Test-Path $dirPath) {
+            $remaining = Get-ChildItem $dirPath -Recurse -File -ErrorAction SilentlyContinue
+            if ($remaining.Count -eq 0) {
+                Remove-Item $dirPath -Force -Recurse
+                Write-Host "  [-] $dir/ (removed — empty directory)" -ForegroundColor DarkGray
             }
         }
     }

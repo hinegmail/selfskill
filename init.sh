@@ -418,12 +418,21 @@ if [[ "$IDE_LIST" = "auto" ]]; then
         if [[ "$is_installed" = false ]]; then
             clean_dst="${CLEANUP_MAP[$clean_key]}"
             if [[ -f "$clean_dst" ]]; then
-                # Only remove if it's a ProjectOrchestrator adapter
-                if grep -qE "ProjectOrchestrator" "$clean_dst" 2>/dev/null && \
-                   grep -qE "auto-generated" "$clean_dst" 2>/dev/null; then
+                # Only remove if it's a ProjectOrchestrator adapter (by content or filename)
+                if grep -qE "ProjectOrchestrator" "$clean_dst" 2>/dev/null || \
+                   echo "$clean_dst" | grep -qE "project-orchestrator"; then
                     rm -f "$clean_dst"
                     echo "  ➖ $clean_dst (removed — not selected)"
                 fi
+            fi
+        fi
+    done
+    # Clean up empty IDE config directories left behind
+    for clean_dir in "$TARGET_PATH/.cursor/rules" "$TARGET_PATH/.clinerules" "$TARGET_PATH/.gemini"; do
+        if [[ -d "$clean_dir" ]]; then
+            if [[ -z "$(find "$clean_dir" -type f 2>/dev/null)" ]]; then
+                rm -rf "$clean_dir"
+                echo "  ➖ $clean_dir/ (removed — empty directory)"
             fi
         fi
     done
