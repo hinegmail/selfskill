@@ -395,6 +395,7 @@ if ($IDE -eq "auto") {
     # Clean up empty IDE config directories left behind
     $ideDirsToCheck = @(
         ".cursor\rules",
+        ".cursor",
         ".clinerules",
         ".gemini",
         ".agents\skills\project-orchestrator",

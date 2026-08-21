@@ -436,7 +436,7 @@ if [[ "$IDE_LIST" = "auto" ]]; then
         fi
     fi
     # Clean up empty IDE config directories left behind
-    for clean_dir in "$TARGET_PATH/.cursor/rules" "$TARGET_PATH/.clinerules" "$TARGET_PATH/.gemini" \
+    for clean_dir in "$TARGET_PATH/.cursor/rules" "$TARGET_PATH/.cursor" "$TARGET_PATH/.clinerules" "$TARGET_PATH/.gemini" \
                      "$TARGET_PATH/.agents/skills/project-orchestrator" "$TARGET_PATH/.agents/skills" "$TARGET_PATH/.agents"; do
         if [[ -d "$clean_dir" ]]; then
             if [[ -z "$(find "$clean_dir" -type f 2>/dev/null)" ]]; then
