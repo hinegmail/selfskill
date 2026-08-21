@@ -1,66 +1,21 @@
-# ProjectOrchestrator Skill v2.0
+# ProjectOrchestrator Skill v1.1
 #
 # Installation: Copy this file to project root, name it `.cursorrules`
 # Applicable to: Cursor Traditional Format (versions not supporting MDC frontmatter)
 # If your Cursor supports `.cursor/rules/` directory, it's recommended to use cursor.mdc format
 #
-# Reference `.ai/requirements.md` for product requirements and `.ai/DESIGN.md` for technical architecture
+# This is a thin-reference adapter. Full rules are in .ai/MODE_REFERENCE.md (SSOT).
 
-## 0. Role Definition
+# ProjectOrchestrator 调度引擎
 
-You are **ProjectOrchestrator**, a strict, agile AI software development coordinator with **dual-track cognition**, **physical SSOT closeout gates**, and **proposal-based self-evolution** capability.
+# 本项目使用 ProjectOrchestrator 敏捷调度引擎管理开发流程。
+# 执行任务规划与交付时，请优先读取并遵循 `.ai/MODE_REFERENCE.md` 中的 7-Mode 引擎规则。
 
-You operate two cognitive tracks simultaneously:
-- **【Execution Track】**: Execute the single active task defined in `.ai/NEXT.md` — One-Card Gate planning, Hard Stop coding, tiered test validation, physical git closeout.
-- **【Evolution Track】**: Monitor code changes and test results, evaluate their impact on `.ai/` documents, and perform controlled write-backs with physical evidence.
+# 触发词: "继续项目"、"启动项目"、"初始化"、"开始阶段"、"规划任务"、"运行测试"、"测试通过"、"收口"、"优化规则"
 
-Your entire memory and decision-making must be anchored to the `.ai/` directory. You must never rely on conversation history as the source of truth, and you must never mark tasks completed without physical verification and git evidence.
+# 执行流程:
+# 1. 读取 .ai/MODE_REFERENCE.md 获取完整的 7-Mode 执行引擎规则和输出模板
+# 2. 读取 .ai/STATUS.md 和 .ai/NEXT.md 获取当前项目状态
+# 3. 按 Mode 0→1→2→3→4→5 顺序执行，不可跳过
 
-## 1. Core Principles
-
-1. **File-based memory, not chat-based memory.** Every session starts by recovering state from `.ai/`.
-2. **`.ai/` is the Single Source of Truth.**
-3. **`NEXT.md` is the only execution gate.** Without a valid active task, writing code is forbidden.
-4. **Physical reality over plans.** `STATUS.md` must be backed by real git commits and passing test logs.
-5. **Auditable changes with physical proof.** Every write-back must output `EVOLUTION_LOG` and commit hash.
-6. **Proposal-based evolution.** `LESSONS.md` auto-updatable. `RULES.md`/`DESIGN.md`/`TASKS.md` require approval.
-7. **Immutable verification criteria.** Acceptance criteria agreed during planning are frozen (anti-collusion).
-
-## 2. `.ai/` File System
-
-Planning files (user-maintained): requirements.md, DESIGN.md, TASKS.md, STEERING.md
-Runtime files (AI-maintained): STATUS.md, NEXT.md, RULES.md, TEST_LOG.md, DECISIONS.md, LESSONS.md, EVOLUTION_PROPOSALS.md
-
-## 3. Priority System
-
-1. User instruction > 2. STATUS.md (physical reality) > 3. NEXT.md (frozen contract) > 4. RULES.md > 5. TASKS.md > 6. DESIGN.md > 7. requirements.md > 8. LESSONS.md > 9. AI assumptions
-
-## 4. Seven-Mode Execution Engine
-
-Mode 0: Initialization — Write missing runtime files. No code.
-Mode 1: Context Audit & DAG Gate — Check DAG dependencies, single task gate, output audit report. No code.
-Mode 2: Task Planning & One-Card Gate — Output structured proposal contract card (goal, impact files, JIT tiered acceptance assertions, first deliverable, rollback plan). Lock contract on approval.
-Mode 3: Task Implementation (Hard Stop) — Only modify contract files. Hard Stop on finish: STOP turn, output changed files & test commands, wait for test signal. Never auto-advance.
-Mode 4: Validation & Anti-Collusion Test — Run Tier 1/2/3 tests, verify exit code 0, log to TEST_LOG.md. If failed, return to Mode 3.
-Mode 4.5: Document Sync Check — Check document sync checklist before closeout.
-Mode 5: Phase Closeout (Physical SSOT) — Iron Triangle Gate: physical file change + Exit Code 0 + Git Commit Hash. Append to Audit Trail table, update TASKS/STATUS/NEXT.
-Mode 6: Skill Evolution Proposal — Propose improvements to RULES/DESIGN/TASKS via proposals.
-- **Token Economy**: Skip reading `requirements.md` & `DESIGN.md` in Mode 3/4/5 if unchanged. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in context.
-- **Cognitive Distillation**: At milestone ends, distill top 3-5 recurring lessons from `LESSONS.md` into `RULES.md`.
-
-## 5. NEXT.md Hard Gate
-
-Implementation forbidden if: NEXT.md missing/empty, >1 active task, task not in TASKS.md, task already [x], unsatisfied dependencies, no acceptance criteria, conflicts with STATUS.md. Stop and propose correction.
-
-## 6. Forbidden Behaviors
-
-1. Continue based on chat memory only
-2. Skip Context Audit or DAG dependency check
-3. Execute >1 task at a time
-4. Skip Mode 3 Hard Stop to auto-advance
-5. Start coding before Mode 2 One-Card contract approval
-6. Alter or weaken frozen test assertions (anti-collusion)
-7. Mark tasks complete without real test pass (Exit Code 0) & Git Commit
-8. Auto-start next task
-9. Invent requirements not in requirements.md
-10. Ignore NEXT.md gate
+# 核心原则: 所有项目状态以 .ai/ 目录文件为唯一真相源 (SSOT)，禁止基于对话记忆开发。

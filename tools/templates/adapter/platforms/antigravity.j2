@@ -1,15 +1,19 @@
-<!-- Antigravity Agent (Google DeepMind) adapter | Install: ANTIGRAVITY.md (project root) -->
-
-{%- include 'base.j2' -%}
-
+---
+name: project-orchestrator
+description: "ProjectOrchestrator 敏捷调度引擎：管理 .ai/ SSOT 单一真相来源，执行 Mode 0~6 状态机流转、One-Card Gate 任务卡审批、硬停机开发与物理审计。"
 ---
 
-{%- include 'modes_compact.j2' -%}
+# ProjectOrchestrator 调度引擎
 
----
+当用户执行项目管理、任务调度或提到以下关键词时，请阅读并严格遵循 `.ai/MODE_REFERENCE.md` 中的 7-Mode 引擎规则：
 
-{%- include 'rules_compact.j2' -%}
+**触发词**: "继续项目"、"启动项目"、"初始化"、"开始阶段"、"规划任务"、"运行测试"、"测试通过"、"收口"、"优化规则"
 
----
+**执行流程**:
+1. 读取 `.ai/MODE_REFERENCE.md` 获取完整的 7-Mode 执行引擎规则和输出模板
+2. 读取 `.ai/STATUS.md` 和 `.ai/NEXT.md` 获取当前项目状态
+3. 按 Mode 0→1→2→3→4→5 顺序执行，不可跳过
 
-{%- include 'footer_compact.j2' -%}
+**核心原则**: 所有项目状态以 `.ai/` 目录文件为唯一真相源 (SSOT)，禁止基于对话记忆开发。
+
+**Version**: {{ version }} | **Generated**: {{ generation_timestamp }} | Auto-generated from skill.md

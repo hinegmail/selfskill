@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v2.0
+# ProjectOrchestrator Skill v1.1
 
 ## 0. Role Definition
 
