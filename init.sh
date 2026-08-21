@@ -391,6 +391,44 @@ for ide in "${IDES[@]}"; do
 done
 INSTALLED_ADAPTERS=$(echo "$INSTALLED_ADAPTERS" | xargs)
 
+# Clean up adapters that exist in target but were NOT selected this run
+# Only in auto mode (interactive menu) — not when user explicitly passed --ide
+if [[ "$IDE_LIST" = "auto" ]]; then
+    # Map: IDE name -> adapter destination path
+    declare -A CLEANUP_MAP=(
+        ["cursor"]="$TARGET_PATH/.cursor/rules/project-orchestrator.mdc"
+        ["cursor-legacy"]="$TARGET_PATH/.cursorrules"
+        ["cline"]="$TARGET_PATH/.clinerules/project-orchestrator.md"
+        ["windsurf"]="$TARGET_PATH/.windsurfrules"
+        ["claude"]="$TARGET_PATH/CLAUDE.md"
+        ["gemini"]="$TARGET_PATH/.gemini/styleguide.md"
+        ["agents"]="$TARGET_PATH/AGENTS.md"
+        ["antigravity"]="$TARGET_PATH/ANTIGRAVITY.md"
+        ["kiro"]="$TARGET_PATH/KIRO_AGENT.md"
+    )
+    for clean_key in "${!CLEANUP_MAP[@]}"; do
+        # Check if this key was installed
+        is_installed=false
+        for inst in $INSTALLED_ADAPTERS; do
+            if [[ "$inst" == "$clean_key" ]]; then
+                is_installed=true
+                break
+            fi
+        done
+        if [[ "$is_installed" = false ]]; then
+            clean_dst="${CLEANUP_MAP[$clean_key]}"
+            if [[ -f "$clean_dst" ]]; then
+                # Only remove if it's a ProjectOrchestrator adapter
+                if grep -qE "ProjectOrchestrator" "$clean_dst" 2>/dev/null && \
+                   grep -qE "auto-generated" "$clean_dst" 2>/dev/null; then
+                    rm -f "$clean_dst"
+                    echo "  ➖ $clean_dst (removed — not selected)"
+                fi
+            fi
+        fi
+    done
+fi
+
 # ============================================================
 # Post-init: Detect unpopulated template files
 # ============================================================

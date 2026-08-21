@@ -365,6 +365,25 @@ foreach ($ideItem in $ideList) {
     }
 }
 
+# Clean up adapters that exist in target but were NOT selected this run
+# Only in auto mode (interactive menu) — not when user explicitly passed -IDE
+if ($IDE -eq "auto") {
+    foreach ($key in $ideConfigs.Keys) {
+        if ($installedAdapters -notcontains $key) {
+            $cfg = $ideConfigs[$key]
+            $dst = Join-Path $TargetPath $cfg.Dst
+            # Only remove if it's a ProjectOrchestrator adapter (contains our signature)
+            if (Test-Path $dst) {
+                $content = Get-Content $dst -Raw -ErrorAction SilentlyContinue
+                if ($content -match "ProjectOrchestrator" -and $content -match "auto-generated") {
+                    Remove-Item $dst -Force
+                    Write-Host "  [-] $($cfg.Label) (removed — not selected)" -ForegroundColor DarkGray
+                }
+            }
+        }
+    }
+}
+
 # ============================================================
 # Post-init: Detect unpopulated template files
 # ============================================================
