@@ -245,7 +245,7 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
         ["gemini"]=".gemini"
         ["claude"]="CLAUDE.md"
         ["agents"]="AGENTS.md"
-        ["antigravity"]="ANTIGRAVITY.md"
+        ["antigravity"]="$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md"
         ["kiro"]="KIRO_AGENT.md"
     )
     DETECTED_IDES=()
@@ -377,7 +377,7 @@ for ide in "${IDES[@]}"; do
             INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS agents"
             ;;
         antigravity)
-            install_adapter "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/ANTIGRAVITY.md" "ANTIGRAVITY.md"
+            install_adapter "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md" ".agents/skills/project-orchestrator/SKILL.md"
             INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS antigravity"
             ;;
         kiro)
@@ -403,7 +403,7 @@ if [[ "$IDE_LIST" = "auto" ]]; then
         ["claude"]="$TARGET_PATH/CLAUDE.md"
         ["gemini"]="$TARGET_PATH/.gemini/styleguide.md"
         ["agents"]="$TARGET_PATH/AGENTS.md"
-        ["antigravity"]="$TARGET_PATH/ANTIGRAVITY.md"
+        ["antigravity"]="$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md"
         ["kiro"]="$TARGET_PATH/KIRO_AGENT.md"
     )
     for clean_key in "${!CLEANUP_MAP[@]}"; do
@@ -427,8 +427,17 @@ if [[ "$IDE_LIST" = "auto" ]]; then
             fi
         fi
     done
+    # Also clean up legacy ANTIGRAVITY.md (old install path, now moved to .agents/skills/)
+    legacy_antigravity="$TARGET_PATH/ANTIGRAVITY.md"
+    if [[ -f "$legacy_antigravity" ]]; then
+        if grep -qE "ProjectOrchestrator" "$legacy_antigravity" 2>/dev/null; then
+            rm -f "$legacy_antigravity"
+            echo "  ➖ ANTIGRAVITY.md (removed — legacy path, migrated to .agents/skills/)"
+        fi
+    fi
     # Clean up empty IDE config directories left behind
-    for clean_dir in "$TARGET_PATH/.cursor/rules" "$TARGET_PATH/.clinerules" "$TARGET_PATH/.gemini"; do
+    for clean_dir in "$TARGET_PATH/.cursor/rules" "$TARGET_PATH/.clinerules" "$TARGET_PATH/.gemini" \
+                     "$TARGET_PATH/.agents/skills/project-orchestrator" "$TARGET_PATH/.agents/skills" "$TARGET_PATH/.agents"; do
         if [[ -d "$clean_dir" ]]; then
             if [[ -z "$(find "$clean_dir" -type f 2>/dev/null)" ]]; then
                 rm -rf "$clean_dir"

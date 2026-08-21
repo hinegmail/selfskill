@@ -235,7 +235,7 @@ $ideConfigs = [ordered]@{
     "claude"      = @{ Dst = "CLAUDE.md";                                           Src = "CLAUDE.md";              Label = "CLAUDE.md" }
     "gemini"      = @{ Dst = ".gemini\styleguide.md";                              Src = "gemini_styleguide.md";   Label = ".gemini/styleguide.md" }
     "agents"      = @{ Dst = "AGENTS.md";                                           Src = "AGENTS.md";              Label = "AGENTS.md" }
-    "antigravity" = @{ Dst = "ANTIGRAVITY.md";                                     Src = "ANTIGRAVITY.md";         Label = "ANTIGRAVITY.md" }
+    "antigravity" = @{ Dst = ".agents\skills\project-orchestrator\SKILL.md";           Src = "ANTIGRAVITY.md";         Label = ".agents/skills/project-orchestrator/SKILL.md" }
     "kiro"        = @{ Dst = "KIRO_AGENT.md";                                      Src = "KIRO_AGENT.md";          Label = "KIRO_AGENT.md" }
 }
 
@@ -262,7 +262,7 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
         "gemini"        = ".gemini"
         "claude"        = "CLAUDE.md"
         "agents"        = "AGENTS.md"
-        "antigravity"   = "ANTIGRAVITY.md"
+        "antigravity"   = ".agents\skills\project-orchestrator\SKILL.md"
         "kiro"          = "KIRO_AGENT.md"
     }
     $detectedIdes = @()
@@ -383,11 +383,23 @@ if ($IDE -eq "auto") {
             }
         }
     }
-    # Clean up empty IDE config directories left behind (e.g. .cursor/rules/, .clinerules/, .gemini/)
+    # Also clean up legacy ANTIGRAVITY.md (old install path, now moved to .agents/skills/)
+    $legacyAntigravity = Join-Path $TargetPath "ANTIGRAVITY.md"
+    if (Test-Path $legacyAntigravity) {
+        $content = Get-Content $legacyAntigravity -Raw -ErrorAction SilentlyContinue
+        if ($content -match "ProjectOrchestrator") {
+            Remove-Item $legacyAntigravity -Force
+            Write-Host "  [-] ANTIGRAVITY.md (removed — legacy path, migrated to .agents/skills/)" -ForegroundColor DarkGray
+        }
+    }
+    # Clean up empty IDE config directories left behind
     $ideDirsToCheck = @(
         ".cursor\rules",
         ".clinerules",
-        ".gemini"
+        ".gemini",
+        ".agents\skills\project-orchestrator",
+        ".agents\skills",
+        ".agents"
     )
     foreach ($dir in $ideDirsToCheck) {
         $dirPath = Join-Path $TargetPath $dir
