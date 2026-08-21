@@ -113,7 +113,7 @@ CORE_FILES=("requirements.md" "DESIGN.md" "TASKS.md" "STATUS.md" "NEXT.md" "STEE
 FULL_FILES=("RULES.md" "TEST_LOG.md" "DECISIONS.md" "LESSONS.md" "EVOLUTION_PROPOSALS.md")
 
 # MODE_REFERENCE.md 总是安装 (compact 适配器依赖它)
-ALWAYS_FILES=("MODE_REFERENCE.md")
+ALWAYS_FILES=("MODE_REFERENCE.md" "README.md")
 
 # 复制模板文件函数，如果指定了 --force 则强制覆盖已存在的文件
 copy_template_file() {

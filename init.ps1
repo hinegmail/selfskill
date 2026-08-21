@@ -96,8 +96,8 @@ $coreFiles = @("requirements.md", "DESIGN.md", "TASKS.md", "STATUS.md", "NEXT.md
 # Full mode extra files
 $fullFiles = @("RULES.md", "TEST_LOG.md", "DECISIONS.md", "LESSONS.md", "EVOLUTION_PROPOSALS.md")
 
-# MODE_REFERENCE.md is always installed (needed by compact adapters)
-$alwaysFiles = @("MODE_REFERENCE.md")
+# MODE_REFERENCE.md and README.md are always installed (needed by compact adapters)
+$alwaysFiles = @("MODE_REFERENCE.md", "README.md")
 
 # 复制模板文件函数，如果指定了 -Force 则强制覆盖已存在的文件
 function Copy-TemplateFile {
