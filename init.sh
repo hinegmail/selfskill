@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 #
 # ProjectOrchestrator 一键初始化脚本 (macOS / Linux)
 #
@@ -7,8 +7,9 @@
 #
 # 选项:
 #   -p, --path PATH       目标项目路径 (默认: 当前目录)
-#   -i, --ide IDES        IDE列表, 逗号分隔 (默认: all)
-#                          可选: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
+#   -i, --ide IDES        IDE列表, 逗号分隔 (默认: auto)
+#                          可选: auto, cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
+#                          auto = 自动检测目标项目中已有的 IDE 配置目录
 #   -l, --lite            轻量模式 (仅创建6个核心文件)
 #   -m, --micro           微型模式 (仅创建3个核心文件: NEXT.md, STATUS.md, LESSONS.md)
 #   -f, --force           强制覆盖已存在的 .ai/ 模板文件
@@ -27,7 +28,7 @@ set -euo pipefail
 # ============================================================
 
 TARGET_PATH="."
-IDE_LIST="all"
+IDE_LIST="auto"
 LITE_MODE=false
 MICRO_MODE=false
 FORCE_MODE=false
@@ -231,7 +232,37 @@ fi
 echo ""
 echo "🔌 安装 IDE 适配器"
 
-if [[ "$IDE_LIST" = "all" ]]; then
+if [[ "$IDE_LIST" = "auto" ]]; then
+    # Auto-detect: check which IDE config directories/files already exist
+    DETECTED_IDES=()
+    # Check for IDE config directories
+    [[ -d "$TARGET_PATH/.cursor" ]] && DETECTED_IDES+=("cursor")
+    [[ -f "$TARGET_PATH/.cursorrules" ]] && DETECTED_IDES+=("cursor-legacy")
+    [[ -d "$TARGET_PATH/.clinerules" ]] && DETECTED_IDES+=("cline")
+    [[ -f "$TARGET_PATH/.windsurfrules" ]] && DETECTED_IDES+=("windsurf")
+    [[ -d "$TARGET_PATH/.gemini" ]] && DETECTED_IDES+=("gemini")
+    # Check for root-level IDE files
+    [[ -f "$TARGET_PATH/CLAUDE.md" ]] && DETECTED_IDES+=("claude")
+    [[ -f "$TARGET_PATH/AGENTS.md" ]] && DETECTED_IDES+=("agents")
+    [[ -f "$TARGET_PATH/ANTIGRAVITY.md" ]] && DETECTED_IDES+=("antigravity")
+    [[ -f "$TARGET_PATH/KIRO_AGENT.md" ]] && DETECTED_IDES+=("kiro")
+    
+    if [[ ${#DETECTED_IDES[@]} -gt 0 ]]; then
+        IDES=("${DETECTED_IDES[@]}")
+        echo "  [i] Auto-detected IDEs: ${IDES[*]}"
+    else
+        # No existing IDE config found — prompt user
+        echo "  [?] No existing IDE config detected in target project."
+        echo "      Available IDEs: cursor, cline, windsurf, claude, gemini, agents, antigravity, kiro"
+        read -p "      Which IDE(s)? (comma-separated, or 'all'): " IDE_INPUT
+        IDE_INPUT=$(echo "$IDE_INPUT" | xargs)
+        if [[ -z "$IDE_INPUT" || "$IDE_INPUT" = "all" ]]; then
+            IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
+        else
+            IFS=',' read -ra IDES <<< "$IDE_INPUT"
+        fi
+    fi
+elif [[ "$IDE_LIST" = "all" ]]; then
     IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
 else
     IFS=',' read -ra IDES <<< "$IDE_LIST"
@@ -258,41 +289,52 @@ install_adapter() {
     fi
 }
 
+INSTALLED_ADAPTERS=""
 for ide in "${IDES[@]}"; do
     ide=$(echo "$ide" | xargs) # trim whitespace
     case "$ide" in
         cursor)
             install_adapter "$ADAPTERS_DIR/cursor.mdc" "$TARGET_PATH/.cursor/rules/project-orchestrator.mdc" ".cursor/rules/project-orchestrator.mdc"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS cursor"
             ;;
         cursor-legacy)
             install_adapter "$ADAPTERS_DIR/cursorrules" "$TARGET_PATH/.cursorrules" ".cursorrules"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS cursor-legacy"
             ;;
         cline)
             install_adapter "$ADAPTERS_DIR/clinerules.md" "$TARGET_PATH/.clinerules/project-orchestrator.md" ".clinerules/project-orchestrator.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS cline"
             ;;
         windsurf)
             install_adapter "$ADAPTERS_DIR/windsurfrules.md" "$TARGET_PATH/.windsurfrules" ".windsurfrules"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS windsurf"
             ;;
         claude)
             install_adapter "$ADAPTERS_DIR/CLAUDE.md" "$TARGET_PATH/CLAUDE.md" "CLAUDE.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS claude"
             ;;
         gemini)
             install_adapter "$ADAPTERS_DIR/gemini_styleguide.md" "$TARGET_PATH/.gemini/styleguide.md" ".gemini/styleguide.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS gemini"
             ;;
         agents)
             install_adapter "$ADAPTERS_DIR/AGENTS.md" "$TARGET_PATH/AGENTS.md" "AGENTS.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS agents"
             ;;
         antigravity)
             install_adapter "$ADAPTERS_DIR/ANTIGRAVITY.md" "$TARGET_PATH/ANTIGRAVITY.md" "ANTIGRAVITY.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS antigravity"
             ;;
         kiro)
             install_adapter "$ADAPTERS_DIR/KIRO_AGENT.md" "$TARGET_PATH/KIRO_AGENT.md" "KIRO_AGENT.md"
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS kiro"
             ;;
         *)
             echo "  ⚠️  未知 IDE: $ide"
             ;;
     esac
 done
+INSTALLED_ADAPTERS=$(echo "$INSTALLED_ADAPTERS" | xargs)
 
 # ============================================================
 # Post-init: Detect unpopulated template files
@@ -381,7 +423,7 @@ fi
 echo ""
 echo "✨ 初始化完成！"
 echo ""
-echo "ProjectOrchestrator Skill v2.0: 7-Mode自动化运作流程"
+echo "ProjectOrchestrator Skill v1.1: 7-Mode自动化运作流程"
 echo ""
 echo "├─ MODE 1: Context Audit        (加载项目状态)"
 echo "├─ MODE 2: One-Card Gate         (单卡开工契约，批准后冻结)"
@@ -393,7 +435,7 @@ echo "└─ New Conversation             (收口后推荐新开对话，切断�
 echo ""
 echo "🚀 快速开始 (3步):"
 echo ""
-echo "  1️⃣  在您的IDE (Cursor/Cline/Windsurf/Claude/Kiro等) 打开对话"
+echo "  1️⃣  在您的IDE (已安装: $INSTALLED_ADAPTERS) 打开对话"
 echo ""
 echo "  2️⃣  说这条命令:"
 echo ""

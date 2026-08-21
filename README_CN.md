@@ -10,16 +10,16 @@
 
 ## ✨ 核心特性
 
-|特性|描述|
-|-|-|
-|🧠**双轨认知**|执行轨（写代码）+ 演进轨（自我反思和知识固化）同时运行|
-|🚦**NEXT.md 硬闸门**|唯一活跃任务控制，彻底杜绝 AI 擅自扩展范围、跳任务|
-|🔄**七模式引擎**|初始化 → 审计 → 规划 → 实现 → 验证 → 收口 → 进化，不可跳跃|
-|📋**单卡开工契约**|编码前强制生成结构化契约：目标 + 影响范围 + JIT 分级验收断言（批准后冻结）|
-|🧬**提案制进化**|LESSONS 可自动积累，规则与 Skill 进化经用户审批后可由 AI 自动应用（通过 Mode 6.5）|
-|📂\*\*`.ai/` 单一事实来源\*\*|所有项目认知存文件，新对话即可完美恢复上下文|
-|🔌**多 IDE 适配**|一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等|
-|⚖️**轻重分层**|三级项目模式：**微型**（3 文件，快速脚本）、**轻量**（6 文件，小项目）、**完整**（11 文件，团队项目）|
+| 特性                            | 描述                                                                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 🧠**双轨认知**            | 执行轨（写代码）+ 演进轨（自我反思和知识固化）同时运行                                                                  |
+| 🚦**NEXT.md 硬闸门**      | 唯一活跃任务控制，彻底杜绝 AI 擅自扩展范围、跳任务                                                                      |
+| 🔄**七模式引擎**          | 初始化 → 审计 → 规划 → 实现 → 验证 → 收口 → 进化，不可跳跃                                                        |
+| 📋**单卡开工契约**        | 编码前强制生成结构化契约：目标 + 影响范围 + JIT 分级验收断言（批准后冻结）                                              |
+| 🧬**提案制进化**          | LESSONS 可自动积累，规则与 Skill 进化经用户审批后可由 AI 自动应用（通过 Mode 6.5）                                      |
+| 📂\*\*`.ai/` 单一事实来源\*\* | 所有项目认知存文件，新对话即可完美恢复上下文                                                                            |
+| 🔌**多 IDE 适配**         | 一份 Skill 适配 Cursor / Cline / Windsurf / Claude Code / Gemini 等                                                     |
+| ⚖️**轻重分层**          | 三级项目模式：**微型**（3 文件，快速脚本）、**轻量**（6 文件，小项目）、**完整**（11 文件，团队项目） |
 
 \---
 
@@ -55,16 +55,17 @@ ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-or
 # 在目标项目中初始化（完整模式 + 所有 IDE）
 
 \#  .\\init.ps1 -Path "D:\\Projects\\CustomerServices-SAAS" -IDE "ANTIGRAVITY"
-.\\init.ps1 -Path "D:\\Projects\\YourProject" -IDE "all"
+.\init.ps1 -Path "D:\Projects\YourProject" -IDE "all"
 
 # 轻量模式 + 仅 Cursor
-.\\init.ps1 -Path "D:\\Projects\\YourProject" -IDE "cursor" -Lite
+.\init.ps1 -Path "D:\Projects\YourProject" -IDE "cursor" -Lite
 
 # 微型模式（3 文件，快速脚本）
-.\\init.ps1 -Path "." -Micro
+.\init.ps1 -Path "D:\Projects\YourProject" -Micro
+.\init.ps1 -Path "." -Micro
 
 # 在当前目录初始化
-.\\init.ps1
+.\init.ps1
 ```
 
 **macOS / Linux (Bash)**:
@@ -85,15 +86,16 @@ ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-or
 
 ### 📊 选哪个模式？
 
-| 判断标准 | Micro 微型 | Lite 轻量 | Full 完整 |
-|---------|-----------|----------|----------|
-| **代码改动量** | < 50 行，单次任务 | < 5k 行，短期项目 | > 5k 行，长期项目 |
-| **团队规模** | 单人，一次性 | 单人或 1-2 人 | 团队（2人+） |
-| **需要规划文件？** | 不需要（仅任务本身） | 需要（需求+设计） | 需要（全套） |
-| **需要任务追溯？** | 不需要 | 最少 | 需要（审计/ADR） |
-| **`.ai/` 文件数** | 3 + MODE_REFERENCE | 6 + MODE_REFERENCE | 11 + MODE_REFERENCE |
+| 判断标准                  | Micro 微型           | Lite 轻量          | Full 完整           |
+| ------------------------- | -------------------- | ------------------ | ------------------- |
+| **代码改动量**      | < 50 行，单次任务    | < 5k 行，短期项目  | > 5k 行，长期项目   |
+| **团队规模**        | 单人，一次性         | 单人或 1-2 人      | 团队（2人+）        |
+| **需要规划文件？**  | 不需要（仅任务本身） | 需要（需求+设计）  | 需要（全套）        |
+| **需要任务追溯？**  | 不需要               | 最少               | 需要（审计/ADR）    |
+| **`.ai/` 文件数** | 3 + MODE_REFERENCE   | 6 + MODE_REFERENCE | 11 + MODE_REFERENCE |
 
 **一句话决策**：
+
 - 🐹 **Micro**：修 Bug、改配置、写工具函数 → `init.ps1 -Micro` / `init.sh --micro`
 - 🐱 **Lite**：个人项目、原型、周末实验 → `init.ps1 -Lite` / `init.sh --lite`
 - 🐘 **Full**：正式项目、团队协作、长期维护 → `init.ps1` / `init.sh`
@@ -120,12 +122,12 @@ ProjectOrchestrator 已配置为标准技能，位于 `.agents/skills/project-or
 * **若为全新项目/首次迁移建档**：
 
 > \*\*启动项目\*\*（英文：“\*\*init project\*\*” 或 “\*\*setup\*\*”）
-  \*AI 将自动通过工具读取已有的原始文档（requirements/DESIGN/TASKS），自动提炼项目骨架并建立 Line-Range INDEX 索引，生成控制文件提案一键写入。\*
+> \*AI 将自动通过工具读取已有的原始文档（requirements/DESIGN/TASKS），自动提炼项目骨架并建立 Line-Range INDEX 索引，生成控制文件提案一键写入。\*
 
 * **若为开发中的项目（同步最新进度）**：
 
 > \*\*继续项目\*\*（英文：“\*\*continue project\*\*” 或 “\*\*continue\*\*”）
-  \*AI 将通过工具快速读取舵盘等控制文件，进入 Context Audit 并输出审计报告。\*
+> \*AI 将通过工具快速读取舵盘等控制文件，进入 Context Audit 并输出审计报告。\*
 
 \---
 
@@ -170,18 +172,18 @@ ProjectOrchestrator/
 
 ## 🔌 支持的 AI IDE
 
-|IDE|适配器文件|安装位置|
-|-|-|-|
-|**技能兼容 IDE**|`.agents/skills/`|`.agents/skills/project-orchestrator/SKILL.md`|
-|**Cursor** (新版)|`cursor.mdc`|`.cursor/rules/project-orchestrator.mdc`|
-|**Cursor** (传统)|`cursorrules`|`.cursorrules`|
-|**Cline / RooCode**|`clinerules.md`|`.clinerules/project-orchestrator.md`|
-|**Windsurf**|`windsurfrules.md`|`.windsurfrules`|
-|**Claude Code**|`CLAUDE.md`|`CLAUDE.md` (项目根目录)|
-|**Gemini Code Assist**|`gemini_styleguide.md`|`.gemini/styleguide.md`|
-|**Antigravity** (Google DeepMind Agent)|`ANTIGRAVITY.md`|`ANTIGRAVITY.md` (项目根目录)|
-|**Kiro AI Agent**|`KIRO_AGENT.md`|`KIRO_AGENT.md` (项目根目录)|
-|**通用**|`AGENTS.md`|`AGENTS.md` (项目根目录)|
+| IDE                                           | 适配器文件               | 安装位置                                         |
+| --------------------------------------------- | ------------------------ | ------------------------------------------------ |
+| **技能兼容 IDE**                        | `.agents/skills/`      | `.agents/skills/project-orchestrator/SKILL.md` |
+| **Cursor** (新版)                       | `cursor.mdc`           | `.cursor/rules/project-orchestrator.mdc`       |
+| **Cursor** (传统)                       | `cursorrules`          | `.cursorrules`                                 |
+| **Cline / RooCode**                     | `clinerules.md`        | `.clinerules/project-orchestrator.md`          |
+| **Windsurf**                            | `windsurfrules.md`     | `.windsurfrules`                               |
+| **Claude Code**                         | `CLAUDE.md`            | `CLAUDE.md` (项目根目录)                       |
+| **Gemini Code Assist**                  | `gemini_styleguide.md` | `.gemini/styleguide.md`                        |
+| **Antigravity** (Google DeepMind Agent) | `ANTIGRAVITY.md`       | `ANTIGRAVITY.md` (项目根目录)                  |
+| **Kiro AI Agent**                       | `KIRO_AGENT.md`        | `KIRO_AGENT.md` (项目根目录)                   |
+| **通用**                                | `AGENTS.md`            | `AGENTS.md` (项目根目录)                       |
 
 \---
 
@@ -211,16 +213,16 @@ ProjectOrchestrator/
 
 ## 💬 常用触发词速查
 
-|你想做什么|说什么|
-|-|-|
-|继续开发会话|"继续项目" / "继续开发" / "continue" / "同步状态"|
-|制定计划|"规划" / "plan" / "执行 Task 1.2"|
-|开始编码|"确认" / "批准" / "approved"|
-|运行测试|"运行测试" / "test" / "validate"|
-|完成任务|"测试通过" / "收口" / "closeout"|
-|优化规则|"优化规则" / "进化" / "evolve"|
-|应用/执行提案|"应用提案" / "批准并执行" / "apply proposal"|
-|启动/初始化项目|"启动项目" / "初始化项目" / "setup" / "init"|
+| 你想做什么      | 说什么                                            |
+| --------------- | ------------------------------------------------- |
+| 继续开发会话    | "继续项目" / "继续开发" / "continue" / "同步状态" |
+| 制定计划        | "规划" / "plan" / "执行 Task 1.2"                 |
+| 开始编码        | "确认" / "批准" / "approved"                      |
+| 运行测试        | "运行测试" / "test" / "validate"                  |
+| 完成任务        | "测试通过" / "收口" / "closeout"                  |
+| 优化规则        | "优化规则" / "进化" / "evolve"                    |
+| 应用/执行提案   | "应用提案" / "批准并执行" / "apply proposal"      |
+| 启动/初始化项目 | "启动项目" / "初始化项目" / "setup" / "init"      |
 
 \---
 
@@ -263,4 +265,3 @@ v2.0 物理凭证门禁（单卡开工契约、物理硬停机、铁三角门禁
 ## 📜 License
 
 MIT — 自由使用、修改和分发。
-

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     ProjectOrchestrator initialization script (Windows PowerShell)
 
@@ -9,9 +9,8 @@
     Target project path. Default: current directory.
 
 .PARAMETER IDE
-    IDE adapters to install, comma-separated.
-    Options: cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
-    Default: all
+    IDE adapters to install. Default: auto (detect existing IDE configs in target project).
+    Options: auto, cursor, cursor-legacy, cline, windsurf, claude, gemini, agents, antigravity, kiro, all
 
 .PARAMETER Lite
     Enable lite mode (only 6 core .ai/ files).
@@ -34,7 +33,7 @@
 
 param(
     [string]$Path = ".",
-    [string]$IDE = "all",
+    [string]$IDE = "auto",
     [switch]$Lite,
     [switch]$Micro,
     [string]$SkillSource = "",
@@ -227,7 +226,70 @@ if ((Test-Path $rulesPath) -and -not $Micro) {
 Write-Host ""
 Write-Host "[AI] Installing IDE adapters" -ForegroundColor Cyan
 
-if ($IDE -eq "all") {
+# IDE detection map: IDE name -> { configDir, adapterFile, dstPath, label }
+$ideConfigs = [ordered]@{
+    "cursor"      = @{ Dst = ".cursor\rules\project-orchestrator.mdc";          Src = "cursor.mdc";             Label = ".cursor/rules/project-orchestrator.mdc" }
+    "cursor-legacy"= @{ Dst = ".cursorrules";                                        Src = "cursorrules";            Label = ".cursorrules" }
+    "cline"       = @{ Dst = ".clinerules\project-orchestrator.md";                Src = "clinerules.md";          Label = ".clinerules/project-orchestrator.md" }
+    "windsurf"    = @{ Dst = ".windsurfrules";                                     Src = "windsurfrules.md";        Label = ".windsurfrules" }
+    "claude"      = @{ Dst = "CLAUDE.md";                                           Src = "CLAUDE.md";              Label = "CLAUDE.md" }
+    "gemini"      = @{ Dst = ".gemini\styleguide.md";                              Src = "gemini_styleguide.md";   Label = ".gemini/styleguide.md" }
+    "agents"      = @{ Dst = "AGENTS.md";                                           Src = "AGENTS.md";              Label = "AGENTS.md" }
+    "antigravity" = @{ Dst = "ANTIGRAVITY.md";                                     Src = "ANTIGRAVITY.md";         Label = "ANTIGRAVITY.md" }
+    "kiro"        = @{ Dst = "KIRO_AGENT.md";                                      Src = "KIRO_AGENT.md";          Label = "KIRO_AGENT.md" }
+}
+
+# Detect which IDEs already have config directories in the target project
+# This helps "auto" mode install only relevant adapters
+$ideDetectMap = [ordered]@{
+    "cursor"      = ".cursor"
+    "cursor-legacy" = ".cursorrules"
+    "cline"       = ".clinerules"
+    "windsurf"    = ".windsurfrules"
+    "gemini"      = ".gemini"
+}
+
+if ($IDE -eq "auto") {
+    # Auto-detect: check which IDE config directories/files already exist
+    $detectedIdes = @()
+    foreach ($kv in $ideDetectMap.GetEnumerator()) {
+        $checkPath = Join-Path $TargetPath $kv.Value
+        if (Test-Path $checkPath) {
+            $detectedIdes += $kv.Key
+        }
+    }
+    # Also check for root-level IDE files (CLAUDE.md, AGENTS.md, etc.)
+    $rootIdeFiles = @{
+        "claude"      = "CLAUDE.md"
+        "agents"      = "AGENTS.md"
+        "antigravity" = "ANTIGRAVITY.md"
+        "kiro"        = "KIRO_AGENT.md"
+    }
+    foreach ($kv in $rootIdeFiles.GetEnumerator()) {
+        $checkPath = Join-Path $TargetPath $kv.Value
+        if (Test-Path $checkPath) {
+            $detectedIdes += $kv.Key
+        }
+    }
+    
+    if ($detectedIdes.Count -gt 0) {
+        $ideList = $detectedIdes | Select-Object -Unique
+        Write-Host "  [i] Auto-detected IDEs: $($ideList -join ', ')" -ForegroundColor DarkGray
+    }
+    else {
+        # No existing IDE config found — prompt user
+        Write-Host "  [?] No existing IDE config detected in target project." -ForegroundColor Yellow
+        Write-Host "      Available IDEs: cursor, cline, windsurf, claude, gemini, agents, antigravity, kiro" -ForegroundColor DarkGray
+        $ideInput = Read-Host "      Which IDE(s)? (comma-separated, or 'all')"
+        if ([string]::IsNullOrWhiteSpace($ideInput) -or $ideInput.Trim() -eq "all") {
+            $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
+        }
+        else {
+            $ideList = $ideInput -split "," | ForEach-Object { $_.Trim() }
+        }
+    }
+}
+elseif ($IDE -eq "all") {
     $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
 }
 else {
@@ -255,56 +317,18 @@ function Install-Adapter {
     }
 }
 
+$installedAdapters = @()
 foreach ($ideItem in $ideList) {
-    switch ($ideItem.ToLower()) {
-        "cursor" {
-            $src = Join-Path $AdaptersDir "cursor.mdc"
-            $dst = Join-Path $TargetPath ".cursor\rules\project-orchestrator.mdc"
-            Install-Adapter $src $dst ".cursor/rules/project-orchestrator.mdc"
-        }
-        "cursor-legacy" {
-            $src = Join-Path $AdaptersDir "cursorrules"
-            $dst = Join-Path $TargetPath ".cursorrules"
-            Install-Adapter $src $dst ".cursorrules"
-        }
-        "cline" {
-            $src = Join-Path $AdaptersDir "clinerules.md"
-            $dst = Join-Path $TargetPath ".clinerules\project-orchestrator.md"
-            Install-Adapter $src $dst ".clinerules/project-orchestrator.md"
-        }
-        "windsurf" {
-            $src = Join-Path $AdaptersDir "windsurfrules.md"
-            $dst = Join-Path $TargetPath ".windsurfrules"
-            Install-Adapter $src $dst ".windsurfrules"
-        }
-        "claude" {
-            $src = Join-Path $AdaptersDir "CLAUDE.md"
-            $dst = Join-Path $TargetPath "CLAUDE.md"
-            Install-Adapter $src $dst "CLAUDE.md"
-        }
-        "gemini" {
-            $src = Join-Path $AdaptersDir "gemini_styleguide.md"
-            $dst = Join-Path $TargetPath ".gemini\styleguide.md"
-            Install-Adapter $src $dst ".gemini/styleguide.md"
-        }
-        "agents" {
-            $src = Join-Path $AdaptersDir "AGENTS.md"
-            $dst = Join-Path $TargetPath "AGENTS.md"
-            Install-Adapter $src $dst "AGENTS.md"
-        }
-        "antigravity" {
-            $src = Join-Path $AdaptersDir "ANTIGRAVITY.md"
-            $dst = Join-Path $TargetPath "ANTIGRAVITY.md"
-            Install-Adapter $src $dst "ANTIGRAVITY.md"
-        }
-        "kiro" {
-            $src = Join-Path $AdaptersDir "KIRO_AGENT.md"
-            $dst = Join-Path $TargetPath "KIRO_AGENT.md"
-            Install-Adapter $src $dst "KIRO_AGENT.md"
-        }
-        default {
-            Write-Host "  [!] Unknown IDE: $ideItem" -ForegroundColor Yellow
-        }
+    $key = $ideItem.ToLower()
+    if ($ideConfigs.Contains($key)) {
+        $cfg = $ideConfigs[$key]
+        $src = Join-Path $AdaptersDir $cfg.Src
+        $dst = Join-Path $TargetPath $cfg.Dst
+        Install-Adapter $src $dst $cfg.Label
+        $installedAdapters += $key
+    }
+    else {
+        Write-Host "  [!] Unknown IDE: $ideItem" -ForegroundColor Yellow
     }
 }
 
@@ -391,7 +415,7 @@ elseif ($statusIsTemplate -or $steeringIsTemplate) {
 Write-Host ""
 Write-Host "[OK] Initialization complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "ProjectOrchestrator Skill v2.0: 7-Mode自动化运作流程" -ForegroundColor Cyan
+Write-Host "ProjectOrchestrator Skill v1.1: 7-Mode自动化运作流程" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "├─ MODE 1: Context Audit        (加载项目状态)" -ForegroundColor Gray
 Write-Host "├─ MODE 2: One-Card Gate         (单卡开工契约，批准后冻结)" -ForegroundColor Gray
@@ -403,7 +427,7 @@ Write-Host "└─ New Conversation             (收口后推荐新开对话，�
 Write-Host ""
 Write-Host "🚀 快速开始 (3步):" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  1️⃣  在您的IDE (Cursor/Cline/Windsurf/Claude/Kiro等) 打开对话" -ForegroundColor White
+Write-Host "  1️⃣  在您的IDE (已安装: $($installedAdapters -join ', ')) 打开对话" -ForegroundColor White
 Write-Host ""
 Write-Host "  2️⃣  说这条命令:" -ForegroundColor White
 Write-Host ""
