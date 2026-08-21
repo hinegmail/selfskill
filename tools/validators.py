@@ -253,6 +253,10 @@ class V2FeatureValidator(BaseValidator):
         - IronTriangle: Iron Triangle / Git Commit
         - AntiCollusion: Anti-Collusion / Exit Code
 
+        Note: Thin-reference adapters (SSOT architecture) intentionally do NOT
+        contain these keywords — they are in MODE_REFERENCE.md instead.
+        Skip validation for thin-reference files.
+
         Args:
             content (str): Content to validate.
             file_path (str): Path to the file.
@@ -260,6 +264,10 @@ class V2FeatureValidator(BaseValidator):
         Returns:
             Tuple[bool, List[str]]: (is_valid, error_messages)
         """
+        # Skip thin-reference adapters (SSOT architecture — keywords are in MODE_REFERENCE.md)
+        if 'MODE_REFERENCE.md' in content and content.count('\n') < 50:
+            return True, []
+
         errors = []
         content_lower = content.lower()
 

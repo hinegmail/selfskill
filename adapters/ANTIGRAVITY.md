@@ -1,4 +1,4 @@
----
+﻿---
 name: project-orchestrator
 description: "ProjectOrchestrator 敏捷调度引擎：管理 .ai/ SSOT 单一真相来源，执行 Mode 0~6 状态机流转、One-Card Gate 任务卡审批、硬停机开发与物理审计。"
 ---
@@ -16,4 +16,4 @@ description: "ProjectOrchestrator 敏捷调度引擎：管理 .ai/ SSOT 单一�
 
 **核心原则**: 所有项目状态以 `.ai/` 目录文件为唯一真相源 (SSOT)，禁止基于对话记忆开发。
 
-**Version**: 1.1 | **Generated**: 2026-08-21T04:14:07.572584Z | Auto-generated from skill.md
+**Version**: v1.1 | **Generated**: 2026-08-21T05:39:08.518374Z | Auto-generated from skill.md
