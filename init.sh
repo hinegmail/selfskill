@@ -232,39 +232,94 @@ fi
 echo ""
 echo "🔌 安装 IDE 适配器"
 
-if [[ "$IDE_LIST" = "auto" ]]; then
-    # Auto-detect: check which IDE config directories/files already exist
+# All selectable IDE names (order matters for menu numbering)
+IDE_NAMES=("cursor" "cursor-legacy" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
+
+if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
+    # Detect which IDEs already have config directories/files in the target project
+    declare -A IDE_DETECT_MAP=(
+        ["cursor"]=".cursor"
+        ["cursor-legacy"]=".cursorrules"
+        ["cline"]=".clinerules"
+        ["windsurf"]=".windsurfrules"
+        ["gemini"]=".gemini"
+        ["claude"]="CLAUDE.md"
+        ["agents"]="AGENTS.md"
+        ["antigravity"]="ANTIGRAVITY.md"
+        ["kiro"]="KIRO_AGENT.md"
+    )
     DETECTED_IDES=()
-    # Check for IDE config directories
-    [[ -d "$TARGET_PATH/.cursor" ]] && DETECTED_IDES+=("cursor")
-    [[ -f "$TARGET_PATH/.cursorrules" ]] && DETECTED_IDES+=("cursor-legacy")
-    [[ -d "$TARGET_PATH/.clinerules" ]] && DETECTED_IDES+=("cline")
-    [[ -f "$TARGET_PATH/.windsurfrules" ]] && DETECTED_IDES+=("windsurf")
-    [[ -d "$TARGET_PATH/.gemini" ]] && DETECTED_IDES+=("gemini")
-    # Check for root-level IDE files
-    [[ -f "$TARGET_PATH/CLAUDE.md" ]] && DETECTED_IDES+=("claude")
-    [[ -f "$TARGET_PATH/AGENTS.md" ]] && DETECTED_IDES+=("agents")
-    [[ -f "$TARGET_PATH/ANTIGRAVITY.md" ]] && DETECTED_IDES+=("antigravity")
-    [[ -f "$TARGET_PATH/KIRO_AGENT.md" ]] && DETECTED_IDES+=("kiro")
-    
-    if [[ ${#DETECTED_IDES[@]} -gt 0 ]]; then
-        IDES=("${DETECTED_IDES[@]}")
-        echo "  [i] Auto-detected IDEs: ${IDES[*]}"
+    for name in "${IDE_NAMES[@]}"; do
+        check_path="$TARGET_PATH/${IDE_DETECT_MAP[$name]}"
+        if [[ -e "$check_path" ]]; then
+            DETECTED_IDES+=("$name")
+        fi
+    done
+
+    # If user explicitly passed --ide all, skip the menu and install everything
+    if [[ "$IDE_LIST" = "all" ]]; then
+        IDES=("${IDE_NAMES[@]}")
     else
-        # No existing IDE config found — prompt user
-        echo "  [?] No existing IDE config detected in target project."
-        echo "      Available IDEs: cursor, cline, windsurf, claude, gemini, agents, antigravity, kiro"
-        read -p "      Which IDE(s)? (comma-separated, or 'all'): " IDE_INPUT
+        # Interactive multi-select menu
+        echo ""
+        echo "  Select IDE adapters to install:"
+        echo "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)"
+        echo ""
+        for i in "${!IDE_NAMES[@]}"; do
+            n=$((i + 1))
+            name="${IDE_NAMES[$i]}"
+            marker=""
+            color="\033[37m" # Gray
+            for det in "${DETECTED_IDES[@]}"; do
+                if [[ "$det" == "$name" ]]; then
+                    marker=" ✓ (detected)"
+                    color="\033[32m" # Green
+                    break
+                fi
+            done
+            echo -e "  [$n] $name$marker" "$color"
+        done
+        echo -e "\033[0m"
+        echo ""
+        
+        read -p "  Choice: " IDE_INPUT
         IDE_INPUT=$(echo "$IDE_INPUT" | xargs)
-        if [[ -z "$IDE_INPUT" || "$IDE_INPUT" = "all" ]]; then
-            IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
+        
+        if [[ -z "$IDE_INPUT" ]]; then
+            # Default: detected IDEs only (or all if none detected)
+            if [[ ${#DETECTED_IDES[@]} -gt 0 ]]; then
+                IDES=("${DETECTED_IDES[@]}")
+            else
+                echo "  No IDE detected. Installing all adapters."
+                IDES=("${IDE_NAMES[@]}")
+            fi
+        elif [[ "$IDE_INPUT" = "all" ]]; then
+            IDES=("${IDE_NAMES[@]}")
         else
-            IFS=',' read -ra IDES <<< "$IDE_INPUT"
+            # Parse number selections
+            IDES=()
+            # Split by comma or space
+            IFS=', ' read -ra NUMS <<< "$IDE_INPUT"
+            for n in "${NUMS[@]}"; do
+                if [[ "$n" =~ ^[0-9]+$ ]]; then
+                    idx=$((n - 1))
+                    if [[ $idx -ge 0 && $idx -lt ${#IDE_NAMES[@]} ]]; then
+                        IDES+=("${IDE_NAMES[$idx]}")
+                    fi
+                fi
+            done
+            if [[ ${#IDES[@]} -eq 0 ]]; then
+                echo "  No valid selection. Installing detected IDEs only."
+                if [[ ${#DETECTED_IDES[@]} -gt 0 ]]; then
+                    IDES=("${DETECTED_IDES[@]}")
+                else
+                    IDES=("${IDE_NAMES[@]}")
+                fi
+            fi
         fi
     fi
-elif [[ "$IDE_LIST" = "all" ]]; then
-    IDES=("cursor" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
 else
+    # User explicitly specified IDE list
     IFS=',' read -ra IDES <<< "$IDE_LIST"
 fi
 

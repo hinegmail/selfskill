@@ -249,50 +249,83 @@ $ideDetectMap = [ordered]@{
     "gemini"      = ".gemini"
 }
 
-if ($IDE -eq "auto") {
-    # Auto-detect: check which IDE config directories/files already exist
+# All selectable IDE names (order matters for menu numbering)
+$ideNames = @("cursor", "cursor-legacy", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
+
+if ($IDE -eq "auto" -or $IDE -eq "all") {
+    # Detect which IDEs already have config directories in the target project
+    $ideDetectMap = @{
+        "cursor"        = ".cursor"
+        "cursor-legacy" = ".cursorrules"
+        "cline"         = ".clinerules"
+        "windsurf"      = ".windsurfrules"
+        "gemini"        = ".gemini"
+        "claude"        = "CLAUDE.md"
+        "agents"        = "AGENTS.md"
+        "antigravity"   = "ANTIGRAVITY.md"
+        "kiro"          = "KIRO_AGENT.md"
+    }
     $detectedIdes = @()
-    foreach ($kv in $ideDetectMap.GetEnumerator()) {
-        $checkPath = Join-Path $TargetPath $kv.Value
+    foreach ($name in $ideNames) {
+        $checkPath = Join-Path $TargetPath $ideDetectMap[$name]
         if (Test-Path $checkPath) {
-            $detectedIdes += $kv.Key
+            $detectedIdes += $name
         }
     }
-    # Also check for root-level IDE files (CLAUDE.md, AGENTS.md, etc.)
-    $rootIdeFiles = @{
-        "claude"      = "CLAUDE.md"
-        "agents"      = "AGENTS.md"
-        "antigravity" = "ANTIGRAVITY.md"
-        "kiro"        = "KIRO_AGENT.md"
-    }
-    foreach ($kv in $rootIdeFiles.GetEnumerator()) {
-        $checkPath = Join-Path $TargetPath $kv.Value
-        if (Test-Path $checkPath) {
-            $detectedIdes += $kv.Key
-        }
-    }
-    
-    if ($detectedIdes.Count -gt 0) {
-        $ideList = $detectedIdes | Select-Object -Unique
-        Write-Host "  [i] Auto-detected IDEs: $($ideList -join ', ')" -ForegroundColor DarkGray
+
+    # If user explicitly passed -IDE all, skip the menu and install everything
+    if ($IDE -eq "all") {
+        $ideList = $ideNames
     }
     else {
-        # No existing IDE config found — prompt user
-        Write-Host "  [?] No existing IDE config detected in target project." -ForegroundColor Yellow
-        Write-Host "      Available IDEs: cursor, cline, windsurf, claude, gemini, agents, antigravity, kiro" -ForegroundColor DarkGray
-        $ideInput = Read-Host "      Which IDE(s)? (comma-separated, or 'all')"
-        if ([string]::IsNullOrWhiteSpace($ideInput) -or $ideInput.Trim() -eq "all") {
-            $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
+        # Interactive multi-select menu
+        Write-Host ""
+        Write-Host "  Select IDE adapters to install:" -ForegroundColor Cyan
+        Write-Host "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)" -ForegroundColor DarkGray
+        Write-Host ""
+        for ($i = 0; $i -lt $ideNames.Count; $i++) {
+            $n = $i + 1
+            $name = $ideNames[$i]
+            $marker = if ($detectedIdes -contains $name) { " ✓ (detected)" } else { "" }
+            $color = if ($detectedIdes -contains $name) { "Green" } else { "Gray" }
+            Write-Host "  [$n] $name$marker" -ForegroundColor $color
+        }
+        Write-Host ""
+        
+        $ideInput = Read-Host "  Choice"
+        $ideInput = $ideInput.Trim()
+        
+        if ([string]::IsNullOrWhiteSpace($ideInput)) {
+            # Default: detected IDEs only (or all if none detected)
+            if ($detectedIdes.Count -gt 0) {
+                $ideList = $detectedIdes
+            } else {
+                Write-Host "  No IDE detected. Installing all adapters." -ForegroundColor Yellow
+                $ideList = $ideNames
+            }
+        }
+        elseif ($ideInput -eq "all") {
+            $ideList = $ideNames
         }
         else {
-            $ideList = $ideInput -split "," | ForEach-Object { $_.Trim() }
+            # Parse number selections
+            $ideList = @()
+            $nums = $ideInput -split "[,\s]+" | Where-Object { $_ -match '^\d+$' }
+            foreach ($n in $nums) {
+                $idx = [int]$n - 1
+                if ($idx -ge 0 -and $idx -lt $ideNames.Count) {
+                    $ideList += $ideNames[$idx]
+                }
+            }
+            if ($ideList.Count -eq 0) {
+                Write-Host "  No valid selection. Installing detected IDEs only." -ForegroundColor Yellow
+                $ideList = if ($detectedIdes.Count -gt 0) { $detectedIdes } else { $ideNames }
+            }
         }
     }
 }
-elseif ($IDE -eq "all") {
-    $ideList = @("cursor", "cline", "windsurf", "claude", "gemini", "agents", "antigravity", "kiro")
-}
 else {
+    # User explicitly specified IDE list
     $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }
 }
 
