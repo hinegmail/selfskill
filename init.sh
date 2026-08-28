@@ -265,6 +265,7 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
         echo "  Select IDE adapters to install:"
         echo "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)"
         echo ""
+        echo -e "  [0] \033[90mother (copy skill.md to project root)\033[0m"
         for i in "${!IDE_NAMES[@]}"; do
             n=$((i + 1))
             name="${IDE_NAMES[$i]}"
@@ -295,6 +296,9 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
             fi
         elif [[ "$IDE_INPUT" = "all" ]]; then
             IDES=("${IDE_NAMES[@]}")
+        elif [[ "$IDE_INPUT" =~ (^|[[:space:],])0([[:space:],]|$) ]]; then
+            IDES=("other")
+            echo "  Copying skill.md to project root."
         else
             # Parse number selections
             IDES=()
@@ -320,7 +324,13 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
     fi
 else
     # User explicitly specified IDE list
-    IFS=',' read -ra IDES <<< "$IDE_LIST"
+    # Handle "other"/"skill" as a special value to copy skill.md to project root
+    if [[ "$IDE_LIST" = "other" || "$IDE_LIST" = "skill" ]]; then
+        IDES=("other")
+        echo "  Copying skill.md to project root."
+    else
+        IFS=',' read -ra IDES <<< "$IDE_LIST"
+    fi
 fi
 
 # 安装 IDE 适配器函数，适配器（规则文件）在存在时总是强制覆盖更新
@@ -344,10 +354,33 @@ install_adapter() {
     fi
 }
 
+# Function to install skill file (copy skill.md to project root)
+install_skill_files() {
+    local skill_dst_dir="$TARGET_PATH/.agents/skills/project-orchestrator"
+    local skill_refs_dir="$skill_dst_dir/references"
+    mkdir -p "$skill_dst_dir" "$skill_refs_dir"
+
+    # Copy skill.md as SKILL.md
+    if [[ -f "$SKILL_SOURCE/skill.md" ]]; then
+        cp "$SKILL_SOURCE/skill.md" "$skill_dst_dir/SKILL.md"
+        echo "  ✅ .agents/skills/project-orchestrator/SKILL.md"
+    fi
+
+    # Copy MODE_REFERENCE.md as references/mode-reference.md
+    if [[ -f "$TEMPLATES_DIR/MODE_REFERENCE.md" ]]; then
+        cp "$TEMPLATES_DIR/MODE_REFERENCE.md" "$skill_refs_dir/mode-reference.md"
+        echo "  ✅ .agents/skills/project-orchestrator/references/mode-reference.md"
+    fi
+}
+
 INSTALLED_ADAPTERS=""
 for ide in "${IDES[@]}"; do
     ide=$(echo "$ide" | xargs) # trim whitespace
     case "$ide" in
+        other|skill)
+            install_skill_files
+            INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS other"
+            ;;
         cursor)
             install_adapter "$ADAPTERS_DIR/cursor.mdc" "$TARGET_PATH/.cursor/rules/project-orchestrator.mdc" ".cursor/rules/project-orchestrator.mdc"
             INSTALLED_ADAPTERS="$INSTALLED_ADAPTERS cursor"
@@ -534,7 +567,7 @@ fi
 echo ""
 echo "✨ 初始化完成！"
 echo ""
-echo "ProjectOrchestrator Skill v1.1: 7-Mode自动化运作流程"
+echo "ProjectOrchestrator Skill v2.0: 7-Mode自动化运作流程"
 echo ""
 echo "├─ MODE 1: Context Audit        (加载项目状态)"
 echo "├─ MODE 2: One-Card Gate         (单卡开工契约，批准后冻结)"

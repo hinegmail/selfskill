@@ -283,6 +283,7 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
         Write-Host "  Select IDE adapters to install:" -ForegroundColor Cyan
         Write-Host "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)" -ForegroundColor DarkGray
         Write-Host ""
+        Write-Host "  [0] other (copy skill to .agents/skills/ for skill-discovery)" -ForegroundColor DarkGray
         for ($i = 0; $i -lt $ideNames.Count; $i++) {
             $n = $i + 1
             $name = $ideNames[$i]
@@ -307,6 +308,10 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
         elseif ($ideInput -eq "all") {
             $ideList = $ideNames
         }
+        elseif ($ideInput -match '(^|[, ]+)0([, ]+|$)') {
+            $ideList = @("other")
+            Write-Host "  Copying skill.md to project root." -ForegroundColor Cyan
+        }
         else {
             # Parse number selections
             $ideList = @()
@@ -326,7 +331,14 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
 }
 else {
     # User explicitly specified IDE list
-    $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }
+    # Handle "other" as a special value to copy skill.md to project root
+    if ($IDE -eq "other" -or $IDE -eq "skill") {
+        $ideList = @("other")
+        Write-Host "  Copying skill.md to project root." -ForegroundColor Cyan
+    }
+    else {
+        $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }
+    }
 }
 
 # 安装 IDE 适配器函数，适配器（规则文件）在存在时总是强制覆盖更新
@@ -350,10 +362,29 @@ function Install-Adapter {
     }
 }
 
+# Function to install skill file (copy skill.md to project root)
+function Install-SkillFiles {
+    $skillSrc = Join-Path $SkillSource "skill.md"
+    $skillDst = Join-Path $TargetPath "skill.md"
+    if (Test-Path $skillSrc) {
+        $exists = Test-Path $skillDst
+        Copy-Item $skillSrc $skillDst -Force
+        if ($exists) {
+            Write-Host "  [*] skill.md (updated)" -ForegroundColor Green
+        } else {
+            Write-Host "  [+] skill.md" -ForegroundColor Green
+        }
+    }
+}
+
 $installedAdapters = @()
 foreach ($ideItem in $ideList) {
     $key = $ideItem.ToLower()
-    if ($ideConfigs.Contains($key)) {
+    if ($key -eq "other" -or $key -eq "skill") {
+        Install-SkillFiles
+        $installedAdapters += $key
+    }
+    elseif ($ideConfigs.Contains($key)) {
         $cfg = $ideConfigs[$key]
         $src = Join-Path $AdaptersDir $cfg.Src
         $dst = Join-Path $TargetPath $cfg.Dst
@@ -497,7 +528,7 @@ elseif ($statusIsTemplate -or $steeringIsTemplate) {
 Write-Host ""
 Write-Host "[OK] Initialization complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "ProjectOrchestrator Skill v1.1: 7-Mode自动化运作流程" -ForegroundColor Cyan
+Write-Host "ProjectOrchestrator Skill v2.0: 7-Mode自动化运作流程" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "├─ MODE 1: Context Audit        (加载项目状态)" -ForegroundColor Gray
 Write-Host "├─ MODE 2: One-Card Gate         (单卡开工契约，批准后冻结)" -ForegroundColor Gray
