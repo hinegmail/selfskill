@@ -283,7 +283,7 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
         Write-Host "  Select IDE adapters to install:" -ForegroundColor Cyan
         Write-Host "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)" -ForegroundColor DarkGray
         Write-Host ""
-        Write-Host "  [0] other (copy skill to .agents/skills/ for skill-discovery)" -ForegroundColor DarkGray
+        Write-Host "  [0] other (copy AGENTS.md - universal format for any IDE)" -ForegroundColor DarkGray
         for ($i = 0; $i -lt $ideNames.Count; $i++) {
             $n = $i + 1
             $name = $ideNames[$i]
@@ -309,8 +309,8 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
             $ideList = $ideNames
         }
         elseif ($ideInput -match '(^|[, ]+)0([, ]+|$)') {
-            $ideList = @("other")
-            Write-Host "  Copying skill.md to project root." -ForegroundColor Cyan
+            $ideList = @("agents")
+            Write-Host "  Installing AGENTS.md (universal format for any IDE)." -ForegroundColor Cyan
         }
         else {
             # Parse number selections
@@ -331,10 +331,17 @@ if ($IDE -eq "auto" -or $IDE -eq "all") {
 }
 else {
     # User explicitly specified IDE list
-    # Handle "other" as a special value to copy skill.md to project root
-    if ($IDE -eq "other" -or $IDE -eq "skill") {
-        $ideList = @("other")
-        Write-Host "  Copying skill.md to project root." -ForegroundColor Cyan
+    # Handle "other" or "agents" as a special value to install AGENTS.md (universal format)
+    if ($IDE -eq "other" -or $IDE -eq "agents" -or $IDE -eq "skill") {
+        if ($IDE -eq "skill") {
+            # Legacy: skill mode copies skill.md to project root
+            $ideList = @("other")
+            Write-Host "  Copying skill.md to project root." -ForegroundColor Cyan
+        } else {
+            # New behavior: other/agents mode installs AGENTS.md (universal format)
+            $ideList = @("agents")
+            Write-Host "  Installing AGENTS.md (universal format for any IDE)." -ForegroundColor Cyan
+        }
     }
     else {
         $ideList = $IDE -split "," | ForEach-Object { $_.Trim() }
