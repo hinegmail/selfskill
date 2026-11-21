@@ -46,12 +46,12 @@ Follow modes sequentially unless user explicitly requests a specific mode. Do no
 
 ### Mode 3: Task Implementation (Hard Stop)
 **Trigger**: Explicit affirmative signal approving Mode 2 contract.
-**Iron Rules**: Only implement NEXT.md task and files in contract. No scope expansion. No phantom code.
+**Iron Rules**: Only implement NEXT.md task and files in contract. No scope expansion. No phantom code. **No Mock / No Fake Fallback** — no hardcoded mock/fake/dummy data in production source (outside tests/); render Empty State or run seed scripts if DB/API is empty.
 **Hard Stop**: When coding is complete, AI **MUST IMMEDIATELY STOP TURN**. Output changed files and test commands. Transition to `AWAITING_VERIFICATION`. **NEVER** auto-advance to Mode 4.5/5.
 
 ### Mode 4: Validation & Anti-Collusion Test
 **Trigger**: User says "运行测试" / "validate" / "run tests"; or user provides test logs.
-**Actions**: Run Tier 1 (static/lint) + Tier 2 (native test suite exit code 0) + Tier 3 (smoke). Verify assertions were not weakened. Record real console output into `.ai/TEST_LOG.md`. If test fails, return to Mode 3.
+**Actions**: Run Tier 1 (static/lint + **Anti-Mock Scan**: scan `git diff` excluding test files for `mockData`/`fakeData`/`dummyData`) + Tier 2 (native test suite exit code 0) + Tier 3 (smoke). Verify assertions were not weakened. Record real console output into `.ai/TEST_LOG.md`. If test fails, return to Mode 3.
 **Health Check**: If test-fix cycles ≥ threshold (default 3), halt and write Root Cause Analysis to TEST_LOG.md.
 
 ### Mode 4.5: Document Sync Check

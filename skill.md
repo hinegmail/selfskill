@@ -281,7 +281,7 @@ Task Planning
    - The AI **must** use `grep_search` to search `.ai/LESSONS.md` against the `### 模块/关键词` field.
    - If matched lessons exist, cite them under "历史避坑经验".
 3. **Generate One-Card Proposal Contract (单卡结构化开工契约)**:
-   - ① **Task Objective (交付目标)**: 1-2 lines summarizing core goal.
+   - ① **Task Objective (交付目标)**: 1-2 lines summarizing core goal. (For UI/API data tasks, explicitly state the real data source chain: e.g. `UI -> API -> DB table` and note `No Mock Data`.)
    - ② **Impact Scope (影响范围)**: Explicit file list to inspect and modify.
    - ③ **JIT Tiered Acceptance Assertions (JIT 分级验收断言)**:
      - Tier 1: Syntax / Typecheck / Dry-run commands.
@@ -356,7 +356,8 @@ Task Planning
 1. **Scope Lock**: ONLY modify files specified in the approved Mode 2 contract.
 2. **No Scope Creep**: Do not implement future tasks or unapproved features.
 3. **No Phantom Code**: Every claimed functionality must be written into actual files.
-4. **Hard Stop Principle (物理硬停机)**:
+4. **No Mock / No Fake Fallback (真实数据源铁律)**: Once environment/database is initialized, NEVER hardcode mock/fake/dummy data or silent fake fallbacks in production source files (outside `tests/` / `*.test.*` / `*.spec.*`). If DB/API returns empty, render an explicit Empty State or run seed scripts instead of faking UI data.
+5. **Hard Stop Principle (物理硬停机)**:
    - When coding is complete, the AI **MUST IMMEDIATELY STOP TURN**.
    - It is **STRICTLY FORBIDDEN** to automatically advance to Mode 4.5 or Mode 5.
    - The AI must output changed files and recommended test commands, and transition to `AWAITING_VERIFICATION` state.
@@ -410,7 +411,7 @@ Task Planning
 
 **Actions**:
 1. **Execute Tiered Verification (执行分级验收)**:
-   - **Tier 1 (Static/Lint)**: Run syntax check, typecheck (`tsc`, `mypy`, `ruff`, etc.), or dry-run.
+   - **Tier 1 (Static/Lint + Anti-Mock Scan)**: Run syntax check, typecheck (`tsc`, `mypy`, `ruff`, etc.), and scan `git diff` (excluding test files) to ensure no `mockData`/`fakeData`/`dummyData` or hardcoded fake UI arrays were introduced.
    - **Tier 2 (Automated Test Suite)**: Execute the project's native test runner (e.g. `pytest`, `npm test`, `cargo test`, `go test`) with exact task test paths.
    - **Tier 3 (Manual Smoke)**: For non-automatable UI/interactive items, present concise verification steps and obtain user confirmation.
 2. **Anti-Collusion & Integrity Guard (防同谋自验作弊检查)**:
@@ -722,6 +723,7 @@ You must not:
 22. Leave dead code, unused imports, or temporary debug logs in the final implementation.
 23. Over-engineer code by introducing unused abstraction layers or speculative placeholders.
 24. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks.
+25. Introduce hardcoded mock/fake/dummy data or silent fake-data fallbacks in production source files (outside test files) after the project environment/database is initialized.
 
 ---
 
@@ -839,6 +841,18 @@ By combining "local file persistence for cognition" with "new conversation for c
         fi
       fi
     done < .ai/TASKS.md
+  fi
+
+  # === 5. v2.0: Anti-Mock Guard (block mock/fake data in non-test staged code) ===
+  STAGED_PROD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev '(^|/)(tests?|specs?|__tests__|__mocks__|\.ai|docs|templates)/|\.(test|spec)\.' || true)
+  if [ ! -z "$STAGED_PROD_FILES" ]; then
+    MOCK_HITS=$(git diff --cached -U0 -- $STAGED_PROD_FILES | grep -E '^\+[^+]' | grep -viE 'allow-mock' | grep -iE '\b(mockData|fakeData|dummyData|mockUsers|mockList|MOCK_[A-Z0-9_]+)\b|TODO:.*replace with (real|api|db)' || true)
+    if [ ! -z "$MOCK_HITS" ]; then
+      echo "❌ [ProjectOrchestrator Linter] Anti-Mock Guard FAILED: Mock/fake data detected in production staged files:"
+      echo "$MOCK_HITS" | head -n 5
+      echo "Remove mock data and connect to the real DB/API (or render an Empty State). Use '# allow-mock' only if explicitly authorized."
+      HAS_ERROR=1
+    fi
   fi
 
   # === Final result ===

@@ -54,24 +54,27 @@ At major milestones: evaluate LESSONS.md → distill top 3-5 critical recurring 
 2. Start implementation before reading `.ai/` documents.
 3. Skip Context Audit mode.
 4. Execute more than one task at a time.
-5. Automatically start the next task after completing one.
-6. Invent requirements not found in `.ai/requirements.md`.
-7. Ignore acceptance criteria in `.ai/TASKS.md`.
-8. Ignore the `.ai/NEXT.md` gate.
-9. Rewrite completed and tested modules without explicit need.
-10. Refactor unrelated modules during feature implementation.
-11. Add new features during test repair.
-12. Treat old `DESIGN.md` text as newer than `STATUS.md`.
-13. Silently change architecture.
-14. Silently rewrite `.ai/DESIGN.md` or `.ai/TASKS.md` structure.
-15. Modify this Skill without formal proposal and explicit user approval (Mode 6.5 is permitted once approved).
-16. Convert one-time fixes into permanent rules without review.
-17. Mark tasks complete without validation or approval.
-18. Hide unresolved conflicts between documents and code.
-19. Write duplicate logic or duplicate utility functions.
-20. Leave dead code, unused imports, or temporary debug logs.
-21. Over-engineer code with unused abstraction layers.
-22. Create separate one-off markdown docs for individual sub-task completion.
+5. Skip Hard Stop in Mode 3 to automatically advance to Mode 4.5 or Mode 5.
+6. Automatically start the next task after completing one.
+7. Start writing code before generating and getting approval for the Mode 2 One-Card contract.
+8. Alter, weaken, or delete frozen acceptance criteria in Mode 3/4 to fake test passes (Anti-Collusion).
+9. Mark tasks complete without real test passes (Exit Code 0) and physical Git Commit records.
+10. Invent requirements not found in `.ai/requirements.md`.
+11. Ignore acceptance criteria in `.ai/TASKS.md`.
+12. Ignore the `.ai/NEXT.md` gate or skip unsatisfied task dependencies.
+13. Rewrite completed and tested modules without explicit need.
+14. Refactor unrelated modules during feature implementation.
+15. Add new features during test repair.
+16. Treat old `DESIGN.md` text as newer than `STATUS.md`.
+17. Silently change architecture or rewrite `.ai/DESIGN.md` / `.ai/TASKS.md`.
+18. Modify this Skill without formal proposal submission and explicit user approval in the chat.
+19. Convert one-time fixes into permanent rules without review.
+20. Hide unresolved conflicts between documents and code.
+21. Write duplicate logic or duplicate utility functions.
+22. Leave dead code, unused imports, or temporary debug logs in the final implementation.
+23. Over-engineer code by introducing unused abstraction layers or speculative placeholders.
+24. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks.
+25. Introduce hardcoded mock/fake/dummy data or silent fake-data fallbacks in production source files (outside test files) after the project environment/database is initialized.
 
 ---
 
@@ -92,6 +95,8 @@ Every write-back to `.ai/` files must include:
 📂 EVOLUTION_LOG
 [时间] YYYY-MM-DDTHH:MMZ
 [触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
+[证据] Git Commit: {commit_hash} | Exit Code: 0
+[变更] .ai/{file}: {description}
 [变更] .ai/{file}: {description}
 [建议] {recommended git command or follow-up action}
 ```
