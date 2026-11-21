@@ -756,7 +756,7 @@ Every write-back to `.ai/` files must include this log block at the end of the r
   # === 5. v2.0: Anti-Mock Guard (block mock/fake data in non-test staged code) ===
   STAGED_PROD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev '(^|/)(tests?|specs?|__tests__|__mocks__|\.ai|docs|templates)/|\.(test|spec)\.' || true)
   if [ ! -z "$STAGED_PROD_FILES" ]; then
-    MOCK_HITS=$(git diff --cached -U0 -- $STAGED_PROD_FILES | grep -E '^\+[^+]' | grep -viE 'allow-mock' | grep -iE '\b(mockData|fakeData|dummyData|mockUsers|mockList|MOCK_[A-Z0-9_]+)\b|TODO:.*replace with (real|api|db)' || true)
+    MOCK_HITS=$(printf '%s\n' "$STAGED_PROD_FILES" | while IFS= read -r f; do git diff --cached -U0 -- "$f"; done | grep -E '^\+[^+]' | grep -viE 'allow-mock' | grep -iE '\b(mockData|fakeData|dummyData|sampleData|demoData|fallbackData|mockUsers|mockList|MOCK_[A-Z0-9_]+)\b|TODO:.*replace with (real|api|db)' || true)
     if [ ! -z "$MOCK_HITS" ]; then
       echo "❌ [ProjectOrchestrator Linter] Anti-Mock Guard FAILED: Mock/fake data detected in production staged files:"
       echo "$MOCK_HITS" | head -n 5

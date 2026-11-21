@@ -241,17 +241,19 @@ class V2FeatureValidator(BaseValidator):
         'OneCardGate': ['One-Card', 'Contract Card', 'frozen', '单卡', '开工契约', 'Contract Freezing'],
         'IronTriangle': ['Iron Triangle', '铁三角', 'Git Commit', 'commit hash', '物理门禁'],
         'AntiCollusion': ['Anti-Collusion', '防自验作弊', '防同谋', 'Exit Code', 'Assertion Immutability'],
+        'AntiMock': ['Anti-Mock', 'mockData', 'fakeData', 'dummyData', 'sampleData', 'demoData', 'fallbackData', '真实数据源铁律', 'allow-mock'],
     }
 
     def validate(self, content: str, file_path: str) -> Tuple[bool, List[str]]:
         """
         Validate that v2.0 core concept keywords are present.
 
-        Checks for four v2.0 concept groups:
+        Checks for five v2.0 concept groups:
         - HardStop: Hard Stop / AWAITING_VERIFICATION
         - OneCardGate: One-Card / Contract / frozen
         - IronTriangle: Iron Triangle / Git Commit
         - AntiCollusion: Anti-Collusion / Exit Code
+        - AntiMock: Anti-Mock / mockData / 真实数据源铁律
 
         Note: Thin-reference adapters (SSOT architecture) intentionally do NOT
         contain these keywords — they are in MODE_REFERENCE.md instead.

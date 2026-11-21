@@ -24,11 +24,8 @@ Python工具包，用于自动生成和维护ProjectOrchestrator Skill适配器�
 ```
 tools/templates/adapter/
 ├── base.j2              # 角色定义、核心原则、文件系统、优先级
-├── modes_compact.j2     # 紧凑模式定义（触发器 + 关键规则，无输出模板）
-├── rules_compact.j2     # 紧凑规则（硬闸门、自进化、触发词、禁止行为）
-├── footer_compact.j2    # 紧凑页脚（新对话策略、安全审计）
 ├── mode_reference.j2    # 完整模式输出模板（生成到 .ai/MODE_REFERENCE.md）
-└── platforms/           # 各IDE平台模板（引用 compact 模板）
+└── platforms/           # 各IDE平台模板（薄层适配器，引用 MODE_REFERENCE.md）
 ```
 
 ### 三级项目模式
@@ -382,8 +379,8 @@ verbose: false
 
    ```
    tools/templates/adapter/base.j2
-   tools/templates/adapter/modes.j2
-   tools/templates/adapter/platforms/{platform}.md.j2
+   tools/templates/adapter/mode_reference.j2
+   tools/templates/adapter/platforms/{platform}.j2
    ```
 2. **使用Jinja2语法**：
 

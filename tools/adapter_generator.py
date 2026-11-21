@@ -19,7 +19,7 @@ try:
 except ImportError:
     from skill_parser import SkillParser
     from template_engine import TemplateEngine
-    from validators import AdapterValidator
+    from validators import AdapterValidator, V2FeatureValidator
 
 
 @dataclass
@@ -198,9 +198,23 @@ class AdapterGenerator:
             validation_warnings = []
             if success and not dry_run:
                 adapter_validator = AdapterValidator()
+                v2_validator = V2FeatureValidator()
                 for platform, file_path in generated_files.items():
                     if platform == 'mode_reference':
-                        continue  # skip validation for non-adapter file
+                        # Validate MODE_REFERENCE.md with V2FeatureValidator (SSOT carrier)
+                        try:
+                            content = Path(file_path).read_text(encoding='utf-8')
+                            is_valid, verrors = v2_validator.validate(content, file_path)
+                            if not is_valid:
+                                for msg in verrors:
+                                    validation_warnings.append(
+                                        f"{platform}/V2FeatureValidator: {msg}"
+                                    )
+                        except Exception as e:
+                            validation_warnings.append(
+                                f"{platform}/V2FeatureValidator: {str(e)}"
+                            )
+                        continue
                     is_valid, validator_errors = adapter_validator.validate_file(file_path)
                     if not is_valid:
                         for vname, verrors in validator_errors.items():

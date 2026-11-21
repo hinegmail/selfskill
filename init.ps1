@@ -25,6 +25,9 @@
 .PARAMETER Force
     Force overwrite existing .ai/ files.
 
+.PARAMETER InstallHook
+    Install Git pre-commit hook (Anti-Mock Guard + integrity checks) into .git/hooks/pre-commit.
+
 .EXAMPLE
     .\init.ps1 -Path "D:\Projects\MyApp" -IDE "cursor,cline" -Lite
     .\init.ps1 -Path "." -IDE "all" -Force
@@ -37,7 +40,8 @@ param(
     [switch]$Lite,
     [switch]$Micro,
     [string]$SkillSource = "",
-    [switch]$Force
+    [switch]$Force,
+    [switch]$InstallHook
 )
 
 $ErrorActionPreference = "Stop"
@@ -526,6 +530,113 @@ elseif ($statusIsTemplate -or $steeringIsTemplate) {
     Write-Host "⚠️ STATUS.md/STEERING.md contain template placeholders." -ForegroundColor Yellow
     Write-Host "  In your IDE, say: 启动项目  (to launch the Interactive Setup Wizard)" -ForegroundColor Yellow
     Write-Host ""
+}
+
+# ============================================================
+# Install Git Pre-Commit Hook (optional, -InstallHook)
+# ============================================================
+
+if ($InstallHook) {
+    $GitDir = Join-Path $TargetPath ".git"
+    if (-not (Test-Path $GitDir -PathType Container)) {
+        Write-Host ""
+        Write-Host "⚠️  -InstallHook: No .git directory found at $TargetPath" -ForegroundColor Yellow
+        Write-Host "   Initialize a git repository first: git init"
+    } else {
+        $HookFile = Join-Path $GitDir "hooks\pre-commit"
+        $HookContent = @'
+#!/bin/sh
+# ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook (v2.0)
+# Checks: NEXT/TASKS consistency, STATUS timestamp, Audit Trail commit hash, [x] task commit binding
+# Anti-Mock Guard: blocks mock/fake data in production staged code
+
+HAS_ERROR=0
+
+# === 1. NEXT.md and TASKS.md consistency ===
+if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
+  ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
+  if [ ! -z "$ACTIVE_TASK" ]; then
+    if grep -q "\[x\] $ACTIVE_TASK" .ai/TASKS.md && grep -q "Active = $ACTIVE_TASK" .ai/NEXT.md; then
+      echo "❌ [ProjectOrchestrator Linter] Integrity Error: $ACTIVE_TASK is marked complete [x] in TASKS.md but is still set as Active in NEXT.md!"
+      echo "Please update NEXT.md to set the next active task before committing."
+      HAS_ERROR=1
+    fi
+  fi
+fi
+
+# === 2. STATUS.md timestamp update ===
+if [ -f ".ai/STATUS.md" ]; then
+  LAST_UPDATE=$(grep "上次全局审计时间" .ai/STATUS.md | cut -d':' -f2 | xargs)
+  if [ "$LAST_UPDATE" = "{待AI审计更新}" ] || [ "$LAST_UPDATE" = "{待更新}" ] || [ -z "$LAST_UPDATE" ]; then
+    echo "⚠️ [ProjectOrchestrator Linter] Warning: STATUS.md last_audit_timestamp not updated"
+    echo "Consider running Mode 5: Phase Closeout to update the timestamp."
+  fi
+fi
+
+# === 3. v2.0: STATUS.md Audit Trail must contain Git Commit Hash ===
+if [ -f ".ai/STATUS.md" ] && [ -f ".ai/TASKS.md" ]; then
+  COMPLETED_TASKS=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/TASKS.md | while read task; do
+    if grep -q "\[x\] $task" .ai/TASKS.md; then echo "$task"; fi
+  done)
+  if [ ! -z "$COMPLETED_TASKS" ]; then
+    if ! grep -q "物理审计台账\|Audit Trail" .ai/STATUS.md; then
+      echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md is missing the Audit Trail (物理审计台账) section."
+      echo "Completed tasks exist but no audit trail found. Run Mode 5: Phase Closeout to generate it."
+      HAS_ERROR=1
+    else
+      if ! grep -qE "[0-9a-f]{7,40}" .ai/STATUS.md; then
+        echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md Audit Trail has no Git Commit Hash entries."
+        echo "Each completed task must have a physical commit hash recorded. Run Mode 5: Phase Closeout."
+        HAS_ERROR=1
+      fi
+    fi
+  fi
+fi
+
+# === 4. v2.0: [x] tasks in TASKS.md must be bound to a commit hash ===
+if [ -f ".ai/TASKS.md" ]; then
+  while IFS= read -r line; do
+    if echo "$line" | grep -q "\[x\]"; then
+      if ! echo "$line" | grep -qE "[0-9a-f]{7,40}"; then
+        TASK_ID=$(echo "$line" | grep -oE "Task [0-9]+\.[0-9]+" || echo "unknown")
+        echo "⚠️ [ProjectOrchestrator Linter] v2.0 Warning: $TASK_ID is marked [x] but has no Git Commit Hash binding."
+        echo "Run Mode 5: Phase Closeout to bind the commit hash."
+      fi
+    fi
+  done < .ai/TASKS.md
+fi
+
+# === 5. v2.0: Anti-Mock Guard (block mock/fake data in non-test staged code) ===
+STAGED_PROD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev '(^|/)(tests?|specs?|__tests__|__mocks__|\.ai|docs|templates)/|\.(test|spec)\.' || true)
+if [ ! -z "$STAGED_PROD_FILES" ]; then
+  MOCK_HITS=$(printf '%s\n' "$STAGED_PROD_FILES" | while IFS= read -r f; do git diff --cached -U0 -- "$f"; done | grep -E '^\+[^+]' | grep -viE 'allow-mock' | grep -iE '\b(mockData|fakeData|dummyData|sampleData|demoData|fallbackData|mockUsers|mockList|MOCK_[A-Z0-9_]+)\b|TODO:.*replace with (real|api|db)' || true)
+  if [ ! -z "$MOCK_HITS" ]; then
+    echo "❌ [ProjectOrchestrator Linter] Anti-Mock Guard FAILED: Mock/fake data detected in production staged files:"
+    echo "$MOCK_HITS" | head -n 5
+    echo "Remove mock data and connect to the real DB/API (or render an Empty State). Use '# allow-mock' only if explicitly authorized."
+    HAS_ERROR=1
+  fi
+fi
+
+# === Final result ===
+if [ "$HAS_ERROR" -eq 1 ]; then
+  echo "❌ [ProjectOrchestrator Linter] Document integrity check FAILED (see errors above)"
+  exit 1
+fi
+
+echo "✅ [ProjectOrchestrator Linter] Document integrity check passed (v2.0)"
+'@
+        $HooksDir = Join-Path $GitDir "hooks"
+        if (-not (Test-Path $HooksDir)) {
+            New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
+        }
+        $HookContentLF = $HookContent -replace "`r`n", "`n"
+        $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText($HookFile, $HookContentLF, $Utf8NoBom)
+        Write-Host ""
+        Write-Host "✅ Git pre-commit hook installed to $HookFile" -ForegroundColor Green
+        Write-Host "   Features: NEXT/TASKS consistency, Audit Trail hash check, Anti-Mock Guard" -ForegroundColor DarkGray
+    }
 }
 
 # ============================================================

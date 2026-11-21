@@ -13,6 +13,7 @@
 #   -l, --lite            轻量模式 (仅创建6个核心文件)
 #   -m, --micro           微型模式 (仅创建3个核心文件: NEXT.md, STATUS.md, LESSONS.md)
 #   -f, --force           强制覆盖已存在的 .ai/ 模板文件
+#       --install-hook    安装 Git pre-commit hook (含 Anti-Mock Guard)
 #   -s, --source PATH     SelfSkill 源目录 (默认: 脚本所在目录)
 #   -h, --help            显示帮助
 #
@@ -32,6 +33,7 @@ IDE_LIST="auto"
 LITE_MODE=false
 MICRO_MODE=false
 FORCE_MODE=false
+INSTALL_HOOK=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_SOURCE="$SCRIPT_DIR"
 
@@ -59,6 +61,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f|--force)
             FORCE_MODE=true
+            shift
+            ;;
+        --install-hook)
+            INSTALL_HOOK=true
             shift
             ;;
         -s|--source)
@@ -237,20 +243,14 @@ IDE_NAMES=("cursor" "cursor-legacy" "cline" "windsurf" "claude" "gemini" "agents
 
 if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
     # Detect which IDEs already have config directories/files in the target project
-    declare -A IDE_DETECT_MAP=(
-        ["cursor"]=".cursor"
-        ["cursor-legacy"]=".cursorrules"
-        ["cline"]=".clinerules"
-        ["windsurf"]=".windsurfrules"
-        ["gemini"]=".gemini"
-        ["claude"]="CLAUDE.md"
-        ["agents"]="AGENTS.md"
-        ["antigravity"]="$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md"
-        ["kiro"]="KIRO_AGENT.md"
-    )
+    # Using parallel arrays for Bash 3.2 (macOS default) compatibility instead of declare -A
+    IDE_DETECT_NAMES=("cursor" "cursor-legacy" "cline" "windsurf" "gemini" "claude" "agents" "antigravity" "kiro")
+    IDE_DETECT_PATHS=(".cursor" ".cursorrules" ".clinerules" ".windsurfrules" ".gemini" "CLAUDE.md" "AGENTS.md" ".agents/skills/project-orchestrator/SKILL.md" "KIRO_AGENT.md")
     DETECTED_IDES=()
-    for name in "${IDE_NAMES[@]}"; do
-        check_path="$TARGET_PATH/${IDE_DETECT_MAP[$name]}"
+    for idx in "${!IDE_DETECT_NAMES[@]}"; do
+        name="${IDE_DETECT_NAMES[$idx]}"
+        rel_path="${IDE_DETECT_PATHS[$idx]}"
+        check_path="$TARGET_PATH/$rel_path"
         if [[ -e "$check_path" ]]; then
             DETECTED_IDES+=("$name")
         fi
@@ -278,7 +278,7 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
                     break
                 fi
             done
-            echo -e "  [$n] $name$marker" "$color"
+            echo -e "${color}  [$n] $name$marker\033[0m"
         done
         echo -e "\033[0m"
         echo ""
@@ -426,19 +426,11 @@ INSTALLED_ADAPTERS=$(echo "$INSTALLED_ADAPTERS" | xargs)
 # Clean up adapters that exist in target but were NOT selected this run
 # Only in auto mode (interactive menu) — not when user explicitly passed --ide
 if [[ "$IDE_LIST" = "auto" ]]; then
-    # Map: IDE name -> adapter destination path
-    declare -A CLEANUP_MAP=(
-        ["cursor"]="$TARGET_PATH/.cursor/rules/project-orchestrator.mdc"
-        ["cursor-legacy"]="$TARGET_PATH/.cursorrules"
-        ["cline"]="$TARGET_PATH/.clinerules/project-orchestrator.md"
-        ["windsurf"]="$TARGET_PATH/.windsurfrules"
-        ["claude"]="$TARGET_PATH/CLAUDE.md"
-        ["gemini"]="$TARGET_PATH/.gemini/styleguide.md"
-        ["agents"]="$TARGET_PATH/AGENTS.md"
-        ["antigravity"]="$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md"
-        ["kiro"]="$TARGET_PATH/KIRO_AGENT.md"
-    )
-    for clean_key in "${!CLEANUP_MAP[@]}"; do
+    # Map: IDE name -> adapter destination path (parallel arrays for Bash 3.2)
+    CLEANUP_NAMES=("cursor" "cursor-legacy" "cline" "windsurf" "claude" "gemini" "agents" "antigravity" "kiro")
+    CLEANUP_PATHS=("$TARGET_PATH/.cursor/rules/project-orchestrator.mdc" "$TARGET_PATH/.cursorrules" "$TARGET_PATH/.clinerules/project-orchestrator.md" "$TARGET_PATH/.windsurfrules" "$TARGET_PATH/CLAUDE.md" "$TARGET_PATH/.gemini/styleguide.md" "$TARGET_PATH/AGENTS.md" "$TARGET_PATH/.agents/skills/project-orchestrator/SKILL.md" "$TARGET_PATH/KIRO_AGENT.md")
+    for cidx in "${!CLEANUP_NAMES[@]}"; do
+        clean_key="${CLEANUP_NAMES[$cidx]}"
         # Check if this key was installed
         is_installed=false
         for inst in $INSTALLED_ADAPTERS; do
@@ -448,7 +440,7 @@ if [[ "$IDE_LIST" = "auto" ]]; then
             fi
         done
         if [[ "$is_installed" = false ]]; then
-            clean_dst="${CLEANUP_MAP[$clean_key]}"
+            clean_dst="${CLEANUP_PATHS[$cidx]}"
             if [[ -f "$clean_dst" ]]; then
                 # Only remove if it's a ProjectOrchestrator adapter (by content or filename)
                 if grep -qE "ProjectOrchestrator" "$clean_dst" 2>/dev/null || \
@@ -557,6 +549,108 @@ elif [[ "$status_is_template" = true || "$steering_is_template" = true ]]; then
     echo "⚠️ STATUS.md/STEERING.md contain template placeholders."
     echo "  In your IDE, say: 启动项目  (to launch the Interactive Setup Wizard)"
     echo ""
+fi
+
+# ============================================================
+# Install Git Pre-Commit Hook (optional, --install-hook)
+# ============================================================
+
+if [[ "$INSTALL_HOOK" = true ]]; then
+    GIT_DIR="$TARGET_PATH/.git"
+    if [[ ! -d "$GIT_DIR" ]]; then
+        echo ""
+        echo "⚠️  --install-hook: No .git directory found at $TARGET_PATH"
+        echo "   Initialize a git repository first: git init"
+    else
+        HOOK_FILE="$GIT_DIR/hooks/pre-commit"
+        HOOK_CONTENT='#!/bin/sh
+# ProjectOrchestrator Enhanced Integrity Linter - Git pre-commit hook (v2.0)
+# Checks: NEXT/TASKS consistency, STATUS timestamp, Audit Trail commit hash, [x] task commit binding
+# Anti-Mock Guard: blocks mock/fake data in production staged code
+
+HAS_ERROR=0
+
+# === 1. NEXT.md and TASKS.md consistency ===
+if [ -f ".ai/NEXT.md" ] && [ -f ".ai/TASKS.md" ]; then
+  ACTIVE_TASK=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/NEXT.md | head -n 1)
+  if [ ! -z "$ACTIVE_TASK" ]; then
+    if grep -q "\[x\] $ACTIVE_TASK" .ai/TASKS.md && grep -q "Active = $ACTIVE_TASK" .ai/NEXT.md; then
+      echo "❌ [ProjectOrchestrator Linter] Integrity Error: $ACTIVE_TASK is marked complete [x] in TASKS.md but is still set as Active in NEXT.md!"
+      echo "Please update NEXT.md to set the next active task before committing."
+      HAS_ERROR=1
+    fi
+  fi
+fi
+
+# === 2. STATUS.md timestamp update ===
+if [ -f ".ai/STATUS.md" ]; then
+  LAST_UPDATE=$(grep "上次全局审计时间" .ai/STATUS.md | cut -d'"'"':'"'"' -f2 | xargs)
+  if [ "$LAST_UPDATE" = "{待AI审计更新}" ] || [ "$LAST_UPDATE" = "{待更新}" ] || [ -z "$LAST_UPDATE" ]; then
+    echo "⚠️ [ProjectOrchestrator Linter] Warning: STATUS.md last_audit_timestamp not updated"
+    echo "Consider running Mode 5: Phase Closeout to update the timestamp."
+  fi
+fi
+
+# === 3. v2.0: STATUS.md Audit Trail must contain Git Commit Hash ===
+if [ -f ".ai/STATUS.md" ] && [ -f ".ai/TASKS.md" ]; then
+  COMPLETED_TASKS=$(grep -oE "Task [0-9]+\.[0-9]+" .ai/TASKS.md | while read task; do
+    if grep -q "\[x\] $task" .ai/TASKS.md; then echo "$task"; fi
+  done)
+  if [ ! -z "$COMPLETED_TASKS" ]; then
+    if ! grep -q "物理审计台账\|Audit Trail" .ai/STATUS.md; then
+      echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md is missing the Audit Trail (物理审计台账) section."
+      echo "Completed tasks exist but no audit trail found. Run Mode 5: Phase Closeout to generate it."
+      HAS_ERROR=1
+    else
+      if ! grep -qE "[0-9a-f]{7,40}" .ai/STATUS.md; then
+        echo "❌ [ProjectOrchestrator Linter] v2.0 Error: STATUS.md Audit Trail has no Git Commit Hash entries."
+        echo "Each completed task must have a physical commit hash recorded. Run Mode 5: Phase Closeout."
+        HAS_ERROR=1
+      fi
+    fi
+  fi
+fi
+
+# === 4. v2.0: [x] tasks in TASKS.md must be bound to a commit hash ===
+if [ -f ".ai/TASKS.md" ]; then
+  while IFS= read -r line; do
+    if echo "$line" | grep -q "\[x\]"; then
+      if ! echo "$line" | grep -qE "[0-9a-f]{7,40}"; then
+        TASK_ID=$(echo "$line" | grep -oE "Task [0-9]+\.[0-9]+" || echo "unknown")
+        echo "⚠️ [ProjectOrchestrator Linter] v2.0 Warning: $TASK_ID is marked [x] but has no Git Commit Hash binding."
+        echo "Run Mode 5: Phase Closeout to bind the commit hash."
+      fi
+    fi
+  done < .ai/TASKS.md
+fi
+
+# === 5. v2.0: Anti-Mock Guard (block mock/fake data in non-test staged code) ===
+STAGED_PROD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev '"'"'(^|/)(tests?|specs?|__tests__|__mocks__|\.ai|docs|templates)/|\.(test|spec)\.'"'"' || true)
+if [ ! -z "$STAGED_PROD_FILES" ]; then
+  MOCK_HITS=$(printf '"'"'%s\n'"'"' "$STAGED_PROD_FILES" | while IFS= read -r f; do git diff --cached -U0 -- "$f"; done | grep -E '"'"'^\+[^+]'"'"' | grep -viE '"'"'allow-mock'"'"' | grep -iE '"'"'\b(mockData|fakeData|dummyData|sampleData|demoData|fallbackData|mockUsers|mockList|MOCK_[A-Z0-9_]+)\b|TODO:.*replace with (real|api|db)'"'"' || true)
+  if [ ! -z "$MOCK_HITS" ]; then
+    echo "❌ [ProjectOrchestrator Linter] Anti-Mock Guard FAILED: Mock/fake data detected in production staged files:"
+    echo "$MOCK_HITS" | head -n 5
+    echo "Remove mock data and connect to the real DB/API (or render an Empty State). Use '"'"'# allow-mock'"'"' only if explicitly authorized."
+    HAS_ERROR=1
+  fi
+fi
+
+# === Final result ===
+if [ "$HAS_ERROR" -eq 1 ]; then
+  echo "❌ [ProjectOrchestrator Linter] Document integrity check FAILED (see errors above)"
+  exit 1
+fi
+
+echo "✅ [ProjectOrchestrator Linter] Document integrity check passed (v2.0)"
+'
+        mkdir -p "$GIT_DIR/hooks"
+        echo "$HOOK_CONTENT" > "$HOOK_FILE"
+        chmod +x "$HOOK_FILE"
+        echo ""
+        echo "✅ Git pre-commit hook installed to $HOOK_FILE"
+        echo "   Features: NEXT/TASKS consistency, Audit Trail hash check, Anti-Mock Guard"
+    fi
 fi
 
 # ============================================================

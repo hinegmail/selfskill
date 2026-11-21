@@ -7,6 +7,7 @@ on:
       - 'skill.md'
       - 'adapters/**'
       - 'tools/**'
+      - 'templates/ai/MODE_REFERENCE.md'
       - '.ai/SKILL_VERSION.md'
       - '.github/workflows/validate-adapter-versions.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - 'skill.md'
       - 'adapters/**'
       - 'tools/**'
+      - 'templates/ai/MODE_REFERENCE.md'
       - '.ai/SKILL_VERSION.md'
 
 jobs:
@@ -65,25 +67,26 @@ jobs:
           --input ../skill.md \
           --templates templates/adapter \
           --output ../adapters
-        echo "--- git diff (adapters) ---"
+        echo "--- git diff (adapters + MODE_REFERENCE.md) ---"
         cd ..
-        git diff --name-only adapters/
-        CHANGED=$(git diff --name-only adapters/ | wc -l)
+        git diff --name-only adapters/ templates/ai/MODE_REFERENCE.md
+        CHANGED=$(git diff --name-only adapters/ templates/ai/MODE_REFERENCE.md | wc -l)
         if [ "$CHANGED" -gt 0 ]; then
           echo ""
-          echo "❌ Adapters are out of sync with skill.md."
+          echo "❌ Adapters or MODE_REFERENCE.md are out of sync with skill.md."
           echo "   Run: python tools/adapter_generator.py"
-          echo "   Then commit the regenerated adapters."
+          echo "   Then commit the regenerated files."
           exit 1
         else
-          echo "✓ All adapters are in sync with skill.md"
+          echo "✓ All adapters and MODE_REFERENCE.md are in sync with skill.md"
         fi
 
     - name: Validate generated adapters
       working-directory: ./tools
       run: |
         python - <<'EOF'
-        from validators import AdapterValidator
+        from pathlib import Path
+        from validators import AdapterValidator, V2FeatureValidator
         import sys
         v = AdapterValidator()
         results = v.validate_directory('../adapters')
@@ -96,6 +99,15 @@ jobs:
                         print(f"  {fname} / {vname}: {m}")
             sys.exit(1)
         print(f"✓ All {len(results)} adapters passed validation")
+
+        mode_ref = Path('../templates/ai/MODE_REFERENCE.md')
+        ok, errs = V2FeatureValidator().validate(mode_ref.read_text(encoding='utf-8'), str(mode_ref))
+        if not ok:
+            print("❌ MODE_REFERENCE.md failed V2FeatureValidator:")
+            for m in errs:
+                print(f"  {m}")
+            sys.exit(1)
+        print("✓ MODE_REFERENCE.md passed V2FeatureValidator")
         EOF
 
     - name: Check SKILL_VERSION.md exists

@@ -11,6 +11,7 @@ from validators import (
     FileReferenceValidator,
     LanguageValidator,
     AdapterValidator,
+    V2FeatureValidator,
 )
 
 
@@ -227,6 +228,89 @@ See requirements.md for details.
             results = validator.validate_directory(tmpdir)
             
             assert len(results) == 0
+
+
+class TestV2FeatureValidator:
+    """Test cases for V2FeatureValidator."""
+
+    def test_valid_full_content(self):
+        """Test that content with all v2.0 concepts passes."""
+        validator = V2FeatureValidator()
+        content = """# MODE_REFERENCE.md
+
+## Hard Stop
+The system enters AWAITING_VERIFICATION state.
+
+## One-Card Gate
+Contract Card is frozen after approval.
+
+## Iron Triangle
+Git Commit hash required for physical gate.
+
+## Anti-Collusion
+Exit Code 0 required. Assertion Immutability enforced.
+
+## Anti-Mock Guard
+Anti-Mock: mockData and fakeData are forbidden.
+真实数据源铁律 (allow-mock for exceptions).
+"""
+        is_valid, errors = validator.validate(content, "MODE_REFERENCE.md")
+        assert is_valid is True
+        assert len(errors) == 0
+
+    def test_missing_antimock_keyword(self):
+        """Test that missing Anti-Mock keywords are detected."""
+        validator = V2FeatureValidator()
+        content = """# Some file
+
+Hard Stop is here.
+One-Card Gate is frozen.
+Iron Triangle with Git Commit.
+Anti-Collusion with Exit Code.
+"""
+        is_valid, errors = validator.validate(content, "test.md")
+        assert is_valid is False
+        assert any("AntiMock" in e for e in errors)
+
+    def test_missing_hardstop_keyword(self):
+        """Test that missing HardStop keywords are detected."""
+        validator = V2FeatureValidator()
+        content = """# Some file
+
+One-Card Gate is frozen.
+Iron Triangle with Git Commit.
+Anti-Collusion with Exit Code.
+Anti-Mock: mockData forbidden.
+"""
+        is_valid, errors = validator.validate(content, "test.md")
+        assert is_valid is False
+        assert any("HardStop" in e for e in errors)
+
+    def test_thin_reference_skipped(self):
+        """Test that thin-reference adapters are skipped (short content with MODE_REFERENCE.md)."""
+        validator = V2FeatureValidator()
+        content = """# Adapter
+See MODE_REFERENCE.md for details.
+"""
+        is_valid, errors = validator.validate(content, "adapter.md")
+        assert is_valid is True
+        assert len(errors) == 0
+
+    def test_antimock_keywords_coverage(self):
+        """Test that various Anti-Mock keywords are recognized."""
+        validator = V2FeatureValidator()
+        # Test with each Anti-Mock keyword
+        for kw in ['Anti-Mock', 'mockData', 'fakeData', 'dummyData',
+                   'sampleData', 'demoData', 'fallbackData',
+                   '真实数据源铁律', 'allow-mock']:
+            content = f"""Hard Stop
+One-Card Gate
+Iron Triangle Git Commit
+Anti-Collusion Exit Code
+{kw}
+"""
+            is_valid, errors = validator.validate(content, "test.md")
+            assert is_valid is True, f"Failed for keyword: {kw}, errors: {errors}"
 
 
 if __name__ == '__main__':
