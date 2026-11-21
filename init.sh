@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # ProjectOrchestrator 一键初始化脚本 (macOS / Linux)
 #
@@ -265,7 +265,7 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
         echo "  Select IDE adapters to install:"
         echo "  (Enter numbers separated by commas/space, e.g. 1,3,5 — or 'all' — or press Enter for detected only)"
         echo ""
-        echo -e "  [0] \033[90mother (copy skill.md to project root)\033[0m"
+        echo -e "  [0] \033[90mother (copy AGENTS.md - universal format for any IDE)\033[0m"
         for i in "${!IDE_NAMES[@]}"; do
             n=$((i + 1))
             name="${IDE_NAMES[$i]}"
@@ -297,8 +297,8 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
         elif [[ "$IDE_INPUT" = "all" ]]; then
             IDES=("${IDE_NAMES[@]}")
         elif [[ "$IDE_INPUT" =~ (^|[[:space:],])0([[:space:],]|$) ]]; then
-            IDES=("other")
-            echo "  Copying skill.md to project root."
+            IDES=("agents")
+            echo "  Installing AGENTS.md (universal format for any IDE)."
         else
             # Parse number selections
             IDES=()
@@ -324,10 +324,15 @@ if [[ "$IDE_LIST" = "auto" || "$IDE_LIST" = "all" ]]; then
     fi
 else
     # User explicitly specified IDE list
-    # Handle "other"/"skill" as a special value to copy skill.md to project root
-    if [[ "$IDE_LIST" = "other" || "$IDE_LIST" = "skill" ]]; then
-        IDES=("other")
-        echo "  Copying skill.md to project root."
+    # Handle "other"/"agents"/"skill"
+    if [[ "$IDE_LIST" = "other" || "$IDE_LIST" = "agents" || "$IDE_LIST" = "skill" ]]; then
+        if [[ "$IDE_LIST" = "skill" ]]; then
+            IDES=("other")
+            echo "  Copying skill.md to project root."
+        else
+            IDES=("agents")
+            echo "  Installing AGENTS.md (universal format for any IDE)."
+        fi
     else
         IFS=',' read -ra IDES <<< "$IDE_LIST"
     fi
@@ -356,20 +361,14 @@ install_adapter() {
 
 # Function to install skill file (copy skill.md to project root)
 install_skill_files() {
-    local skill_dst_dir="$TARGET_PATH/.agents/skills/project-orchestrator"
-    local skill_refs_dir="$skill_dst_dir/references"
-    mkdir -p "$skill_dst_dir" "$skill_refs_dir"
-
-    # Copy skill.md as SKILL.md
     if [[ -f "$SKILL_SOURCE/skill.md" ]]; then
-        cp "$SKILL_SOURCE/skill.md" "$skill_dst_dir/SKILL.md"
-        echo "  ✅ .agents/skills/project-orchestrator/SKILL.md"
-    fi
-
-    # Copy MODE_REFERENCE.md as references/mode-reference.md
-    if [[ -f "$TEMPLATES_DIR/MODE_REFERENCE.md" ]]; then
-        cp "$TEMPLATES_DIR/MODE_REFERENCE.md" "$skill_refs_dir/mode-reference.md"
-        echo "  ✅ .agents/skills/project-orchestrator/references/mode-reference.md"
+        if [[ -f "$TARGET_PATH/skill.md" ]]; then
+            cp "$SKILL_SOURCE/skill.md" "$TARGET_PATH/skill.md"
+            echo "  *️⃣  skill.md (updated)"
+        else
+            cp "$SKILL_SOURCE/skill.md" "$TARGET_PATH/skill.md"
+            echo "  ✅ skill.md"
+        fi
     fi
 }
 

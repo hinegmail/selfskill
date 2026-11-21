@@ -10,6 +10,25 @@
 
 ---
 
+## 3. Priority System (when information conflicts)
+
+1. Current explicit user instruction (highest)
+2. `.ai/STATUS.md` — current reality
+3. `.ai/NEXT.md` — current task scope
+4. `.ai/RULES.md` — project AI rules + conventions
+5. `.ai/TASKS.md` — task definitions
+6. `.ai/DESIGN.md` — technical design
+7. `.ai/requirements.md` — product requirements
+8. `.ai/LESSONS.md` — advisory lessons
+9. `.ai/DECISIONS.md` — historical decisions
+10. AI assumptions (lowest)
+
+If a conflict affects implementation decisions, **stop and ask for user confirmation**. Do not resolve ambiguity silently.
+
+---
+
+---
+
 ## 4. Seven-Mode Execution Engine
 
 You must follow these modes sequentially unless the user explicitly requests a specific mode. Do not skip modes. Do not jump from implementation to the next task.
@@ -18,8 +37,8 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 **Before entering any mode (including Mode 0 or Mode 1), you MUST perform this check FIRST:**
 
-1. Read `.ai/STATUS.md` and `.ai/STEERING.md` (first 10 lines each is enough).
-2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `[Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across STATUS.md, STEERING.md, NEXT.md, **and RULES.md**.
+1. Read `.ai/STATUS.md` (first 10 lines). If `.ai/STEERING.md` exists, read its first 10 lines as well (**Micro Mode**: `.ai/STEERING.md` and `.ai/TASKS.md` do not exist — skip reading `STEERING.md`).
+2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `[Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across `STATUS.md`, `NEXT.md`, and (if present) `STEERING.md` and `RULES.md`.
 3. **If ANY placeholder is found** → Immediately enter **Mode 0: Initialization** (auto-extraction). Do NOT proceed to Mode 1 or any other mode. Do NOT output an audit report. Do NOT ask "what would you like to do?" — just execute Mode 0 auto-extraction directly.
 4. **If NO placeholders found** → Continue to the normal mode flow below.
 
@@ -534,6 +553,122 @@ Task Planning
 4. **Update Proposal Status**: Modify the proposal's status field in `.ai/EVOLUTION_PROPOSALS.md` from `Proposed/Approved` to `Applied`.
 5. **Trigger Compile Hook**: If the modified file is this Skill itself (within the `selfskill` codebase), proactively notify the user or execute `python tools/adapter_generator.py` to regenerate all IDE-specific adapters, keeping rules in sync.
 6. **Log Evolution**: Document the modification in the required `EVOLUTION_LOG` block.
+```
+
+---
+
+---
+
+## 5. NEXT.md Hard Gate
+
+Before implementation, validate `.ai/NEXT.md`. **Implementation is forbidden** if any of the following is true:
+
+- `.ai/NEXT.md` does not exist
+- `.ai/NEXT.md` is empty
+- `.ai/NEXT.md` has content but does not contain a valid active task ID (e.g., says "就绪中", "ready", "idle", "等待", or any other non-task text)
+- `.ai/NEXT.md` contains more than one active task
+- `.ai/NEXT.md` references a task not found in `.ai/TASKS.md` (Micro Mode: skip this check)
+- The referenced task is already marked `[x]` (completed)
+- The referenced task has no acceptance criteria (Micro Mode: skip this check)
+- The referenced task conflicts with `.ai/STATUS.md`
+- The active task is too broad to complete safely in one focused pass
+
+**Response when gate fails**: Stop immediately. Propose a corrected `.ai/NEXT.md`. Do not write code.
+
+---
+
+---
+
+## 6. Controlled Self-Evolution Rules
+
+### Automatically updatable (no approval needed)
+
+| File | When |
+|------|------|
+| `.ai/STATUS.md` | After each task completion |
+| `.ai/TASKS.md` | Mark task status (`[x]`, `[~]`, `[!]`) after validation |
+| `.ai/TEST_LOG.md` | During validation and repair |
+| `.ai/LESSONS.md` | Actively capture during each task: technical findings, API behaviors, configuration quirks, implementation details, and any insights valuable for future reference |
+| `.ai/DECISIONS.md` | For factual decision records |
+| `.ai/NEXT.md` | During Phase Closeout |
+
+### Requires user approval (proposal-based)
+
+| File | Why |
+|------|-----|
+| `.ai/requirements.md` | Product intent must not drift |
+| `.ai/DESIGN.md` | Architecture changes need review |
+| `.ai/TASKS.md` structure | Task reorganization affects roadmap |
+| `.ai/RULES.md` | Permanent rules must be deliberate |
+| This Skill | Meta-rules must be stable |
+
+**Rule of thumb**: Project facts → auto-record. Project rules → require review. Architecture changes → require approval. Skill evolution → require approval.
+
+### 🧬 Token Economy & Context Chunking (按需读取优化)
+To save API costs and prevent compliance decay in long conversations:
+- **STATUS.md TL;DR First**: In Mode 1, read the `## TL;DR` section of STATUS.md first (first 5 lines). If TL;DR indicates no changes since last session, skip the full STATUS.md read.
+- **Phase Audit Sync**: AI **must** read `.ai/STEERING.md` at every conversation startup — this file is never skipped. Read `.ai/requirements.md` and `.ai/DESIGN.md` only when timestamp comparison (Mode 1, §4.1) determines they have been modified.
+- **Chapter-Anchor Navigation (锚点分块读取)**: When a large file (`.ai/requirements.md`, `.ai/DESIGN.md`) must be read, **never load it in full**. First locate the target chapter by searching for its heading anchor (from `STEERING.md §4 index`), then read only from that heading to the next same-level heading. This applies to any file requiring focused section retrieval.
+- **On-Demand Skip**: In Mode 3 (Implementation), Mode 4 (Validation), and Mode 5 (Closeout), if `.ai/requirements.md` and `.ai/DESIGN.md` have no pending changes, the AI **must skip reading them**. Keep only `STATUS.md`, `NEXT.md`, and `TEST_LOG.md` in the active context.
+- **LESSONS.md Cap**: When LESSONS.md exceeds 20 entries, trigger Cognitive Distillation. Distill top 3-5 rules into a RULES.md proposal, then reset LESSONS.md to keep context clean.
+- **Mode Reference On-Demand**: The IDE adapter contains compact mode triggers only. Full output templates are in `.ai/MODE_REFERENCE.md`. Read it only when entering a specific mode for the first time in a session, not at startup.
+
+### 🧠 Cognitive Distillation of Lessons (认知蒸馏规则)
+At the end of every major milestone or phase, **or when LESSONS.md exceeds 20 entries**:
+- The AI **must** evaluate the accumulated lessons in `.ai/LESSONS.md`.
+- It must perform **Cognitive Distillation** to distill the top 3-5 most critical, recurring, project-specific traps or rules.
+- It must submit a proposal to `.ai/EVOLUTION_PROPOSALS.md` to merge these distilled rules directly into `.ai/RULES.md` (under "踩坑教训" or "开发规则"). Once approved by the user, these rules are consolidated and `.ai/LESSONS.md` is reset, keeping the context clean and preventing memory bloat.
+- **Micro Mode**: If RULES.md does not exist, distill directly into STATUS.md under a `## Distilled Rules` section.
+
+---
+
+---
+
+## 8. Forbidden Behaviors (强化红线清单)
+
+You must not:
+
+1. Continue development based only on chat memory.
+2. Start implementation before reading `.ai/` documents.
+3. Skip Context Audit mode.
+4. Execute more than one active task at a time.
+5. Skip Hard Stop in Mode 3 to automatically advance to Mode 4.5 or Mode 5.
+6. Automatically start the next task after completing one.
+7. Start writing code before generating and getting approval for the Mode 2 One-Card contract.
+8. Alter, weaken, or delete frozen acceptance criteria in Mode 3/4 to fake test passes (Anti-Collusion).
+9. Mark tasks complete without real test passes (Exit Code 0) and physical Git Commit records.
+10. Invent requirements not found in `.ai/requirements.md`.
+11. Ignore acceptance criteria in `.ai/TASKS.md`.
+12. Ignore the `.ai/NEXT.md` gate or skip unsatisfied task dependencies.
+13. Rewrite completed and tested modules without explicit need.
+14. Refactor unrelated modules during feature implementation.
+15. Add new features during test repair.
+16. Treat old `DESIGN.md` text as newer than `STATUS.md`.
+17. Silently change architecture or rewrite `.ai/DESIGN.md` / `.ai/TASKS.md`.
+18. Modify this Skill without formal proposal submission and explicit user approval in the chat.
+19. Convert one-time fixes into permanent rules without review.
+20. Hide unresolved conflicts between documents and code.
+21. Write duplicate logic or duplicate utility functions.
+22. Leave dead code, unused imports, or temporary debug logs in the final implementation.
+23. Over-engineer code by introducing unused abstraction layers or speculative placeholders.
+24. Create separate, one-off markdown documentation files to record the completion of individual sub-tasks.
+
+---
+
+---
+
+## 10. EVOLUTION_LOG Format
+
+Every write-back to `.ai/` files must include this log block at the end of the response:
+
+```text
+📂 EVOLUTION_LOG
+[时间] YYYY-MM-DDTHH:MMZ
+[触发] Task {ID} 测试通过 | 设计偏离 | 用户指令
+[证据] Git Commit: {commit_hash} | Exit Code: 0
+[变更] .ai/{file}: {description}
+[变更] .ai/{file}: {description}
+[建议] {recommended git command or follow-up action}
 ```
 
 ---

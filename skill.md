@@ -1,4 +1,4 @@
-# ProjectOrchestrator Skill v1.1
+# ProjectOrchestrator Skill v2.0
 
 ## 0. Role Definition
 
@@ -97,8 +97,8 @@ You must follow these modes sequentially unless the user explicitly requests a s
 
 **Before entering any mode (including Mode 0 or Mode 1), you MUST perform this check FIRST:**
 
-1. Read `.ai/STATUS.md` and `.ai/STEERING.md` (first 10 lines each is enough).
-2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `[Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across STATUS.md, STEERING.md, NEXT.md, **and RULES.md**.
+1. Read `.ai/STATUS.md` (first 10 lines). If `.ai/STEERING.md` exists, read its first 10 lines as well (**Micro Mode**: `.ai/STEERING.md` and `.ai/TASKS.md` do not exist — skip reading `STEERING.md`).
+2. Scan for template placeholder patterns: `{待`, `0 / 0 任务`, `项目名称` as literal text, `{待填写}`, `{待提取}`, `[Milestone 1]` with no real name, `{auth_middleware_name}`, `{语言`, `{spaces`, `{e.g.`. Scan across `STATUS.md`, `NEXT.md`, and (if present) `STEERING.md` and `RULES.md`.
 3. **If ANY placeholder is found** → Immediately enter **Mode 0: Initialization** (auto-extraction). Do NOT proceed to Mode 1 or any other mode. Do NOT output an audit report. Do NOT ask "what would you like to do?" — just execute Mode 0 auto-extraction directly.
 4. **If NO placeholders found** → Continue to the normal mode flow below.
 

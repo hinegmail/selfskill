@@ -13,4 +13,4 @@
 
 **核心原则**: 所有项目状态以 `.ai/` 目录文件为唯一真相源 (SSOT)，禁止基于对话记忆开发。
 
-**Version**: v1.1 | **Generated**: 2026-08-21T05:39:08.518374Z | Auto-generated from skill.md
+**Version**: v2.0 | **Generated**: 2026-11-21T13:44:26.736556Z | Auto-generated from skill.md

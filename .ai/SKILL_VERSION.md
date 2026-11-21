@@ -4,9 +4,9 @@
 
 | 组件 | 版本 | 状态 | 最后更新 |
 |------|------|------|---------|
-| **skill.md** | v1.1 | ✅ 稳定 | 2026-08-21 |
-| **适配器** | v1.1 | ✅ 同步 | 2026-08-21 |
-| **模板** | v1.1 | ✅ 同步 | 2026-08-21 |
+| **skill.md** | v2.0 | ✅ 稳定 | 2026-11-21 |
+| **适配器** | v2.0 | ✅ 同步 | 2026-11-21 |
+| **模板** | v2.0 | ✅ 同步 | 2026-11-21 |
 
 ---
 
@@ -65,22 +65,22 @@
 在发布新版本前，请逐一完成以下检查项。每一项都是**可执行且清晰明确**的。
 
 ### 1. 版本号一致性检查
-- [ ] **skill.md** 的第一行包含版本 `v1.0`（查看：`grep -n "v1.0" skill.md | head -1`）
-- [ ] **KIRO_AGENT.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/KIRO_AGENT.md | wc -l`，应 ≥ 1）
-- [ ] **ANTIGRAVITY.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/ANTIGRAVITY.md | wc -l`，应 ≥ 1）
-- [ ] **cursor.mdc** 包含 `v1.0`（查看：`grep "v1.0" adapters/cursor.mdc | wc -l`，应 ≥ 1）
-- [ ] **clinerules.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/clinerules.md | wc -l`，应 ≥ 1）
-- [ ] **CLAUDE.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/CLAUDE.md | wc -l`，应 ≥ 1）
-- [ ] **windsurfrules.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/windsurfrules.md | wc -l`，应 ≥ 1）
-- [ ] **gemini_styleguide.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/gemini_styleguide.md | wc -l`，应 ≥ 1）
-- [ ] **AGENTS.md** 包含 `v1.0`（查看：`grep "v1.0" adapters/AGENTS.md | wc -l`，应 ≥ 1）
+- [ ] **skill.md** 的第一行包含版本 `v2.0`（查看：`grep -n "v2.0" skill.md | head -1`）
+- [ ] **KIRO_AGENT.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/KIRO_AGENT.md | wc -l`，应 ≥ 1）
+- [ ] **ANTIGRAVITY.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/ANTIGRAVITY.md | wc -l`，应 ≥ 1）
+- [ ] **cursor.mdc** 包含 `v2.0`（查看：`grep "v2.0" adapters/cursor.mdc | wc -l`，应 ≥ 1）
+- [ ] **clinerules.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/clinerules.md | wc -l`，应 ≥ 1）
+- [ ] **CLAUDE.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/CLAUDE.md | wc -l`，应 ≥ 1）
+- [ ] **windsurfrules.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/windsurfrules.md | wc -l`，应 ≥ 1）
+- [ ] **gemini_styleguide.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/gemini_styleguide.md | wc -l`，应 ≥ 1）
+- [ ] **AGENTS.md** 包含 `v2.0`（查看：`grep "v2.0" adapters/AGENTS.md | wc -l`，应 ≥ 1）
 
 **快速检查命令**：
 ```bash
 echo "=== 版本号检查 ===" && \
 for file in skill.md adapters/*.md adapters/*.mdc adapters/cursorrules; do \
   if [ -f "$file" ]; then \
-    count=$(grep -c "v1.0" "$file" 2>/dev/null || echo 0); \
+    count=$(grep -c "v2.0" "$file" 2>/dev/null || echo 0); \
     echo "$file: $count 次"; \
   fi; \
 done
@@ -351,5 +351,5 @@ python tools/adapter_generator.py --version 1.0 --apply
 ---
 
 **文件维护**：自动生成版本 + 手动审查  
-**最后更新**：2026-08-21  
+**最后更新**：2026-11-21  
 **下一次计划更新**：v2.1（待定）

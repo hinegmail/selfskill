@@ -106,3 +106,52 @@ jobs:
           echo "✗ SKILL_VERSION.md not found"
           exit 1
         fi
+
+  init-smoke-test:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            shell: bash
+          - os: windows-latest
+            shell: pwsh
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Smoke test init.sh (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        for mode in "--micro" "--lite" ""; do
+          TMP_DIR=$(mktemp -d)
+          ./init.sh -p "$TMP_DIR" -i claude,antigravity $mode
+          test -f "$TMP_DIR/.ai/STATUS.md"
+          test -f "$TMP_DIR/.ai/NEXT.md"
+          test -f "$TMP_DIR/.ai/MODE_REFERENCE.md"
+          test -f "$TMP_DIR/CLAUDE.md"
+          test -f "$TMP_DIR/.agents/skills/project-orchestrator/SKILL.md"
+          rm -rf "$TMP_DIR"
+        done
+
+    - name: Smoke test init.ps1 (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        foreach ($modeFlag in @("Micro", "Lite", "Full")) {
+          $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("po-smoke-" + [System.Guid]::NewGuid().ToString("N"))
+          New-Item -ItemType Directory -Path $tmpDir -Force | Out-Null
+          if ($modeFlag -eq "Micro") {
+            & .\init.ps1 -Path $tmpDir -IDE "claude,antigravity" -Micro
+          } elseif ($modeFlag -eq "Lite") {
+            & .\init.ps1 -Path $tmpDir -IDE "claude,antigravity" -Lite
+          } else {
+            & .\init.ps1 -Path $tmpDir -IDE "claude,antigravity"
+          }
+          if (-not (Test-Path (Join-Path $tmpDir ".ai\STATUS.md"))) { throw "Missing STATUS.md" }
+          if (-not (Test-Path (Join-Path $tmpDir ".ai\NEXT.md"))) { throw "Missing NEXT.md" }
+          if (-not (Test-Path (Join-Path $tmpDir ".ai\MODE_REFERENCE.md"))) { throw "Missing MODE_REFERENCE.md" }
+          if (-not (Test-Path (Join-Path $tmpDir "CLAUDE.md"))) { throw "Missing CLAUDE.md" }
+          if (-not (Test-Path (Join-Path $tmpDir ".agents\skills\project-orchestrator\SKILL.md"))) { throw "Missing Antigravity SKILL.md" }
+          Remove-Item -Path $tmpDir -Recurse -Force
+        }
